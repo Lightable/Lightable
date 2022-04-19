@@ -1,0 +1,21 @@
+
+  [theme="new"] {
+    --bg:           #1d1918;
+    --fg:           #30292F;
+    --text:         #496669;
+    --sb:           #292a30;
+    --highlight:    #1F2233;
+    --notification: #413F54;
+    --ac:    #54AAB0;
+    --green: hsl(139,calc(var(--saturation-factor, 1)*47.3%),43.9%);
+    --yellow:#ffcb6b;
+    --blue:  #ffcb6b;
+    --red:   #f07178;
+    --purple:#C77F79;
+    --orange:#f78c6c;
+    --cyan:  #89ddff;
+    --gray:  #717CB4;
+    --white: #eeffff;
+    --error: #ff5370;
+    --link:  #80cbc4;
+  }

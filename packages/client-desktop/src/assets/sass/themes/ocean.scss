@@ -1,0 +1,21 @@
+[theme="ocean"] {
+    --creator: 'https://material-theme.com/docs/reference/color-palette/';
+    --bg:           #0F111A;
+    --fg:           #8F93A2;
+    --text:         #4B526D;
+    --sb:           #181A1F;
+    --highlight:    #1F2233;
+    --notification: #090B10;
+    --ac:    #84ffff;
+    --green: hsl(139,calc(var(--saturation-factor, 1)*47.3%),43.9%);
+    --yellow:#ffcb6b;
+    --blue:  #82aaff;
+    --red:   #f07178;
+    --purple:#c792ea;
+    --orange:#f78c6c;
+    --cyan:  #89ddff;
+    --gray:  #717CB4;
+    --white: #eeffff;
+    --error: #ff5370;
+    --link:  #80cbc4;
+  }

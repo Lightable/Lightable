@@ -1,0 +1,14 @@
+
+  /* Tooltip */
+  .tippy-box {
+    background-color: var(--fg) !important;
+    .tippy-content {
+      color: var(--text) !important;
+      font-size: large;
+      font-style: normal;
+      font-family: Arial !important;
+    }
+    .tippy-arrow {
+      color: var(--fg);
+    }
+  }

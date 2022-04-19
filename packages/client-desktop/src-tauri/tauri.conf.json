@@ -1,0 +1,80 @@
+{
+  "package": {
+    "productName": "chatty",
+    "version": "0.0.1"
+  },
+  "build": {
+    "distDir": "../dist",
+    "devPath": "http://localhost:8080",
+    "beforeDevCommand": "yarn run serve",
+    "beforeBuildCommand": "yarn run build"
+  },
+  "tauri": {
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "org.feuer.chatty",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "resources": [],
+      "externalBin": [],
+      "copyright": "",
+      "category": "DeveloperTool",
+      "shortDescription": "",
+      "longDescription": "",
+      "deb": {
+        "depends": [],
+        "useBootstrapper": false
+      },
+      "macOS": {
+        "frameworks": [],
+        "minimumSystemVersion": "",
+        "useBootstrapper": false,
+        "exceptionDomain": "",
+        "signingIdentity": null,
+        "entitlements": null
+      },
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+          "https://chatty-api.feuer.tech/release/{{current_version}}"
+      ],
+      "dialog": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM3MDg0RkNGQjZEMjQ1OTgKUldTWVJkSzJ6MDhJeHhLSzF2Q3c1NUFOQmFVcjNPY0ZSMUoxWmV3YllreGRLWHVtciszSDdEU1AK"
+  },
+    "allowlist": {
+      "all": true,
+      "fs": {
+        "scope": ["$APP/db", "$DOWNLOAD/**", "$RESOURCE/**", "$USER/**"]
+      }
+    },
+    "windows": [
+      {
+        "title": "Chatty",
+        "width": 1220,
+        "height": 700,
+        "minWidth": 940,
+        "minHeight": 500,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false,
+        "visible": true
+      }
+    ],
+    "security": {
+      "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"
+    }
+  }
+}

@@ -1,0 +1,80 @@
+<template>
+  <div class="sidebar">
+    <SelfItem/>
+    <SidebarItem @hover="hover.friend = true" @leave="hover.friend = false" @click="(currentPanel == 'Friends') ? setCurrentPanel('None') : setCurrentPanel('Friends')">
+      <Friend :color="(hover.friend) ? 'var(--ac)' : 'var(--white)'" class="icon-tran" height="28px" width="28px"/>
+    </SidebarItem>
+    <SidebarItem @click="(currentPanel == 'Groups') ? setCurrentPanel('None') : setCurrentPanel('Groups')" type="disabled">
+      <Group color="var(--gray)" class="icon-tran" height="28px" width="28px"/>
+    </SidebarItem>
+    <div class="bottom">
+
+   
+    <SidebarItem @hover="hover.settings = true" @leave="hover.settings = false" @click="(currentPanel == 'Settings') ? setCurrentPanel('None') : setCurrentPanel('Settings')">
+      <Settings :color="(hover.settings) ? 'var(--ac)' : 'var(--white)'" class="icon-tran" height="28px" width="28px"/>
+    </SidebarItem>
+     </div>
+     
+  </div>
+
+</template>
+
+<script lang="ts">
+import {defineComponent, computed} from 'vue';
+import SelfItem from './SelfItem.vue';
+import Friend from '../global/Icons/Friend.vue';
+import SidebarItem from './SidebarItem.vue';
+import Group from '../global/Icons/Group.vue';
+import Settings from '../global/Icons/Settings.vue';
+import { AppStore } from '@/stores/AppStore';
+
+export default defineComponent({
+    name: "sidebar",
+    setup() {
+        let appStore = AppStore();
+        return {
+          currentPanel: computed(() => appStore.currentPanelAct),
+          setCurrentPanel: appStore.setCurrentPanel
+        }
+     },
+    data() {
+      return {
+        hover: {
+          friend: false,
+          group: false,
+          settings: false,
+        },
+        
+      }
+    },
+    components: { SelfItem, Friend, SidebarItem, Group, Settings }
+});
+</script>
+
+<style lang="scss" scoped>
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  max-width: 55px;
+  width: 55px;
+  background-color: var(--titlebar);
+  max-height: 100vh;
+  height: 100vh;
+  overflow-y: scroll;
+  align-items: center;
+  .bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: auto;
+    margin-bottom: 25px;
+    width: 100%;
+  }
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+.icon-tran {
+  transition: all 150ms ease;
+}
+</style>

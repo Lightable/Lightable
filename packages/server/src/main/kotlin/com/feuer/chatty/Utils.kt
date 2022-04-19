@@ -1,0 +1,67 @@
+package com.feuer.chatty
+
+import org.bson.codecs.pojo.annotations.BsonCreator
+import org.bson.codecs.pojo.annotations.BsonProperty
+import java.lang.management.ManagementFactory
+import java.time.Instant
+import javax.management.Attribute
+import javax.management.AttributeList
+import javax.management.ObjectName
+import kotlin.collections.ArrayList
+
+
+object Utils {
+    // Banner :P Because why not?
+    const val BANNER = " ██████╗  ██╗  ██╗   █████╗   ████████╗  ████████╗ ██╗   ██╗\n" +
+                       "██╔════╝  ██║  ██║  ██╔══██╗  ╚══██╔══╝  ╚══██╔══╝ ╚██╗ ██╔╝\n" +
+                       "██║       ███████║  ███████║     ██║        ██║     ╚████╔╝ \n" +
+                       "██║       ██╔══██║  ██╔══██║     ██║        ██║      ╚██╔╝  \n" +
+                       "╚██████╗  ██║  ██║  ██║  ██║     ██║        ██║       ██║   \n" +
+                       " ╚═════╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝     ╚═╝        ╚═╝       ╚═╝     "
+    const val VERSION = "1.9.12"
+    fun generateID(): String {
+        val rand = (10000000..99999999).random()
+        return "${rand}${Instant.now().toEpochMilli()}" // Parse 8 chars to get timestamp
+    }
+    fun generateGenericAuth(len: Int = 25): String {
+        val alphanumerics = CharArray(26) { it -> (it + 97).toChar() }.toSet()
+            .union(CharArray(9) { it -> (it + 48).toChar() }.toSet())
+        return (0 until len).map {
+            alphanumerics.toList().random()
+        }.joinToString("")
+    }
+    fun formatSize(v: Long): String? {
+        if (v < 1024) return "$v B"
+        val z = (63 - java.lang.Long.numberOfLeadingZeros(v)) / 10
+        return String.format("%.1f %sB", v.toDouble() / (1L shl z * 10), " KMGTPE"[z])
+    }
+
+    @Throws(Exception::class)
+    fun getProcessCpuLoad(): Double {
+        val mbs = ManagementFactory.getPlatformMBeanServer()
+        val name = ObjectName.getInstance("java.lang:type=OperatingSystem")
+        val list: AttributeList = mbs.getAttributes(name, arrayOf("ProcessCpuLoad"))
+        if (list.isEmpty()) return Double.NaN
+        val att: Attribute = list.get(0) as Attribute
+        val value = att.value as Double
+        return if (value == -1.0) Double.NaN else (value * 1000).toInt() / 10.0
+    }
+
+    data class User(var name: String, var userid: String, var friends: ArrayList<String>?, var auth: String?, var status: String?, var about: String?, var online: Boolean?, var statusIcon: String?, var avatar: String?, var created: Instant)
+    class Status @BsonCreator constructor(
+        @BsonProperty("text") var text: String?,
+        @BsonProperty("icon") var icon: String?)
+
+    object Constants {
+        enum class Badges {
+            CHATTY_DEVELOPER,
+            CHATTY_SUPPORTER,
+            CHATTY_ADMIN
+        }
+        enum class OnlineStates {
+            OFFLINE,
+            IDLE,
+            ONLINE
+        }
+    }
+}

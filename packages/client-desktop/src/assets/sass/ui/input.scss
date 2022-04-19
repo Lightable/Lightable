@@ -1,0 +1,30 @@
+@mixin input($bg: var(--sc-bg), $focus-bg: 0 0 0 1.5pt var(--ac), $border-radius: 8px, $boxshad: 0 0 0 1px var(--gray)) {
+    background: var(--sc-bg);
+    color: var(--white);
+    box-shadow: $boxshad;
+    outline: 0;
+    border: none;
+    min-width: 200px;
+    width: 100%;
+    font-size: 1.2rem;
+    border-radius: $border-radius;
+    padding: 8px 16px;
+    transition: box-shadow 0.2s ease-in-out 0s;
+    &[failed="true"] {
+        box-shadow: 0 0 0 1px var(--red);
+    }
+    &[type="password"] {
+        &:focus {
+            box-shadow: 0 0 0 1px var(--blue);
+        }
+    }
+    &:focus {
+        box-shadow: 0 0 0 1px var(--ac);
+    }
+    &:-internal-autofill-selected {
+        appearance: none;
+        background-image: none !important;
+        background-color: var(--sc-bg) !important;
+    }
+
+}

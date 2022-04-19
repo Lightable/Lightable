@@ -1,0 +1,20 @@
+[theme="liberty"] {
+    --bg:           #2c2b38;
+    --fg:           #30292F;
+    --text:         #ad4c6b;
+    --sb:           #30292F;
+    --highlight:    #1F2233;
+    --notification: #413F54;
+    --ac:    #355691;
+    --green: hsl(139,calc(var(--saturation-factor, 1)*47.3%),43.9%);
+    --yellow:#ffcb6b;
+    --blue:  #ffcb6b;
+    --red:   #f07178;
+    --purple:#5F5AA2;
+    --orange:#f78c6c;
+    --cyan:  #89ddff;
+    --gray:  #717CB4;
+    --white: #eeffff;
+    --error: #ff5370;
+    --link:  #80cbc4;
+  }

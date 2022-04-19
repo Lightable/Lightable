@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html data-tauri-drag-region="">
+<head>
+  <title>Chatty Splash</title>
+</head>
+<body>
+  <svg class="icon"
+        fill="#717CB4"
+        height="150px"
+        viewbox="0 0 24 24"
+        width="150px"
+        xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 0h24v24H0V0z"
+        fill="none"></path>
+  <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg>
+  <h1 class="descript">App is Loading</h1>
+  <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+      html,
+      body {
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        background-color: #1b1b1b00;
+        font-family: Inter;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        user-select: none;
+      }
+      .icon {
+        animation: slidein 250ms ease;
+      }
+      .descript {
+        color: #44bb89;
+        animation: fade 250ms ease forwards;
+      }
+      @keyframes slidein {
+        from {
+          margin-left: -100%;
+          width: 300%;
+        }
+
+        to {
+          margin-left: 0%;
+          width: 100%;
+        }
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+  </style>
+</body>
+</html>

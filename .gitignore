@@ -23,6 +23,9 @@
 /packages/client-desktop/*.njsproj
 /packages/client-desktop/*.sln
 /packages/client-desktop/*.sw?
+/packages/client-desktop/src-tauri/WixTools
+/packages/client-desktop/src-tauri/target
+/packages/client-desktop/build/tauri-codegen-assets
 /packages/server/.gradle
 /packages/server/build/
 

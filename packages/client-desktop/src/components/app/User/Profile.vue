@@ -1,0 +1,67 @@
+<template>
+  <BaseModal v-on:clicked="setCurrentProfile(null)">
+    <template v-slot:icon>
+      <Friend height="30px" width="30px" color="var(--white)" />
+    </template>
+    <template v-slot:name>
+      <span class="title">@{{ profile.name }}</span>
+    </template>
+    <template v-slot:body>
+      <div
+        class="bio"
+        v-html="profile.about == null ? 'No bio was found' : parse(profile.about)"
+      ></div>
+    </template>
+    <template v-slot:actions>
+      <div class="actions">
+        <button class="db" dbt="danger" @click="async () => { await profile.removeFriend(); setCurrentProfile(null); }">Remove</button>
+        <button class="db" dbt="success" @click="$router.push('/login')">Send Message</button>
+      </div>
+    </template>
+  </BaseModal>
+  <!-- <DebugModalData :content="profile" v-if="true"/> -->
+</template>
+
+<script lang="ts">
+import {defineComponent} from 'vue';
+import BaseModal from '@/components/global/BaseModal.vue';
+import Friend from '@/components/global/Icons/Friend.vue';
+import parseMarkdown from '@/lib/utils/parseMarkdown';
+import { AppStore } from '@/stores/AppStore';
+import { IUser } from '@/lib/structures/Users';
+import DebugModalData from '@/components/global/DebugModalData.vue';
+export default defineComponent({
+  name: 'ProfileModal',
+  components: {BaseModal, Friend, DebugModalData},
+  props: {
+    profile: Object,
+  },
+  setup() {
+      let appStore = AppStore();
+    return {
+      parse: parseMarkdown,
+      setCurrentProfile: appStore.setCurrentlyActiveProfile
+    };
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+.title {
+  font-size: calc(var(--font-size) + 12px);
+  margin-left: 8px;
+  color: var(--white);
+  font-weight: bold;
+}
+.bio {
+  padding: 8px;
+  color: var(--white);
+}
+.actions {
+  width: 100%;
+  justify-content: space-between;
+  align-content: space-around;
+  display: flex;
+  flex-direction: row;
+}
+</style>

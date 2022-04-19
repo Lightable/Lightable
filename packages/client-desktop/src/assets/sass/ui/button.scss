@@ -1,0 +1,35 @@
+@mixin Button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2px;
+    background: var(--sc-bg);
+    padding: 2px 16px;
+    cursor: pointer;
+    transition: all 150ms ease-in-out;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 500;
+    &[type="ignore"] {
+      color: var(--error);
+    }
+    &:hover {
+      opacity: 0.5;
+    }
+    &[color="success"] {
+      background: var(--green);
+      color: white;
+    }
+    &[color='primary'] {
+      background: var(--purple);
+      color: white;
+    }
+    &[color='warning'] {
+      background: var(--yellow);
+      color: white;
+    }
+    &[color='danger'] {
+      background: var(--red);
+      color: white;
+    }
+}
