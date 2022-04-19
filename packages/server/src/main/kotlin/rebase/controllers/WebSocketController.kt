@@ -26,7 +26,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
         val compressionType = handler.queryParam("compression") ?: "none"
         rawConnections[handler.sessionId] = SessionWithCompression(handler, compressionType)
         logger.info("Connection established \"/ws\" ${handler.sessionId}")
-        send(handler, compressionType, HelloPayload(30000))
+        send(handler, compressionType, ReadyPayload(30000))
     }
 
     fun message(handler: WsMessageContext) {
@@ -140,6 +140,36 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             payload.t = SocketMessageType.ServerSelfTyping.ordinal
             send(payload.self.ws.session, payload.self.ws.type, payload)
         }
+
+        // Relationships
+
+        // Self -> You've requested a friend
+        // External -> Someone has requested to be your friend
+        events.subscribe<ServerPendingFriend> { payload ->
+            logger.info("New Pending Friend -> To = ${payload.friend.id} From = ${payload.self.id}")
+            val friendSocket = connections.values.find { u -> u.user.identifier == payload.friend.id }
+            val selfSocket = connections.values.find { u -> u.user.identifier == payload.self.id }
+            if (friendSocket != null) {
+                send(friendSocket.ws.session, friendSocket.ws.type, payload)
+            }
+            if (selfSocket != null) {
+                payload.t = SocketMessageType.ServerSelfRequestFriend.ordinal
+                send(selfSocket.ws.session, selfSocket.ws.type, payload)
+            }
+        }
+        // Self -> You've removed a
+        events.subscribe<ServerRequestRemove> { payload ->
+            logger.info("Remove Pending Friend -> To = ${payload.friend.id} From = ${payload.self.id}")
+            val friendSocket = connections.values.find { u -> u.user.identifier == payload.friend.id }
+            val selfSocket = connections.values.find { u -> u.user.identifier == payload.self.id }
+            if (friendSocket != null) {
+                send(friendSocket.ws.session, friendSocket.ws.type, payload)
+            }
+            if (selfSocket != null) {
+                payload.t = SocketMessageType.ServerSelfRequestRemove
+                send(selfSocket.ws.session, selfSocket.ws.type, payload)
+            }
+        }
     }
 }
 
@@ -147,8 +177,8 @@ data class ReceivedMessage(
     val t: Int,
 )
 
-data class HelloPayload(@JsonIgnore val heartbeat: Int) {
-    val t = SocketMessageType.ServerHello.ordinal
+data class ReadyPayload(@JsonIgnore val heartbeat: Int) {
+    val t = SocketMessageType.ServerReady.ordinal
     val d = object {
         val interval = heartbeat
     }
@@ -212,9 +242,20 @@ data class SessionProperties(
     var ip: String,
     var build: String
 )
-
+data class ServerPendingFriend(
+    @JsonIgnore val self: PublicUser,
+    @JsonIgnore val friend: PublicUser
+) {
+    var t = SocketMessageType.ServerPendingFriend.ordinal
+    val d = self
+}
+data class ServerRequestRemove(
+    @JsonIgnore val self: PublicUser,
+    @JsonIgnore val friend: PublicUser
+) {
+    var t = SocketMessageType.ServerRequestRemoved
+}
 enum class SocketMessageType {
-    ServerHello,
     ClientStart,
     ClientPing,
     ServerPong,

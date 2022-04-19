@@ -9,6 +9,7 @@ import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.core.util.RouteOverviewPlugin
 import io.javalin.plugin.openapi.OpenApiOptions
 import io.javalin.plugin.openapi.OpenApiPlugin
+import io.javalin.plugin.openapi.dsl.OpenApiDocumentation
 import io.javalin.plugin.openapi.dsl.documented
 import io.javalin.plugin.openapi.ui.ReDocOptions
 import io.javalin.plugin.openapi.ui.SwaggerOptions
@@ -122,8 +123,11 @@ fun main(args: Array<String>) {
                     post("{id}", documented(relationship.createPendingRelationshipDoc, relationship::addRelationship))
                     get(documented(relationship.getSelfRelationshipsDoc, relationship::getRelationships))
                     get("{id}", documented(relationship.getSelfRelationshipDoc, relationship::getRelationship))
-                    delete("/pending/{id}", relationship::removePendingRelationship)
-
+                    path("/pending") {
+                        post("/pending/{id}", documented(relationship.addPendingRelationshipDoc, relationship::acceptPendingRelationship))
+                        delete("/pending/{id}", documented(relationship.removePendingRelationshipDoc, relationship::removePendingRelationship))
+                    }
+                    delete("{id}", documented(relationship.removeRelationshipDoc, relationship::removeRelationship))
                 }
             }
 

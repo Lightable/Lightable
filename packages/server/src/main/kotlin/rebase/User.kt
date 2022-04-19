@@ -27,7 +27,7 @@ data class User constructor(
         Instant.now(),
         mutableSetOf("MESSAGE", "DM", "USER")
     ),
-    @field:BsonProperty(useDiscriminator = true) var friends: Friends = Friends(),
+    @field:BsonProperty(useDiscriminator = true) var relationships: Friends = Friends(),
     @BsonProperty("state") var state: Int = UserState.OFFLINE.ordinal,
     @field:BsonProperty("status") var status: Status? = null,
     @BsonProperty("admin") var admin: Boolean = false,
@@ -70,7 +70,7 @@ data class User constructor(
     @BsonIgnore
     fun checkValidFriendRequest(id: Long): Boolean {
         val friend = cache?.users?.get(id) ?: return false
-        if (friend.friends.friends.contains(this.identifier) || friend.friends.pending.contains(this.identifier)) {
+        if (friend.relationships.friends.contains(this.identifier) || friend.relationships.pending.contains(this.identifier)) {
             return false
         }
         return true
@@ -78,30 +78,39 @@ data class User constructor(
     @BsonIgnore
     fun checkValidFriend(id: Long): Boolean {
         val friend = cache?.users?.get(id) ?: return false
-        if (!friend.friends.pending.contains(this.identifier) || !this.friends.friends.contains(friend.identifier)) {
+        if (!friend.relationships.pending.contains(this.identifier) || !this.relationships.friends.contains(friend.identifier)) {
             return false
         }
         return true
     }
     @BsonIgnore
-    fun addPendingFriend(id: Long) {
-        this.friends.pending.add(id)
-        this.cache?.users?.get(id)?.friends?.requests?.add(this.identifier)
+    fun removeFriend(id: Long) {
+        val friend = cache?.users?.get(id)
+        friend?.relationships?.friends?.remove(this.identifier)
+        this.relationships.friends.remove(id)
+        friend?.save()
     }
+    @BsonIgnore
+    fun addRequest(id: Long) {
+        val friend = this.cache?.users?.get(id)!!
+        this.relationships.requests.add(id)
+        friend.relationships.pending.add(this.identifier)
+    }
+    @BsonIgnore
     fun removePendingFriend(id: Long) {
-        this.friends.pending.remove(id)
-        this.cache?.users?.get(id)?.friends?.requests?.remove(this.identifier)
+        this.relationships.pending.remove(id)
+        this.cache?.users?.get(id)?.relationships?.requests?.remove(this.identifier)
     }
     @BsonIgnore
     fun acceptRequest(id: Long): Boolean {
         val friend = cache?.users?.get(id) ?: return false
-        return if (!this.friends.pending.contains(id) || !friend.friends.requests.contains(id)) {
+        return if (!this.relationships.pending.contains(id) || !friend.relationships.requests.contains(id)) {
             false
         } else {
-            this.friends.pending.remove(id)
-            friend.friends.requests.remove(id)
-            friend.friends.friends.add(id)
-            this.friends.friends.add(id)
+            this.relationships.pending.remove(id)
+            friend.relationships.requests.remove(id)
+            friend.relationships.friends.add(id)
+            this.relationships.friends.add(id)
             true
         }
     }
@@ -110,19 +119,19 @@ data class User constructor(
         val friendList = mutableListOf<PublicUser>()
         val requests = mutableListOf<PublicUser>()
         val pendings = mutableListOf<PublicUser>()
-        for (id in friends.friends) {
+        for (id in relationships.friends) {
             val friend = cache?.users?.get(id)
             if (friend != null) {
                 friendList.add(friend.toPublic())
             }
         }
-        for (id in friends.requests) {
+        for (id in relationships.requests) {
             val request = cache?.users?.get(id)
             if (request != null) {
                 requests.add(request.toPublic())
             }
         }
-        for (id in friends.pending) {
+        for (id in relationships.pending) {
             val pending = cache?.users?.get(id)
             if (pending != null) {
                 pendings.add(pending.toPublic())
@@ -164,14 +173,16 @@ data class Icon(override val cdn: String, override val animated: Boolean, overri
 }
 
 data class Friends constructor(
-    @BsonProperty("friends") @JsonProperty("friends") var friends: ArrayList<Long> = arrayListOf(),
+    @BsonProperty("relationships") @JsonProperty("relationships") var friends: ArrayList<Long> = arrayListOf(),
+    // Other people's request show up as "Pending" for you
     @BsonProperty("pending") @JsonProperty("pending") var pending: ArrayList<Long> = arrayListOf(),
+    // Your requests that show up as "Pending" for other users
     @BsonProperty("requests") @JsonProperty("requests") var requests: ArrayList<Long> = arrayListOf())
 
 data class FriendsPublic @BsonCreator constructor(
-    @BsonIgnore var friends: MutableList<PublicUser>,
-    @BsonIgnore  var pending: MutableList<PublicUser>,
-    @BsonIgnore var requests: MutableList<PublicUser>
+    @BsonProperty @BsonIgnore var friends: MutableList<PublicUser>,
+    @BsonProperty @BsonIgnore var pending: MutableList<PublicUser>,
+    @BsonProperty @BsonIgnore var requests: MutableList<PublicUser>
 ) {
     @BsonIgnore
     fun isEmpty(): Boolean {

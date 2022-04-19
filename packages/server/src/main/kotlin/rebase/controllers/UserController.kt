@@ -2,51 +2,51 @@ package rebase.controllers
 
 import io.javalin.http.Context
 import io.javalin.plugin.openapi.dsl.document
-import io.javalin.plugin.openapi.dsl.documented
 import io.javalin.plugin.openapi.dsl.documentedContent
 import io.javalin.plugin.openapi.dsl.oneOf
-import org.litote.kmongo.json
+import java.util.concurrent.ExecutorService
 import rebase.*
 import rebase.interfaces.FailImpl
-import java.util.concurrent.ExecutorService
 
 class UserController(val cache: Cache, val snowflake: Snowflake, val executor: ExecutorService) {
-    val createUserDoc = document().body<NewUser> {
-        it.required = true
-        it.description = "Contains data to create the user"
-    }.operation {
-        it.description("Create User")
-        it.operationId("createUser")
-        it.summary("Create User")
-        it.addTagsItem("User")
-    }.result(
-        "201", oneOf(
-            documentedContent<String>("json", false)
-        )
-    ).result(
-        "401", oneOf(
-            documentedContent<UserAuthFail>("json", false)
-        )
-    ).result("400", oneOf(documentedContent<UserDataFail>("json", false)))
-        .result("403", oneOf(documentedContent<UserDataFail>("json", false)))
+    val createUserDoc =
+        document()
+            .body<NewUser> {
+                it.required = true
+                it.description = "Contains data to create the user"
+            }
+            .operation {
+                it.description("Create User")
+                it.operationId("createUser")
+                it.summary("Create User")
+                it.addTagsItem("User")
+            }
+            .result("201", oneOf(documentedContent<String>("json", false)))
+            .result("401", oneOf(documentedContent<UserAuthFail>("json", false)))
+            .result("400", oneOf(documentedContent<UserDataFail>("json", false)))
+            .result("403", oneOf(documentedContent<UserDataFail>("json", false)))
 
     fun createUser(ctx: Context) {
         val body = ctx.bodyAsClass<NewUser>()
-        if (body.validate(ctx) && cache.users.values.find { user -> user.email == body.email } == null) {
-            val user = User(
-                cache = cache,
-                email = body.email,
-                password = body.password,
-                name = body.username,
-                identifier = snowflake.nextId(),
-                friends = Friends()
-            )
+        if (body.validate(ctx) &&
+            cache.users.values.find { user -> user.email == body.email } == null
+        ) {
+            val user =
+                User(
+                    cache = cache,
+                    email = body.email,
+                    password = body.password,
+                    name = body.username,
+                    identifier = snowflake.nextId(),
+                    relationships = Friends()
+                )
             user.save()
-            ctx.status(201).json( object
-                {
-                    val token = user.token.token
-                }
-            )
+            ctx.status(201)
+                .json(
+                    object {
+                        val token = user.token.token
+                    }
+                )
             return
         } else {
             ctx.status(403).json(UserDataFail("Email is already in use"))
@@ -54,20 +54,17 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
         }
     }
 
-    val getSelfUserDoc = document().operation {
-        it.description("Get Self User")
-        it.operationId("getSelf")
-        it.summary("Get Self")
-        it.addTagsItem("Self")
-    }.result(
-        "200", oneOf(
-            documentedContent<PrivateUser>("json", false)
-        )
-    ).result(
-        "401", oneOf(
-            documentedContent<UserAuthFail>("json", false)
-        )
-    ).header<String>("Authorization")
+    val getSelfUserDoc =
+        document()
+            .operation {
+                it.description("Get Self User")
+                it.operationId("getSelf")
+                it.summary("Get Self")
+                it.addTagsItem("Self")
+            }
+            .result("200", oneOf(documentedContent<PrivateUser>("json", false)))
+            .result("401", oneOf(documentedContent<UserAuthFail>("json", false)))
+            .header<String>("Authorization")
 
     fun getSelfUser(ctx: Context) {
         requireAuth(ctx).run {
@@ -75,34 +72,34 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
         }
     }
 
-    val loginUserDoc = document().body<UserLogin>().operation {
-        it.description("Login to user")
-        it.operationId("loginUser")
-        it.summary("Login with password and email to get user data and token")
-        it.addTagsItem("Self")
-    }.result(
-        "200", oneOf(
-            documentedContent<PrivateUser>("json", false),
-        )
-    ).result(
-        "401", oneOf(
-            documentedContent<UserLoginFail>("json", false)
-        )
-    )
+    val loginUserDoc =
+        document()
+            .body<UserLogin>()
+            .operation {
+                it.description("Login to user")
+                it.operationId("loginUser")
+                it.summary("Login with password and email to get user data and token")
+                it.addTagsItem("Self")
+            }
+            .result("200", oneOf(documentedContent<PrivateUser>("json", false)))
+            .result("401", oneOf(documentedContent<UserLoginFail>("json", false)))
 
     fun login(ctx: Context) {
         val info = ctx.bodyAsClass<UserLogin>()
         for (user in cache.users.values) {
             if (user.email == info.email && user.password == info.password) {
                 // Wait to get expiry working
-//                if (user.token.expired()) {
-//                    user.token = StandardToken(ZonedDateTime.now(ZoneOffset.UTC).plusDays(6).toInstant(), user.token.permissions)
-//                    ctx.header("Token", user.token.token)
-//                    ctx.header("Permissions", user.token.permissions.joinToString(","))
-//                    executor.submit {
-//                        user.save()
-//                    }
-//                }
+                //                if (user.token.expired()) {
+                //                    user.token =
+                // StandardToken(ZonedDateTime.now(ZoneOffset.UTC).plusDays(6).toInstant(),
+                // user.token.permissions)
+                //                    ctx.header("Token", user.token.token)
+                //                    ctx.header("Permissions",
+                // user.token.permissions.joinToString(","))
+                //                    executor.submit {
+                //                        user.save()
+                //                    }
+                //                }
                 ctx.status(200).json(user.toPrivate())
                 return
             } else {
@@ -113,24 +110,36 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
     }
 
     inner class Relationships {
-        val createPendingRelationshipDoc = document().operation {
-            it.description("Create Pending Relationship")
-            it.operationId("createRelationship")
-            it.summary("Create Pending Relationship")
-            it.addTagsItem("Self")
-            it.addTagsItem("Relationship")
-        }.result("201", oneOf(documentedContent<PublicUser>(
-            "json", true
-        ))).result("204", null).result("403", oneOf(documentedContent<RelationshipRequestFail>("json", false))).result("401", oneOf(documentedContent<UserAuthFail>("json", false))).header<String>("Authorization")
+        val createPendingRelationshipDoc =
+            document()
+                .operation {
+                    it.description("Create Pending Relationship")
+                    it.operationId("createRelationship")
+                    it.summary("Create Pending Relationship")
+                    it.addTagsItem("Self")
+                    it.addTagsItem("Relationship")
+                }
+                .result("201", oneOf(documentedContent<PublicUser>("json", true)))
+                .result("204", null)
+                .result("403", oneOf(documentedContent<RelationshipRequestFail>("json", false)))
+                .result("401", oneOf(documentedContent<UserAuthFail>("json", false)))
+                .header<String>("Authorization")
+
         fun addRelationship(ctx: Context) {
             val user = requireAuth(ctx)
-            val friend = cache.users.values.find { u -> u.identifier == ctx.pathParam("id").toLong() }
+            val friend =
+                cache.users.values.find { u -> u.identifier == ctx.pathParam("id").toLong() }
             if (user != null) {
                 if (!user.checkValidFriendRequest(ctx.pathParam("id").toLong())) {
-                    ctx.status(403).json(RelationshipRequestFail("You are already friends with this user or are already pending!"))
+                    ctx.status(403)
+                        .json(
+                            RelationshipRequestFail(
+                                "You are already friends with this user or are already pending!"
+                            )
+                        )
                     return
                 } else if (friend != null) {
-                    friend.addPendingFriend(user.identifier)
+                    friend.addRequest(user.identifier)
                     ctx.status(201).json(friend.toPublic()).run {
                         user.save()
                         friend.save()
@@ -139,15 +148,21 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 }
             }
         }
-        val getSelfRelationshipsDoc = document().operation {
-            it.description("Get Relationships")
-            it.operationId("getRelationships")
-            it.summary("Get Relationships")
-            it.addTagsItem("Self")
-            it.addTagsItem("Relationship")
-        }.result("200", oneOf(documentedContent<PublicUser>(
-            "json", true
-        ))).result("204", null).result("401", oneOf(documentedContent<UserAuthFail>("json", false))).header<String>("Authorization")
+
+        val getSelfRelationshipsDoc =
+            document()
+                .operation {
+                    it.description("Get Relationships")
+                    it.operationId("getRelationships")
+                    it.summary("Get Relationships")
+                    it.addTagsItem("Self")
+                    it.addTagsItem("Relationship")
+                }
+                .result("200", oneOf(documentedContent<PublicUser>("json", true)))
+                .result("204", null)
+                .result("401", oneOf(documentedContent<UserAuthFail>("json", false)))
+                .header<String>("Authorization")
+
         fun getRelationships(ctx: Context) {
             val user = requireAuth(ctx)
             if (user != null) {
@@ -162,21 +177,18 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             }
         }
 
-        val getSelfRelationshipDoc = document().operation {
-            it.description("Get Relationship")
-            it.operationId("getRelationship")
-            it.summary("Get Relationship")
-            it.addTagsItem("Self")
-            it.addTagsItem("Relationship")
-        }.result(
-            "200", oneOf(
-                documentedContent<PublicUser>("json", false)
-            )
-        ).result(
-            "401", oneOf(
-                documentedContent<UserAuthFail>("json", false)
-            )
-        ).header<String>("Authorization")
+        val getSelfRelationshipDoc =
+            document()
+                .operation {
+                    it.description("Get Relationship")
+                    it.operationId("getRelationship")
+                    it.summary("Get Relationship")
+                    it.addTagsItem("Self")
+                    it.addTagsItem("Relationship")
+                }
+                .result("200", oneOf(documentedContent<PublicUser>("json", false)))
+                .result("401", oneOf(documentedContent<UserAuthFail>("json", false)))
+                .header<String>("Authorization")
 
         fun getRelationship(ctx: Context) {
             val user = requireAuth(ctx)
@@ -184,22 +196,93 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             val friend = cache.users.values.find { u -> u.identifier == userPath.toLong() }
             if (user != null) {
                 if (user.checkValidFriend(userPath.toLong()) && friend != null) {
-                        ctx.status(200).json(friend.toPublic())
-                    }  else {
-                    ctx.status(403).json(UserDataFail("$userPath is not your friend. Add them first!"))
+                    ctx.status(200).json(friend.toPublic())
+                } else {
+                    ctx.status(403)
+                        .json(UserDataFail("$userPath is not your friend. Add them first!"))
                 }
             }
         }
+
+        val removePendingRelationshipDoc =
+            document()
+                .operation {
+                    it.description("Remove Pending Relationship")
+                    it.operationId("removePendingRelationship")
+                    it.summary("Remove Pending Relationship")
+                    it.addTagsItem("Self")
+                    it.addTagsItem("Relationship")
+                }
+                .result<Unit>("204")
+                .result("403", oneOf(documentedContent<UserDataFail>("json", false)))
+                .header<String>("Authorization")
 
         fun removePendingRelationship(ctx: Context) {
             val user = requireAuth(ctx)
             val pendingUser = ctx.pathParam("id")
             if (user != null) {
-                if (user.friends.pending.contains(pendingUser.toLong())) {
+                if (user.relationships.pending.contains(pendingUser.toLong())) {
                     user.removePendingFriend(pendingUser.toLong())
                     ctx.status(204)
                 } else {
                     ctx.status(403).json(UserDataFail("$pendingUser isn't pending with you"))
+                }
+            }
+        }
+
+        val addPendingRelationshipDoc =
+            document()
+                .operation {
+                    it.description("Add Pending Relationship")
+                    it.operationId("acceptPendingRelationship")
+                    it.summary("Add Pending Relationship")
+                    it.addTagsItem("Self")
+                    it.addTagsItem("Relationship")
+                }
+                .result("201", oneOf(documentedContent<PublicUser>("json", false)))
+                .result("403", oneOf(documentedContent<UserDataFail>("json", false)))
+                .header<String>("Authorization")
+
+        fun acceptPendingRelationship(ctx: Context) {
+            val user = requireAuth(ctx)
+            val pendingUser = ctx.pathParam("id")
+            if (user != null) {
+                if (user.acceptRequest(pendingUser.toLong())) {
+                    ctx.status(201).json(cache.users[pendingUser.toLong()]?.toPublic()!!)
+                } else {
+                    ctx.status(403).json(UserDataFail("$pendingUser isn't pending with you"))
+                }
+            }
+        }
+
+        val removeRelationshipDoc =
+            document()
+                .operation {
+                    it.description("Remove Relationship")
+                    it.operationId("deleteRelationship")
+                    it.summary("Remove Relationship")
+                    it.addTagsItem("Self")
+                    it.addTagsItem("Relationship")
+                }
+                .result<Unit>("204")
+                .result("403", oneOf(documentedContent<UserDataFail>("json", false)))
+                .header<String>("Authorization")
+
+        fun removeRelationship(ctx: Context) {
+            val user = requireAuth(ctx)
+            val relationshipID = ctx.pathParam("id")
+            if (user != null) {
+                // Inverse checking for pending / already friends
+                if (!user.checkValidFriendRequest(relationshipID.toLong()) &&
+                    !user.relationships.pending.contains(relationshipID.toLong())
+                ) {
+                    user.removeFriend(relationshipID.toLong())
+                    ctx.status(204)
+                } else {
+                    ctx.status(403)
+                        .json(
+                            UserDataFail("You are only pending or are not friends with this user!")
+                        )
                 }
             }
         }
@@ -224,11 +307,13 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             get() = "DATA_USER_FAIL"
         override val message = bad
     }
+
     data class RelationshipRequestFail(val bad: String) : FailImpl {
         override val code: String
             get() = "FRIEND_REQUEST_FAIL"
         override val message = bad
     }
+
     private fun requireAuth(ctx: Context): rebase.User? {
         val auth = ctx.header("Authorization")
         cache.users.values.forEach {
@@ -250,12 +335,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
 
     data class UserLogin(val email: String, val password: String)
 
-
-    data class NewUser(
-        val email: String,
-        val password: String,
-        val username: String
-    ) {
+    data class NewUser(val email: String, val password: String, val username: String) {
         fun validate(ctx: Context): Boolean {
             val emailVal = validateEmail(ctx)
             val passwordVal = validatePassword(ctx)
@@ -288,6 +368,5 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
         }
     }
 
-    init {
-    }
+    init {}
 }
