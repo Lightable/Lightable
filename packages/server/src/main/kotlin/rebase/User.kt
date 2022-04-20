@@ -33,6 +33,7 @@ data class User constructor(
     @BsonProperty("admin") var admin: Boolean = false,
     @BsonProperty("enabled") var enabled: Boolean = true,
     @BsonProperty("avatar") var avatar: Avatar? = null,
+    @BsonIgnore @JsonIgnore var test: Boolean = false
 ) : BucketImpl {
     @BsonIgnore
     @JsonIgnore
@@ -93,8 +94,8 @@ data class User constructor(
     @BsonIgnore
     fun addRequest(id: Long) {
         val friend = this.cache?.users?.get(id)!!
-        this.relationships.requests.add(id)
-        friend.relationships.pending.add(this.identifier)
+        this.relationships.pending.add(id)
+        friend.relationships.requests.add(this.identifier)
     }
     @BsonIgnore
     fun removePendingFriend(id: Long) {

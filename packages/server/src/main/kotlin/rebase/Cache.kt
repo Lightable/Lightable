@@ -32,7 +32,12 @@ class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase) 
             println("Found existing user: ${user.name} ${user.identifier}")
             users[user.identifier] = user
         }
+        logger.info("Creating test user account")
+        users["000000000000000000".toLong()] = User(test = true)
+        logger.info("Created test account -> ${users["000000000000000000".toLong()]}")
     }
 
-    companion object
+    companion object {
+
+    }
 }

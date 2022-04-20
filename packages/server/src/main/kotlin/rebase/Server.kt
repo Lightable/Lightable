@@ -15,6 +15,7 @@ import io.javalin.plugin.openapi.ui.ReDocOptions
 import io.javalin.plugin.openapi.ui.SwaggerOptions
 import io.swagger.v3.oas.models.info.Info
 import org.slf4j.LoggerFactory
+import rebase.controllers.DeveloperController
 import rebase.controllers.WebSocketController
 import java.time.Instant
 import java.time.ZoneId
@@ -98,19 +99,22 @@ fun main(args: Array<String>) {
         println("[Message]: ${e.message}")
         println("[Message -> Local]: ${e.localizedMessage}")
         println("[${t.colors.brightGreen.invoke("End Context")}]\n")
+        ctx.json(object { val e = e.message }).status(500)
     }
     javalin.start(port)
     val db = RebaseMongoDatabase()
     val async = Executors.newCachedThreadPool()
     val cache = Cache(async, db)
     val websocketController = WebSocketController(logger, cache, isProd)
-    javalin.exception(Exception::class.java) { e, ctx ->
-        ctx.json(object { val e = e.message }).status(500)
-    }
+    val developerController = DeveloperController(cache)
     javalin.routes {
         ws("/ws") {
             it.onConnect(websocketController::connection)
             it.onMessage(websocketController::message)
+        }
+        path("/admin") {
+            patch("/disable/{id}", developerController::disableUser)
+
         }
         path("/user") {
             val user = rebase.controllers.UserController(cache, snowflake, async)

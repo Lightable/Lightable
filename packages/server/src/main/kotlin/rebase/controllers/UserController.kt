@@ -67,7 +67,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             .header<String>("Authorization")
 
     fun getSelfUser(ctx: Context) {
-        requireAuth(ctx).run {
+        requireAuth(cache, ctx).run {
             this?.let { it.toPrivate().let { it1 -> ctx.status(200).json(it1) } }
         }
     }
@@ -126,7 +126,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 .header<String>("Authorization")
 
         fun addRelationship(ctx: Context) {
-            val user = requireAuth(ctx)
+            val user = requireAuth(cache, ctx)
             val friend =
                 cache.users.values.find { u -> u.identifier == ctx.pathParam("id").toLong() }
             if (user != null) {
@@ -164,7 +164,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 .header<String>("Authorization")
 
         fun getRelationships(ctx: Context) {
-            val user = requireAuth(ctx)
+            val user = requireAuth(cache, ctx)
             if (user != null) {
                 val friends = user.getFriends()
                 if (friends.isEmpty()) {
@@ -191,7 +191,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 .header<String>("Authorization")
 
         fun getRelationship(ctx: Context) {
-            val user = requireAuth(ctx)
+            val user = requireAuth(cache, ctx)
             val userPath = ctx.pathParam("id")
             val friend = cache.users.values.find { u -> u.identifier == userPath.toLong() }
             if (user != null) {
@@ -218,7 +218,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 .header<String>("Authorization")
 
         fun removePendingRelationship(ctx: Context) {
-            val user = requireAuth(ctx)
+            val user = requireAuth(cache, ctx)
             val pendingUser = ctx.pathParam("id")
             if (user != null) {
                 if (user.relationships.pending.contains(pendingUser.toLong())) {
@@ -244,7 +244,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 .header<String>("Authorization")
 
         fun acceptPendingRelationship(ctx: Context) {
-            val user = requireAuth(ctx)
+            val user = requireAuth(cache, ctx)
             val pendingUser = ctx.pathParam("id")
             if (user != null) {
                 if (user.acceptRequest(pendingUser.toLong())) {
@@ -269,7 +269,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 .header<String>("Authorization")
 
         fun removeRelationship(ctx: Context) {
-            val user = requireAuth(ctx)
+            val user = requireAuth(cache, ctx)
             val relationshipID = ctx.pathParam("id")
             if (user != null) {
                 // Inverse checking for pending / already friends
@@ -314,24 +314,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
         override val message = bad
     }
 
-    private fun requireAuth(ctx: Context): rebase.User? {
-        val auth = ctx.header("Authorization")
-        cache.users.values.forEach {
-            println("User ${it.name} (${it.identifier}) - ${it.token.token} Compare $auth")
-        }
-        if (auth == null) {
-            ctx.status(401).json(UserAuthFail())
-        } else {
-            val user = cache.users.values.find { user -> user.token.token == auth }
-            return if (user == null) {
-                ctx.status(401).json(UserAuthFail())
-                null
-            } else {
-                user
-            }
-        }
-        return null
-    }
+
 
     data class UserLogin(val email: String, val password: String)
 
@@ -369,4 +352,22 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
     }
 
     init {}
+}
+fun requireAuth(cache: Cache, ctx: Context): rebase.User? {
+    val auth = ctx.header("Authorization")
+    cache.users.values.forEach {
+        println("User ${it.name} (${it.identifier}) - ${it.token.token} Compare $auth")
+    }
+    if (auth == null) {
+        ctx.status(401).json(UserController.UserAuthFail())
+    } else {
+        val user = cache.users.values.find { user -> user.token.token == auth }
+        return if (user == null || !user.enabled) {
+            ctx.status(401).json(UserController.UserAuthFail())
+            null
+        } else {
+            user
+        }
+    }
+    return null
 }
