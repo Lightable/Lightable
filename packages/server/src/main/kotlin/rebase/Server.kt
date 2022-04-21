@@ -9,7 +9,6 @@ import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.core.util.RouteOverviewPlugin
 import io.javalin.plugin.openapi.OpenApiOptions
 import io.javalin.plugin.openapi.OpenApiPlugin
-import io.javalin.plugin.openapi.dsl.OpenApiDocumentation
 import io.javalin.plugin.openapi.dsl.documented
 import io.javalin.plugin.openapi.ui.ReDocOptions
 import io.javalin.plugin.openapi.ui.SwaggerOptions
@@ -17,35 +16,41 @@ import io.swagger.v3.oas.models.info.Info
 import org.slf4j.LoggerFactory
 import rebase.controllers.DeveloperController
 import rebase.controllers.WebSocketController
+import java.io.File
+import java.io.FileOutputStream
+import java.io.PrintStream
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
 
+
 val t = Terminal()
 fun main(args: Array<String>) {
+    var isProd = false
     Thread.currentThread().name = "Server (Main)"
     Thread.setDefaultUncaughtExceptionHandler { thread, err ->
         clearConsole()
-        println("Exception at " + t.colors.info.invoke(thread.name) + "\n")
-        println("Estimated stack cause: ${err.stackTrace.last()}")
-        println("[${t.colors.danger.invoke("Begin Trace")}]\n")
-        print(err.stackTraceToString())
-        println("[${t.colors.danger.invoke("Finish Trace")}]\n")
-        println("[${t.colors.brightGreen.invoke("Context")}]")
-        println("[Cause]: ${err.cause}")
-        println("[Message]: ${err.message}")
-        println("[Message -> Local]: ${err.localizedMessage}")
-        println("[${t.colors.brightGreen.invoke("End Context")}]\n")
-        println("[${t.colors.brightMagenta.invoke("Thread Stack")}]")
+        System.err.println("Exception at " + t.colors.info.invoke(thread.name) + "\n")
+        System.err.println("Estimated stack cause: ${err.stackTrace.last()}")
+        System.err.println("[${t.colors.danger.invoke("Begin Trace")}]\n")
+        System.err.println(err.stackTraceToString())
+        System.err.println("[${t.colors.danger.invoke("Finish Trace")}]\n")
+        System.err.println("[${t.colors.brightGreen.invoke("Context")}]")
+        System.err.println("[Cause]: ${err.cause}")
+        System.err.println("[Message]: ${err.message}")
+        System.err.println("[Message -> Local]: ${err.localizedMessage}")
+        System.err.println("[${t.colors.brightGreen.invoke("End Context")}]\n")
+        System.err.println("[${t.colors.brightMagenta.invoke("Thread Stack")}]")
         thread.stackTrace.forEach { trace ->
-            println(trace.toString())
+            System.err.println(trace.toString())
         }
+
     }
     val logger = LoggerFactory.getLogger("Server")
     val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
     var port = 8080
-    var isProd = false
+
     println(Utils.BANNER)
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (args[args.indexOf("--port") + 1].isNotBlank()) {
@@ -66,6 +71,13 @@ fun main(args: Array<String>) {
     if (args.contains("--prod") || System.getenv("prod").toBoolean()) {
         println("${t.colors.brightGreen.invoke("Production mode is enabled ")}✅")
         isProd = true
+    }
+    if (isProd) {
+        val file = File("err.clog")
+        val fos = FileOutputStream(file)
+        val ps = PrintStream(fos)
+        System.setErr(ps)
+
     }
     println("${t.colors.brightRed.invoke("---->>")} Logs ${t.colors.brightBlue.invoke("<<----\n")}")
     val snowflake = Snowflake()

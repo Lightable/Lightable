@@ -1,6 +1,7 @@
 package rebase.controllers
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -17,6 +18,7 @@ import rebase.compression.CompressionUtil
 import java.nio.ByteBuffer
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.*
+import okhttp3.internal.notify
 
 class WebSocketController(private val logger: Logger, private val cache: Cache, private val isProd: Boolean) {
     private val rawConnections = mutableMapOf<String, SessionWithCompression>()
@@ -30,7 +32,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
         println(" ${yellow("Compression")} >> ${magenta(compressionType)}")
         println(" ${yellow("Session")} >> ${magenta(handler.sessionId)}")
         rawConnections[handler.sessionId] = SessionWithCompression(handler, compressionType)
-//        logger.info("Connection established \"/ws\" ${handler.sessionId}")
+//      logger.info("Connection established \"/ws\" ${handler.sessionId}")
         send(handler, compressionType, ReadyPayload(30000))
     }
 
@@ -47,17 +49,17 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                 val properties = jsonWrap.convertValue(rawMessage["d"], SessionProperties::class.java)
                 val user = cache.users.values.find { u -> u.token.token == properties.auth }
                     ?: return session.session.closeSession(
-                        4004,
+                        1010,
                         "Authentication matching ${properties.auth} doesn't exist"
                     )
                 val existingConnection = connections.values.find { u -> u.user.token.token == properties.auth}
                 if (existingConnection != null) {
                     send(existingConnection.ws.session, existingConnection.ws.type, ServerDropGateway)
-                    existingConnection.ws.session.closeSession(5000, "Can't have 2 connections at once! Security Risk ⚠")
+                    existingConnection.ws.session.closeSession(1008, "Can't have 2 connections at once! Security Risk ⚠")
                 }
                 if (!user.enabled) {
                     send(session.session, session.type, DisabledUser)
-                    session.session.closeSession(4004, "Your account has been disabled")
+                    session.session.closeSession(1008, "Your account has been disabled")
                     return
                 }
                 connections[session.session.sessionId] = ChattySession(session, true, user, properties)
@@ -75,8 +77,9 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                 )
                 return
             } else if (connections[session.session.sessionId]?.authenticated == false) {
+
                 return session.session.closeSession(
-                    4003,
+                    1008,
                     "That is a privileged endpoint and can't be accessed without first authenticating"
                 )
             } else {
@@ -112,9 +115,14 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                 }
             }
         } catch (e: Exception) {
-            logger.error("Failed to parse JSON ${e.message}")
             if (!isProd) e.printStackTrace()
-            handler.closeSession(4000, "Could not parse JSON ${e.message}")
+            if (e == JsonParseException::class.java) {
+                logger.error("Failed to parse JSON ${e.message}")
+                handler.closeSession(1007, "Could not parse JSON ${e.message}")
+            } else {
+                handler.closeSession(1006, e.message)
+                logger.error("The controller encountered an error it couldn't recover from (Check err.clog) (Session = ${handler.sessionId})")
+            }
         }
     }
 
@@ -122,7 +130,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
         val connection = connections[handler.sessionId]
         println(red(underline("WS >> Closed Connection << WS")))
         if (connection == null) {
-            println("${yellow("Session")} >> ${magenta(handler.sessionId)}")
+            println(" ${yellow("Session")} >> ${magenta(handler.sessionId)}")
         } else {
             println(" ${yellow("User")} >> ${magenta(connection.user.identifier.toString())}")
             println(" ${yellow("Authenticated")} >> ${if (connection.authenticated) green("true") else red("false")}")
