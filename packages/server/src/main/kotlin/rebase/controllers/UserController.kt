@@ -139,7 +139,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                         )
                     return
                 } else if (friend != null) {
-                    friend.addRequest(user.identifier)
+                    user.addRequest(friend.identifier)
                     ctx.status(201).json(friend.toPublic()).run {
                         user.save()
                         friend.save()

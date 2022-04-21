@@ -1,6 +1,7 @@
 package rebase.controllers
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
@@ -46,6 +47,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                         4004,
                         "Authentication matching ${properties.auth} doesn't exist"
                     )
+                logger.info(properties.toString())
                 val existingConnection = connections.values.find { u -> u.user.token.token == properties.auth}
                 if (existingConnection != null) {
                     send(existingConnection.ws.session, existingConnection.ws.type, ServerDropGateway)
@@ -92,7 +94,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                         GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "state", UserState.DND.ordinal))
                     }
                     SocketMessageType.ClientTyping.ordinal -> {
-                        val typingTo = connections.values.find{ f -> f.user.identifier == jsonWrap.convertValue(rawMessage["d"], Long::class.java) }
+                        val typingTo = connections.values.find{ f -> f.user.identifier == jsonWrap.convertValue(rawMessage["d"], String::class.java).toLong() }
                         if (typingTo != null) {
                             GlobalBus.post(ClientTyping(userSession, typingTo))
                         } else {
@@ -103,6 +105,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             }
         } catch (e: Exception) {
             logger.error("Failed to parse JSON ${e.message}")
+            if (!isProd) e.printStackTrace()
             handler.closeSession(4000, "Could not parse JSON ${e.message}")
         }
     }
@@ -143,13 +146,14 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
         // Relationships
 
         // External pending
-        events.subscribe<ServerPendingFriend> { payload ->
+        events.subscribe<ServerPending> { payload ->
             logger.info("New Pending Friend -> To = ${payload.friend.id} From = ${payload.self.id}")
             val friendSocket = connections.values.find { u -> u.user.identifier == payload.friend.id }
             if (friendSocket != null) {
                 send(friendSocket.ws.session, friendSocket.ws.type, payload)
             }
         }
+
         // Self Friend Request
         events.subscribe<ServerSelfPending> { payload ->
             logger.info("New Request To = ${payload.friend.id} From = ${payload.self.id}")
@@ -159,16 +163,38 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             }
         }
 
-        // Self -> You've removed a
+        // External Deny friendship request
         events.subscribe<ServerRequestRemove> { payload ->
-            logger.info("Remove Pending Friend -> To = ${payload.friend.id} From = ${payload.self.id}")
-            val friendSocket = connections.values.find { u -> u.user.identifier == payload.friend.id }
-            val selfSocket = connections.values.find { u -> u.user.identifier == payload.self.id }
+            logger.info("Remove Pending Friend -> To = ${payload.pendingFriend.id} From = ${payload.self.id}")
+            val friendSocket = connections.values.find { u -> u.user.identifier == payload.pendingFriend.id }
             if (friendSocket != null) {
                 send(friendSocket.ws.session, friendSocket.ws.type, payload)
             }
+        }
+
+        // Self Deny friendship request
+        events.subscribe<ServerSelfRequestRemove> { payload ->
+            logger.info("Remove Self Pending Friend -> To = ${payload.pendingFriend.id} From = ${payload.self.id}")
+            val selfSocket = connections.values.find { u -> u.user.identifier == payload.self.id }
             if (selfSocket != null) {
-                payload.t = SocketMessageType.ServerSelfRequestRemove
+                send(selfSocket.ws.session, selfSocket.ws.type, payload)
+            }
+        }
+
+        // External accept friendship
+        events.subscribe<ServerRequestAccept> { payload ->
+            logger.info("Accept Pending Friend -> To ${payload.t} From = ${payload.self.id}")
+            val friendSocket = connections.values.find { u -> u.user.identifier == payload.pendingFriend.id }
+            if (friendSocket != null) {
+                send(friendSocket.ws.session, friendSocket.ws.type, payload)
+            }
+        }
+
+        // Self accept friendship
+        events.subscribe<ServerSelfRequestAccept> { payload ->
+            logger.info("Accept Self Pending Friend -> To ${payload.pendingFriend.id} From = ${payload.self.id}")
+            val selfSocket = connections.values.find { u -> u.user.identifier == payload.self.id }
+            if (selfSocket != null) {
                 send(selfSocket.ws.session, selfSocket.ws.type, payload)
             }
         }
@@ -191,15 +217,16 @@ data class FriendUpdatePayload(
     val id: Long,
     val name: String,
     val value: Any,
-    var t: Int = SocketMessageType.ServerFriendUpdate.ordinal
+    var t: Int = SocketMessageType.ServerFriendUpdate.ordinal,
 ) {
     fun toJSON(): String {
         val json = jacksonObjectMapper().createObjectNode()
         val dataJson = jacksonObjectMapper().createObjectNode()
         val valueJson = jacksonObjectMapper().convertValue(value, JsonNode::class.java)
         json.put("t", t)
-        json.set<JsonNode>("d", dataJson)
         dataJson.set<JsonNode>(name, valueJson)
+        dataJson.put("id", id.toString())
+        json.set<JsonNode>("d", dataJson)
         return json.toString()
     }
 }
@@ -224,9 +251,8 @@ data class ClientTyping(
     @JsonIgnore val to: ChattySession,
     var t: Int = 0
 ) {
-    val d = object {
-        val id = self.user.identifier
-    }
+    val d = self.user.identifier.toString()
+
 }
 data class ServerReadyPayload(
     val user: PublicUser,
@@ -260,7 +286,7 @@ data class SessionProperties(
     var ip: String,
     var build: String
 )
-data class ServerPendingFriend(
+data class ServerPending(
     @JsonIgnore val self: PublicUser,
     @JsonIgnore val friend: PublicUser
 ) {
@@ -271,22 +297,42 @@ data class ServerSelfPending(
     @JsonIgnore val self: PublicUser,
     @JsonIgnore val friend: PublicUser
 ) {
-    val t = SocketMessageType.ServerSelfRequestFriend
-    val d = friend.id
+    val t = SocketMessageType.ServerSelfRequestFriend.ordinal
+    val d = friend.id.toString()
 }
 data class ServerRequestRemove(
     @JsonIgnore val self: PublicUser,
-    @JsonIgnore val friend: PublicUser
+    @JsonIgnore val pendingFriend: PublicUser
 ) {
-    var t = SocketMessageType.ServerRequestRemoved
+    val t = SocketMessageType.ServerRequestRemoved.ordinal
 }
-
+data class ServerSelfRequestRemove(
+    @JsonIgnore val self: PublicUser,
+    @JsonIgnore val pendingFriend: PublicUser
+) {
+    val t = SocketMessageType.ServerSelfRequestRemove.ordinal
+    val d = pendingFriend.id.toString()
+}
+data class ServerRequestAccept(
+    @JsonIgnore val self: PublicUser,
+    @JsonIgnore val pendingFriend: PublicUser
+) {
+    val t = SocketMessageType.ServerRequestAccepted.ordinal
+    val d = self
+}
+data class ServerSelfRequestAccept(
+    @JsonIgnore val self: PublicUser,
+    @JsonIgnore val pendingFriend: PublicUser
+) {
+    val t = SocketMessageType.ServerSelfRequestAccepted.ordinal
+    val d = pendingFriend
+}
 object ServerDropGateway {
-    val t = SocketMessageType.ServerDropGateway
+    val t = SocketMessageType.ServerDropGateway.ordinal
     val d = null
 }
 object DisabledUser {
-    val t = SocketMessageType.ServerSelfDisabledUser
+    val t = SocketMessageType.ServerSelfDisabledUser.ordinal
     val d = null
 }
 enum class SocketMessageType {
@@ -309,9 +355,10 @@ enum class SocketMessageType {
     ServerFriendRemove,
     ServerSelfFriendRemove,
     ServerSelfRequestFriend,
-    ServerSelfPendingRemove,
     ServerSelfRequestRemove,
     ServerRequestRemoved,
+    ServerRequestAccepted,
+    ServerSelfRequestAccepted,
     ServerFriendUpdate,
     ServerMessageCreate,
     ServerSelfMessageCreate,

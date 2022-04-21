@@ -5,11 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.feuer.chatty.auth.StandardToken
+import me.kosert.flowbus.GlobalBus
 import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import org.bson.codecs.pojo.annotations.BsonProperty
 import org.eclipse.jetty.websocket.common.WebSocketSession
-import rebase.controllers.UserController
+import rebase.controllers.*
 import rebase.interfaces.BucketImpl
 import rebase.interfaces.ISnowflake
 import rebase.interfaces.Image.ImageImpl
@@ -66,7 +67,8 @@ data class User constructor(
     }
     @BsonIgnore
     fun toPublic(): PublicUser {
-        return PublicUser(this)
+        val public = PublicUser(this)
+        return public
     }
     @BsonIgnore
     fun checkValidFriendRequest(id: Long): Boolean {
@@ -94,13 +96,18 @@ data class User constructor(
     @BsonIgnore
     fun addRequest(id: Long) {
         val friend = this.cache?.users?.get(id)!!
-        this.relationships.pending.add(id)
-        friend.relationships.requests.add(this.identifier)
+        this.relationships.requests.add(id)
+        friend.relationships.pending.add(this.identifier)
+        GlobalBus.post(ServerPending(this.toPublic(), friend.toPublic()))
+        GlobalBus.post(ServerSelfPending(this.toPublic(), friend.toPublic()))
     }
     @BsonIgnore
     fun removePendingFriend(id: Long) {
         this.relationships.pending.remove(id)
-        this.cache?.users?.get(id)?.relationships?.requests?.remove(this.identifier)
+        val pendingFriend = this.cache?.users?.get(id)
+        pendingFriend?.relationships?.requests?.remove(this.identifier)
+        GlobalBus.post(ServerRequestRemove(this.toPublic(), pendingFriend?.toPublic()!!))
+        GlobalBus.post(ServerSelfRequestRemove(this.toPublic(), pendingFriend.toPublic()))
     }
     @BsonIgnore
     fun acceptRequest(id: Long): Boolean {
@@ -112,6 +119,8 @@ data class User constructor(
             friend.relationships.requests.remove(id)
             friend.relationships.friends.add(id)
             this.relationships.friends.add(id)
+            GlobalBus.post(ServerRequestAccept(this.toPublic(), friend.toPublic()))
+            GlobalBus.post(ServerSelfRequestAccept(this.toPublic(), friend.toPublic()))
             true
         }
     }
@@ -160,11 +169,13 @@ data class PrivateUser(@JsonIgnore private val user: User) {
 
 data class PublicUser(@JsonIgnore private val user: User) {
     val name = user.name
-    val id = user.identifier
+    @JsonIgnore val id = user.identifier
     val status = user.status
     val admin = user.admin
     val enabled = user.enabled
+    @JsonProperty("id") val identifier = id.toString()
 }
+
 
 data class Status constructor(@BsonProperty("icon") var icon: Icon, @BsonProperty("text")  var text: String)
 data class Icon(override val cdn: String, override val animated: Boolean, override val id: ISnowflake) : ImageImpl {
