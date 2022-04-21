@@ -1,11 +1,10 @@
 package rebase.controllers
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.javalin.websocket.WsCloseContext
 import io.javalin.websocket.WsConnectContext
 import io.javalin.websocket.WsContext
 import io.javalin.websocket.WsMessageContext
@@ -16,7 +15,8 @@ import org.slf4j.Logger
 import rebase.*
 import rebase.compression.CompressionUtil
 import java.nio.ByteBuffer
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Public
+import com.github.ajalt.mordant.rendering.TextColors.*
+import com.github.ajalt.mordant.rendering.TextStyles.*
 
 class WebSocketController(private val logger: Logger, private val cache: Cache, private val isProd: Boolean) {
     private val rawConnections = mutableMapOf<String, SessionWithCompression>()
@@ -26,8 +26,11 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
     private val events = EventsReceiver()
     fun connection(handler: WsConnectContext) {
         val compressionType = handler.queryParam("compression") ?: "none"
+        println(green(underline("WS >> Opened Connection << WS")))
+        println(" ${yellow("Compression")} >> ${magenta(compressionType)}")
+        println(" ${yellow("Session")} >> ${magenta(handler.sessionId)}")
         rawConnections[handler.sessionId] = SessionWithCompression(handler, compressionType)
-        logger.info("Connection established \"/ws\" ${handler.sessionId}")
+//        logger.info("Connection established \"/ws\" ${handler.sessionId}")
         send(handler, compressionType, ReadyPayload(30000))
     }
 
@@ -47,7 +50,6 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                         4004,
                         "Authentication matching ${properties.auth} doesn't exist"
                     )
-                logger.info(properties.toString())
                 val existingConnection = connections.values.find { u -> u.user.token.token == properties.auth}
                 if (existingConnection != null) {
                     send(existingConnection.ws.session, existingConnection.ws.type, ServerDropGateway)
@@ -59,7 +61,13 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                     return
                 }
                 connections[session.session.sessionId] = ChattySession(session, true, user, properties)
-                logger.info("New session authenticated $session $properties")
+                println(blue("  ${underline(">> Authenticated Connection <<")}"))
+                println("   ${yellow("Session")} >> ${magenta(session.session.sessionId)}")
+                println("   ${yellow("Authenticated")} >> ${green("true")}")
+                println(cyan("    ${underline(">> Properties <<")}"))
+                println("     ${yellow("Browser")} >> ${magenta(properties.browser)}")
+                println("     ${yellow("IP")} >> ${magenta(properties.ip)}")
+                println("     ${yellow("Build")} >> ${magenta(properties.build)}")
                 send(
                     session.session,
                     session.type,
@@ -107,6 +115,20 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             logger.error("Failed to parse JSON ${e.message}")
             if (!isProd) e.printStackTrace()
             handler.closeSession(4000, "Could not parse JSON ${e.message}")
+        }
+    }
+
+    fun close(handler: WsCloseContext) {
+        val connection = connections[handler.sessionId]
+        println(red(underline("WS >> Closed Connection << WS")))
+        if (connection == null) {
+            println("${yellow("Session")} >> ${magenta(handler.sessionId)}")
+        } else {
+            println(" ${yellow("User")} >> ${magenta(connection.user.identifier.toString())}")
+            println(" ${yellow("Authenticated")} >> ${if (connection.authenticated) green("true") else red("false")}")
+            println(" ${yellow("Session")} >> ${magenta(handler.sessionId)}")
+            connections.remove(handler.sessionId)
+            rawConnections.remove(handler.sessionId)
         }
     }
 

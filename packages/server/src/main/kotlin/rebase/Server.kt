@@ -111,6 +111,7 @@ fun main(args: Array<String>) {
         ws("/ws") {
             it.onConnect(websocketController::connection)
             it.onMessage(websocketController::message)
+            it.onClose(websocketController::close)
         }
         path("/admin") {
             patch("/disable/{id}", developerController::disableUser)

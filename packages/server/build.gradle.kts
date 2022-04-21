@@ -39,6 +39,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compileOnly(kotlin("serialization", version = kotlinVersion))
     implementation("io.javalin:javalin-bundle:4.4.0")
+    implementation("com.github.ajalt.mordant:mordant:2.0.0-beta5")
 
 }
 
