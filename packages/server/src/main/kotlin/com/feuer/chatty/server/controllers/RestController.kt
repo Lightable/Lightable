@@ -45,8 +45,7 @@ class RestController(
     var releaseAuth = UUID.randomUUID().toString()
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val events = EventsReceiver()
-    private val auth =
-        decodeFromString(PrivateAuth.serializer(), File("./auth.json").bufferedReader().readLines().joinToString("\n"))
+    private val auth = PrivateAuth("exampleadminemail@example.com", "exampleadminpassword")
     private val classState = object {
         var timing = 0
         var reached = 0

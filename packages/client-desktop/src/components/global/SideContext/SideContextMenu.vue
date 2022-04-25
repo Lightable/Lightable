@@ -1,4 +1,5 @@
 <template>
+<BringOutAni>
   <div class="side-ctx-menu">
     <div class="header">
       <BringOutAni class="flex-header" v-if="true">
@@ -18,6 +19,7 @@
         <slot name="body"/>
     </div>
   </div>
+  </BringOutAni>
 </template>
 
 <script lang="ts">
