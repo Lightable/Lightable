@@ -1,31 +1,34 @@
 package rebase.controllers
 
 import io.javalin.http.Context
+import io.javalin.plugin.openapi.annotations.HttpMethod
+import io.javalin.plugin.openapi.annotations.OpenApi
+import io.javalin.plugin.openapi.annotations.OpenApiContent
+import io.javalin.plugin.openapi.annotations.OpenApiResponse
 import io.javalin.plugin.openapi.dsl.document
 import io.javalin.plugin.openapi.dsl.documentedContent
 import io.javalin.plugin.openapi.dsl.oneOf
-import java.util.concurrent.ExecutorService
+import me.kosert.flowbus.GlobalBus
 import rebase.*
 import rebase.interfaces.FailImpl
+import java.util.concurrent.ExecutorService
+import kotlin.system.measureTimeMillis
 
-class UserController(val cache: Cache, val snowflake: Snowflake, val executor: ExecutorService) {
-    val createUserDoc =
-        document()
-            .body<NewUser> {
-                it.required = true
-                it.description = "Contains data to create the user"
-            }
-            .operation {
-                it.description("Create User")
-                it.operationId("createUser")
-                it.summary("Create User")
-                it.addTagsItem("User")
-            }
-            .result("201", oneOf(documentedContent<String>("json", false)))
-            .result("401", oneOf(documentedContent<UserAuthFail>("json", false)))
-            .result("400", oneOf(documentedContent<UserDataFail>("json", false)))
-            .result("403", oneOf(documentedContent<UserDataFail>("json", false)))
-
+class UserController(val cache: Cache, val snowflake: Snowflake, val executor: ExecutorService, val isProd: Boolean, val fileController: FileController) {
+    @OpenApi(
+        path = "/user",
+        method = HttpMethod.POST,
+        responses = [
+            OpenApiResponse("201", content = [OpenApiContent(UserCreateToken::class, type = "application/json")]),
+            OpenApiResponse("401", content = [OpenApiContent(UserAuthFail::class, type = "application/json")]),
+            OpenApiResponse("400", content = [OpenApiContent(UserAuthFail::class, type = "application/json")]),
+            OpenApiResponse("403", content = [OpenApiContent(UserAuthFail::class, type = "application/json")])
+        ],
+        summary = "Create User",
+        description = "Creates a user with email, name, and password",
+        tags = ["User"],
+        operationId = "createUser"
+    )
     fun createUser(ctx: Context) {
         val body = ctx.bodyAsClass<NewUser>()
         if (body.validate(ctx) &&
@@ -53,7 +56,38 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             return
         }
     }
-
+    fun createTestUsers(ctx: Context) {
+        if (isProd) {
+            ctx.json(UserDataFail("Nice Try :)"))
+        } else {
+            val count = ctx.queryParam("s")?.toInt() ?: 1
+            for (i in 0 until count) {
+                val userCreationTiming = measureTimeMillis {
+                    val email = "${Constants.getRandomString(10)}@example.com"
+                    val password = "TESTPASS_${Constants.getRandomString(20)}"
+                    val user = User(test = true, email = email, password = password, cache = cache, identifier = snowflake.nextId())
+                    user.save(false)
+                }
+                print("\rCreated user in ${userCreationTiming}ms (${i})")
+            }
+            println()
+            ctx.status(201)
+        }
+    }
+    fun removeTestUsers(ctx: Context) {
+        if (isProd) {
+            ctx.json(UserDataFail("Nice Try :)"))
+        } else {
+            cache.removeAllTestUsers()
+        }
+    }
+    fun getAllUsers(ctx: Context) {
+        if (isProd) {
+            ctx.json(UserDataFail("Nice Try :)"))
+        } else {
+            ctx.status(200).json(cache.users.values)
+        }
+    }
     val getSelfUserDoc =
         document()
             .operation {
@@ -109,6 +143,67 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
         ctx.status(401).json(UserLoginFail())
     }
 
+    val patchUserDoc =
+        document()
+            .body<UpdateUserPatch>()
+            .operation {
+                it.description("Update user")
+                it.operationId("updateUser")
+                it.summary("Update User")
+                it.addTagsItem("Self")
+            }
+            .result("200", oneOf(documentedContent<PrivateUser>("json", false)))
+            .result("401", oneOf(documentedContent<UserDataFail>("json", false)))
+
+    fun update(ctx: Context) {
+        val user = requireAuth(cache, ctx)
+        val updatedUser = ctx.bodyAsClass<UpdateUserPatch>()
+        if (user != null) {
+            if (updatedUser.name != null) user.name = updatedUser.name
+            if (updatedUser.status != null) user.status = updatedUser.status
+            if (updatedUser.email != null) user.email = updatedUser.email
+            if (updatedUser.notice != null) user.notice = updatedUser.notice
+            user.save()
+            ctx.status(200).json(user.toPublic())
+            GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.identifier, "user", user.toPublic()))
+            GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
+            return
+        }
+    }
+    fun updateAvatar(ctx: Context) {
+        val user = requireAuth(cache, ctx)
+        if (user != null) {
+            val file = ctx.uploadedFile("avatar")
+            if (file == null) {
+                ctx.status(400).json(UserDataFail("Form upload must contain image file"))
+            } else {
+
+                when (file.contentType) {
+                    "image/gif" -> {
+                        ctx.status(403).json(UserDataFail("Not yet supported"))
+                        return
+                    }
+                    "image/png", "image/jpeg" -> {
+                        val image = Avatar(false, snowflake.nextId())
+                        fileController.addAvatar(user.identifier, image.identifier, file, "png")
+                        user.avatar = image
+                        user.save()
+                        GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.toPublic().id, "user", user.toPublic()))
+                        GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
+                        ctx.json(201).json(user.toPublic())
+
+                        return
+                    }
+                    else -> {
+                        ctx.status(403).json(UserDataFail("Content type must be ImageType"))
+                        return
+                    }
+                }
+            }
+
+        }
+
+    }
     inner class Relationships {
         val createPendingRelationshipDoc =
             document()
@@ -314,8 +409,14 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
         override val message = bad
     }
 
+    data class UpdateUserPatch(
+        val name: String?,
+        val email: String?,
+        val notice: UserNotice?,
+        val status: Status?,
+    )
 
-
+    data class UserCreateToken(val token: String)
     data class UserLogin(val email: String, val password: String)
 
     data class NewUser(val email: String, val password: String, val username: String) {
@@ -353,6 +454,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
 
     init {}
 }
+
 fun requireAuth(cache: Cache, ctx: Context): rebase.User? {
     val auth = ctx.header("Authorization")
     cache.users.values.forEach {

@@ -78,6 +78,7 @@ export default defineComponent({
     appWindow.center();
     appWindow.setFocus();
     appWindow.setTitle('Chatty • Login');
+    ClientStore().$resetData();
   },
   methods: {
     async login(e: any) {
@@ -89,7 +90,7 @@ export default defineComponent({
       this.stateLogin = 'Logging In...';
       let hashed = await hash(this.state.password);
       try {
-        let user = await client?.req('POST', '/v2/user/@me/login', undefined, {
+        let user = await client?.req('POST', '/user/@me/login', undefined, {
           email: this.state.email,
           password: hashed,
         });
@@ -105,12 +106,12 @@ export default defineComponent({
           }, 1000);
         }
         // @ts-ignore
-        if (user.auth) {
+        if (user.token) {
           // @ts-ignore
           snackstore.create('success', `Welcome Back  ${user.name}`, true, 2000);
           auth.addAccount(user!!);
           // @ts-ignore
-          await client?.loginWT(user.auth);
+          await client?.loginWT(user.token.token);
           await auth.save();
 
           appWindow.setSize(new LogicalSize(1220, 700));

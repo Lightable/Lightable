@@ -117,6 +117,6 @@ class Snowflake {
         private const val maxSequence = (1L shl SEQUENCE_BITS) - 1
 
         // Custom Epoch (January 1, 2015 Midnight UTC = 2015-01-01T00:00:00Z)
-        private const val DEFAULT_CUSTOM_EPOCH = 1420070400000L
+        private const val DEFAULT_CUSTOM_EPOCH = 1640995200000L
     }
 }

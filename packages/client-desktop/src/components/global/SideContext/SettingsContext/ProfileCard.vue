@@ -1,7 +1,7 @@
 <template>
   <div class="profile">
     <div class="left">
-      <Avatar size="64px" class="avatar">
+      <Avatar :user="user" size="64" class="avatar" :circle="true">
         <Edit
           class="avatar-edit"
           color="var(--white)"

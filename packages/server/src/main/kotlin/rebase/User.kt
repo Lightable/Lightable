@@ -20,7 +20,7 @@ data class User constructor(
     @JsonIgnore @BsonIgnore override var cache: Cache? = null,
     @JsonIgnore @BsonIgnore override val jackson: ObjectMapper = jacksonObjectMapper(),
     @BsonIgnore @JsonIgnore var connections: ArrayList<WebSocketSession> = ArrayList(),
-    @JsonProperty("id") @BsonProperty("identifier") var identifier: Long = 0,
+    @JsonIgnore @BsonProperty("identifier") var identifier: Long = 0,
     @BsonProperty("name") var name: String = "Test Account",
     @BsonProperty("email") var email: String = "TestAccount@example.com",
     @BsonProperty("password") var password: String = "TestAccount\$pass",
@@ -28,12 +28,13 @@ data class User constructor(
         Instant.now(),
         mutableSetOf("MESSAGE", "DM", "USER")
     ),
+    @field:BsonProperty(useDiscriminator = true) var notice: UserNotice? = null,
     @field:BsonProperty(useDiscriminator = true) var relationships: Friends = Friends(),
     @BsonProperty("state") var state: Int = UserState.OFFLINE.ordinal,
     @field:BsonProperty("status") var status: Status? = null,
     @BsonProperty("admin") var admin: Boolean = false,
     @BsonProperty("enabled") var enabled: Boolean = true,
-    @BsonProperty("avatar") var avatar: Avatar? = null,
+    @field:BsonProperty(useDiscriminator = true) @BsonProperty("avatar") var avatar: Avatar? = null,
     @BsonIgnore @JsonIgnore var test: Boolean = false
 ) : BucketImpl {
     @BsonIgnore
@@ -44,8 +45,8 @@ data class User constructor(
     val expired: Boolean = token.expired()
 
     @BsonIgnore
-    override fun save() {
-        cache?.saveOrReplaceUser(this)
+    override fun save(saveToDatabase: Boolean) {
+        cache?.saveOrReplaceUser(this, saveToDatabase)
     }
 
     @BsonIgnore
@@ -159,7 +160,7 @@ data class User constructor(
 
 data class PrivateUser(@JsonIgnore private val user: User) {
     val name = user.name
-    val id = user.identifier
+    val id = user.identifier.toString()
     val email = user.email
     val status = user.status
     val token = user.token
@@ -173,15 +174,14 @@ data class PublicUser(@JsonIgnore private val user: User) {
     val status = user.status
     val admin = user.admin
     val enabled = user.enabled
+    val avatar = user.avatar
     @JsonProperty("id") val identifier = id.toString()
 }
-
+data class UserNotice constructor(@BsonProperty val text: String?, @BsonProperty val icon: Icon?)
 
 data class Status constructor(@BsonProperty("icon") var icon: Icon, @BsonProperty("text")  var text: String)
-data class Icon(override val cdn: String, override val animated: Boolean, override val id: ISnowflake) : ImageImpl {
-    override fun getEffectiveURL(): String {
-        TODO("Not yet implemented")
-    }
+data class Icon(override val cdn: String, override val animated: Boolean, @JsonIgnore override val id: Long) : ImageImpl {
+    @JsonProperty("id") val identifier = id.toString()
 }
 
 data class Friends constructor(
@@ -205,15 +205,11 @@ data class FriendsPublic @BsonCreator constructor(
         return false
     }
 }
-class Avatar  @BsonCreator constructor(
-    @BsonProperty("userID") @JsonProperty("user") val userID: ISnowflake,
-    @BsonProperty("animated") override val animated: Boolean,
-    @BsonProperty("cdn") override val cdn: String,
-    @BsonProperty("imageID") @JsonProperty("id") override val id: ISnowflake
-) : ImageImpl {
-    override fun getEffectiveURL(): String {
-        TODO("Not yet implemented")
-    }
+data class Avatar constructor(
+    @BsonProperty var animated: Boolean = false,
+    @BsonProperty("identifier") @JsonIgnore var identifier: Long = 0L
+)  {
+   @BsonIgnore @JsonProperty("id") var idJSON = identifier.toString()
 }
 enum class UserState {
     OFFLINE,

@@ -53,7 +53,6 @@ export const SettingsStore = defineStore('SettingsStore', {
             let notifications = await this.store.get('notifications') as Notifications;
             this.setCurrentTheme(currentTheme);
             this.notifications = notifications;
-            console.log(this.store.entries());
         }
     }
 });

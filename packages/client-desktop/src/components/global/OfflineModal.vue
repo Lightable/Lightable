@@ -6,9 +6,9 @@
     <template v-slot:name>
       <span class="title">You have been disconnected</span>
     </template>
-    <!-- <template v-slot:body>
-       <h3 style="text-align: center; color: var(--yellow);">Attempting to reconnect you shortly</h3>
-    </template> -->
+    <template v-slot:body>
+       <span style="color: var(--yellow);">Attempting to reconnect you shortly</span>
+    </template>
   </BaseModal>
 </template>
 

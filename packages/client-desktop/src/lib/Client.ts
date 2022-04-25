@@ -5,10 +5,11 @@ import { SnackStore } from "@/stores/SnackStore";
 import axios, { Axios, AxiosRequestHeaders } from "axios";
 import EventEmitter from "events";
 import { Store } from "pinia";
-import { ChattySocket } from "./ChattySocket";
+import { ChattySocket, ServerReadyPayload } from "./ChattySocket";
 import Logger from "./Logger";
 import { Route, RouteMethod, RoutePath } from "./Routes/Routes";
 import { AttachmentMeta } from "./structures/Attachment";
+import { Device } from "./structures/Device";
 import Messages, { IMessage } from "./structures/Messages";
 import Users, { User } from "./structures/Users";
 import { Nullable } from "./util/null";
@@ -25,6 +26,7 @@ export class Client extends EventEmitter {
     self?: User;
     users: Users;
     pending: Users;
+    requests: Users;
     apiURL: string;
     Axios: Axios;
     ws: ChattySocket;
@@ -35,9 +37,10 @@ export class Client extends EventEmitter {
         this.options = options;
         this.users = new Users(this);
         this.pending = new Users(this);
+        this.requests = new Users(this);
         this.apiURL = options.rest?.api!!;
         this.Axios = axios.create({ baseURL: this.apiURL });
-        this.gateway = "ws://localhost:5898";
+        this.gateway = "ws://localhost:8081";
         this.ws = new ChattySocket(this);
         this.logger = new Logger();
         this.logger.logInfo('ChattyClient', 'Init', null);
@@ -46,6 +49,34 @@ export class Client extends EventEmitter {
             console.log(message, msg);
             this.users.$get(msg.user.id).messages?.create(message);
         });
+        this.ws.on('dropped', (payload: Device) => {
+            this.options.store.setLoggedInDevice(payload);
+        });
+        this.ws.on('ready', (payload: ServerReadyPayload) => {
+            console.log(this.options);
+            let data = payload.d;
+            // Self
+            data.user.authentication = this.self.auth!!
+            this.self = new User(this, data.user);
+            // Relationships
+            for (let i = 0; data.relationships.friends.length > i; i++) { // Friends
+                let friend = data.relationships.friends[i];
+                this.users.set(friend.id, new User(this, friend));
+            }
+            this.logger.log('ChattySocket', `Total Friends = ${data.relationships.friends.length}`, null);
+            for (let i = 0; data.relationships.pending.length > i; i++) { // Pending Friends
+                let pending = data.relationships.pending[i];
+                this.pending.set(pending.id, new User(this, pending));
+            }
+            this.logger.log('ChattySocket', `Total Pending Friends = ${data.relationships.pending.length}`, null);
+            for (let i = 0; data.relationships.requests.length > i; i++) { // Pending Requests
+                let request = data.relationships.requests[i];
+                this.requests.set(request.id, new User(this, request));
+            }
+            this.logger.log('ChattySocket', `Total Requests = ${data.relationships.requests.length}`, null);
+            let prod = payload.d.meta.prod;
+            this.options.store.setProduction(prod);
+        })
     }
     async req<M extends RouteMethod, T extends RoutePath>(
         method: M,
@@ -81,7 +112,7 @@ export class Client extends EventEmitter {
      */
     async loginWEP(email: string, password: string) {
         if (!email || !password) throw new SyntaxError('Email, nor password can be null');
-        let login = await this.req('POST', '/v2/user/@me/login', {
+        let login = await this.req('POST', '/user/@me/login', {
             email: email,
             password: password
         })
@@ -98,7 +129,7 @@ export class Client extends EventEmitter {
         this.options.auth = auth;
         this.options.store.setState(State.SUCCESS);
         this.options.store.setNotice('Logging In');
-        let login = await this.req('GET', '/v2/user/@me', {
+        let login = await this.req('GET', '/user/@me', {
             'Authorization': auth
         });
         login.authentication = auth;
@@ -111,7 +142,6 @@ export class Client extends EventEmitter {
                 this.options.store.setNotice('Authenticating');
                 this.ws.$login();
                 this.options.store.setState(State.FINISHED);
-                this.getFriends();
             }).catch((err) => {
                 let snackstore = SnackStore();
                 snackstore.create('error', 'Websocket failed to connect', false, undefined);
@@ -120,26 +150,6 @@ export class Client extends EventEmitter {
             });
         }
 
-    }
-    async getFriends() {
-        let friendRequest = await this.req('GET', '/v2/user/@me/relationships', {
-            'Authorization': `${this.options.auth}`
-        });
-        for (let i: number = 0; friendRequest.friends.length > i; i++) {
-            let friend = friendRequest.friends[i];
-            let user = new User(this, friend);
-            let lastMessage = await this.req('GET', `/v2/user/@me/channels/${friend.id}/messages?limit=1`, {
-                'Authorization': this.self?.auth!!
-            }) as Nullable<IMessages>;
-            if (lastMessage) {
-                user.messages?.create(lastMessage.messages[0]);
-            }
-            this.users.set(friend.id, user);
-        }
-        for (let i: number = 0; friendRequest.pending.length > i; i++) {
-            let pending = friendRequest.pending[i];
-            this.pending.set(pending.id, new User(this, pending));
-        }
     }
     async $connect() {
         await this
@@ -179,7 +189,6 @@ export interface SocketOptions {
 }
 export interface RestOptions {
     api: string,
-    cdn: string,
     headers: {},
     retries: number,
     version: number,

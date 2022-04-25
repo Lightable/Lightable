@@ -36,7 +36,9 @@
   --toggle-bg-off: var(--sb);
   --toggle-border-on: transparent;
   --toggle-border-off: transparent;
-
+  .circle {
+    border-radius: 50%;
+  }
 }
 [type='button'] {
   cursor: pointer;

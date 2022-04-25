@@ -3,24 +3,47 @@ export default interface ISocketDecoder {
 }
 
 export interface SocketResponse {
-    op: OPCodes,
-    type?: RecieveCodes,
+    t: SocketMessageType,
     d: any
 }
 
-export enum OPCodes {
-    Dispatch = 0,
-    Heartbeat = 1,
-    Identify = 2,
-    Presence = 3,
-    Voice = 4,
-    Resume = 5,
-    Invalid = 6,
-    Hello = 7,
-    ACK = 8,
-    Recieve = 9
+export enum SocketMessageType {
+    ClientStart,
+    ServerStart,
+    ClientPing,
+    ServerPong,
+    ClientTyping,
+    ClientCallStart,
+    ClientCallEnd,
+    ClientStatusAway,
+    ClientStatusDND,
+    ClientStatusOnline,
+    ServerReset,
+    ServerReady,
+    ServerSelfUpdate,
+    ServerSessionCreate,
+    ServerSessionUpdate,
+    ServerSessionDelete,
+    ServerPendingFriend,
+    ServerFriendRemove,
+    ServerSelfFriendRemove,
+    ServerSelfRequestFriend,
+    ServerSelfRequestRemove,
+    ServerRequestRemoved,
+    ServerRequestAccepted,
+    ServerSelfRequestAccepted,
+    ServerFriendUpdate,
+    ServerMessageCreate,
+    ServerSelfMessageCreate,
+    ServerMessageDelete,
+    ServerSelfMessageDelete,
+    ServerMessageUpdate,
+    ServerSelfMessageUpdate,
+    ServerTyping,
+    ServerSelfTyping,
+    ServerDropGateway,
+    ServerSelfDisabledUser
 }
-
 export enum RecieveCodes {
     INVALID_AUTH = -1,
     Message = 0,

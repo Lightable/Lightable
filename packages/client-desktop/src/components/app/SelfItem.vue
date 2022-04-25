@@ -19,7 +19,7 @@
     </div>
 
     <div class="inner-self">
-      <Avatar size="35px" :src="(me?.avatar as Object)" :displaywarn="false" @click="active = !active" type="button"/>
+      <Avatar size="35" :user="me" :displaywarn="false" @click="active = !active" type="button" :circle="true"/>
     </div>
   </div>
 </template>

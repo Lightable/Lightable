@@ -7,7 +7,7 @@
       @contextmenu="openProfileContext"
     >
       <div class="inner">
-        <Avatar />
+        <Avatar :circle="true" :user="user" />
         <div class="detail-wrap">
           <span class="name">
             <b>{{ user.name }}</b>

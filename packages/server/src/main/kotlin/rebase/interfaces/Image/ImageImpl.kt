@@ -11,10 +11,5 @@ import rebase.interfaces.ISnowflake
 interface ImageImpl {
     val cdn: String
     val animated: Boolean
-    val id: ISnowflake
-
-    /**
-     * Retrieves the effective image URL
-     */
-    fun getEffectiveURL(): String
+    val id: Long
 }

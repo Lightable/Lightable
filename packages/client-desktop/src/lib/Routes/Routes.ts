@@ -30,26 +30,26 @@ type Routes =
     /* Device */
     | {
         method: 'GET';
-        route: `/v2/user/@me/devices`;
+        route: `/user/@me/devices`;
         data: undefined;
         response: Nullable<Device[]>;
     }
     /* User */
     | {
         method: 'POST',
-        route: `/v2/user/@me/create`;
+        route: `/user/@me/create`;
         data: UserCreate;
         response: User
     }
     | {
         method: 'POST',
-        route: `/v2/user/@me/login`;
+        route: `/user/@me/login`;
         data: Nullable<UserLogin>;
         response: ISelf
     }
     | {
         method: 'PATCH',
-        route: '/v2/user/@me/update';
+        route: '/user/@me';
         data: {
             name?: string;
             status?: object;
@@ -61,30 +61,30 @@ type Routes =
     }
     | {
         method: 'GET';
-        route: '/v2/user/@me';
+        route: '/user/@me';
         data: undefined;
         response: ISelf
     }
     | {
         method: 'PUT',
-        route: `/v2/user/@me/relationships/${FriendID}`,
+        route: `/user/@me/relationships/${FriendID}`,
         data: undefined,
         response: Nullable<PendingFriend>
     } | {
         method: 'GET',
-        route: '/v2/user/@me/relationships',
+        route: '/user/@me/relationships',
         data: undefined,
         response: Relationships
     }
     | {
         method: 'POST',
-        route: '/v2/user/@me/relationships/pending/id/accept',
+        route: '/user/@me/relationships/pending/id/accept',
         data: undefined,
         response: IUser
     }
     | {
         method: 'DELETE',
-        route: '/v2/user/@me/relationships/pending/id/deny',
+        route: '/user/@me/relationships/pending/id/deny',
         data: undefined,
         response: null
     }

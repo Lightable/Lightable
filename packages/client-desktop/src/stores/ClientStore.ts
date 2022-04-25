@@ -5,6 +5,7 @@ import { Nullable } from "@/lib/util/null";
 import { defineStore } from "pinia";
 import { IPartialSelf, PartialSelfUser } from "./AuthenticationStore";
 import Logger from "@/lib/Logger";
+import { Device } from "@/lib/structures/Device";
 
 export const ClientStore = defineStore('ClientStore', {
     state: () => ({
@@ -15,8 +16,9 @@ export const ClientStore = defineStore('ClientStore', {
         // Loading settings
         state: State.SUCCESS,
         notice: 'Connecting to WebSocket' as ClientNotice | string,
-
         logger: new Logger(),
+        production: true as boolean,
+        connectedDevice: null as Device | null
     }),
     actions: {
         setClient(client: Client) {
@@ -45,6 +47,17 @@ export const ClientStore = defineStore('ClientStore', {
         setNotice(notice: ClientNotice | string) {
             this.notice = notice;
             if (this.notice == "Failed to Connect") { this.logger.logWarn('ClientStore', 'SetNotice', this.notice) } else { this.logger.logInfo('ClientStore', 'SetNotice', this.notice) }
+        },
+        setProduction(production: boolean) {
+            this.production = production;
+        },
+        setLoggedInDevice(device: Device) {
+            this.connectedDevice = device;
+        },
+        $resetData() {
+            this.account = null;
+            this.connectedDevice = null;
+            this.production = true;
         }
     }
 })

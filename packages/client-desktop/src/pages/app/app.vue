@@ -9,6 +9,7 @@
        <SettingsContextMenu v-if="currentPanel == 'Settings'"/>
        <Profile v-if="currentlyActiveProfile != null" :profile="currentlyActiveProfile"/>
        <OfflineModal v-if="offline"/>
+       <TooManyConnections v-if="loggedInDevice != null | loggedInDevice != undefined"/>
     </div>
   </div>
   <router-view />
@@ -30,8 +31,9 @@ import SettingsContextMenu from '@/components/global/SideContext/SettingsContext
 import NewNameModal from '../../components/global/NewNameModal.vue';
 import Profile from '@/components/app/User/Profile.vue';
 import OfflineModal from '@/components/global/OfflineModal.vue';
+import TooManyConnections from '@/components/global/TooManyConnections.vue';
 export default defineComponent({
-  components: { Loading, SideBar, UnravelAni, SideContextMenu, Friend, FriendContextMenu, AddFriendModal, SettingsContextMenu, NewNameModal, Profile, OfflineModal },
+  components: { Loading, SideBar, UnravelAni, SideContextMenu, Friend, FriendContextMenu, AddFriendModal, SettingsContextMenu, NewNameModal, Profile, OfflineModal, TooManyConnections },
   name: 'app',
   setup() {
     let clientStore = ClientStore();
@@ -43,7 +45,8 @@ export default defineComponent({
       addFriendModalVis: computed(() => appStore.addFriendModalVis),
       newNameModalVis: computed(() => appStore.newNameModalVis),
       currentlyActiveProfile: computed(() => appStore.currentlyActiveProfile),
-      offline: computed(() => appStore.offline)
+      offline: computed(() => appStore.offline),
+      loggedInDevice: computed(() => clientStore.connectedDevice)
     };
   },
   async mounted() {

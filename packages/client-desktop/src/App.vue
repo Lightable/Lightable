@@ -26,8 +26,7 @@ export default defineComponent({
     let instance = new Client({
       store: client,
       rest: {
-        api: 'http://localhost:5898',
-        cdn: 'http://localhost:5898/cdn',
+        api: 'http://localhost:8081',
         headers: {
           'x-usmell': true,
         },

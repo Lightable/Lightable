@@ -50,9 +50,10 @@ export interface ISelf extends IUser {
     authentication: string
 }
 export interface IAvatar {
-    img: string,
-    animated: boolean
+    animated: boolean,
+    id: string
 }
+
 export class User {
     client: Client;
     _id: string;
@@ -117,7 +118,7 @@ export class User {
 
     async changeName(name: string) {
         try {
-            let updatedUser = await this.client.req('PATCH', '/v2/user/@me/update', {
+            let updatedUser = await this.client.req('PATCH', '/user/@me', {
                 Authorization: this.client.self?.auth!!
             }, {
                 name: name
@@ -130,9 +131,13 @@ export class User {
     }
     $update(data: Partial<IUser>) {
         for (const update in data) {
+            console.log(update)
             const key = update as keyof IUser;
             (this[key] as any) = data[key];
         }
+    }
+    getAvatar() {
+       return `${this.client.apiURL}/cdn/user/${this._id}/avatars/avatar_${this.avatar.id}`; 
     }
 }
 

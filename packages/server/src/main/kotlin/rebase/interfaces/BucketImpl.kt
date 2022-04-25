@@ -6,7 +6,7 @@ import rebase.Cache
 interface BucketImpl {
     val cache: Cache?
     val jackson: ObjectMapper
-    fun save()
+    fun save(saveToDatabase: Boolean = true)
     fun remove()
     fun toJSON(): String
 }

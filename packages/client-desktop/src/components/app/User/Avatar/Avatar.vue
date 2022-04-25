@@ -1,23 +1,14 @@
 <template>
-  <tippy content="Avatars are not yet supported ⚠️" v-tippy="{placement: 'top'}" v-if="displaywarn">
-    <div class="avatar">
-      <Missing v-if="true" :height="size" :width="size" color="var(--error)" />
-
-      <!-- <img :src="client?.generateFileURL(src.animated, false, {id: src.img, animated: src.animated})!!" :height="size" :width="size" v-else/> -->
+    <div class="avatar" v-if="user.avatar == null">
+      <Missing :height="size" :width="size" color="var(--error)" class="avatar-src" :circle="circle"/>
     </div>
-  </tippy>
-  <div class="else-warn" v-else>
-     <div class="avatar">
-      <Missing v-if="true" :height="size" :width="size" color="var(--error)" />
-
-      <!-- <img :src="client?.generateFileURL(src.animated, false, {id: src.img, animated: src.animated})!!" :height="size" :width="size" v-else/> -->
-    </div>
+     <div class="avatar" v-else>
+      <img :src="user.getAvatar()+`?size=64`" :height="size" :width="size" class="avatar-src" :circle="circle"/>
   </div>
   <slot/>
 </template>
 
 <script lang="ts">
-import {Attachment} from '@/lib/structures/Attachment';
 import {defineComponent, computed} from 'vue';
 import {ClientStore} from '../../../../stores/ClientStore';
 import {Filter} from './AvatarFilter';
@@ -29,24 +20,18 @@ export default defineComponent({
     size: {
       type: String,
       required: false,
-      default: () => '32px',
+      default: () => '32',
     },
     filter: {
       type: String,
       required: false,
       default: () => 'None' as Filter,
     },
-    src: {
+    user: {
       type: Object,
-      required: false,
-      default: () => null,
+      required: true,
     },
-    animate: Boolean,
-    displaywarn: {
-      type: Boolean,
-      required: false,
-      default: () => true
-    }
+    circle: Boolean
   },
   setup(props) {
     let client = ClientStore();
@@ -58,3 +43,11 @@ export default defineComponent({
   components: {Missing},
 });
 </script>
+
+<style lang="scss" scoped>
+  .avatar-src {
+    &[circle='true'] {
+      border-radius: 50%;
+    }
+  }
+</style>

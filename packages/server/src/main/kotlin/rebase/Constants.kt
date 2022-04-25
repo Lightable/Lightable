@@ -14,4 +14,10 @@ object Constants {
             )
         val HASH = Regex("/[0-9a-f]{64}/i")
     }
+    fun getRandomString(length: Int) : String {
+        val charset = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz0123456789"
+        return (1..length)
+            .map { charset.random() }
+            .joinToString("")
+    }
 }

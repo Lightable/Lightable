@@ -9,7 +9,7 @@ import rebase.interfaces.Image.AvatarImpl
 class Avatar(
     override val cdn: String,
     override val animated: Boolean,
-    override val id: ISnowflake,
+    override val id: Long,
     override val size: Long,
     override val connectedUser: String
 ) : AvatarImpl {
@@ -17,5 +17,4 @@ class Avatar(
      * Allows you to get the limited avatar data for Serialization
      */
     fun getAvatar() = this as AvatarImpl
-    override fun getEffectiveURL() = "${cdn}/${connectedUser}/${if (animated) "a_" else ""}${id}"
 }
