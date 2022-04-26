@@ -162,8 +162,10 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             connections.values.forEach { v -> println(v.user.identifier) }
             val friends = connections.values.find { u -> u.user.identifier== payload.id }!!.user.getFriends()
             for (friend in friends.friends) {
-                val friendSession = connections.values.find { f -> f.user.identifier == friend.id }!!
-                send(friendSession.ws.session, friendSession.ws.type, jsonStr = payload.toJSON())
+                val friendSession = connections.values.find { f -> f.user.identifier == friend.id }
+                if (friendSession != null) {
+                    send(friendSession.ws.session, friendSession.ws.type, jsonStr = payload.toJSON())
+                }
             }
             GlobalBus.dropAll()
             return@subscribe

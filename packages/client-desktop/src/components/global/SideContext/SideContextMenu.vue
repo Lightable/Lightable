@@ -1,24 +1,24 @@
 <template>
-<BringOutAni>
-  <div class="side-ctx-menu">
-    <div class="header">
-      <BringOutAni class="flex-header" v-if="true">
-        <div class="header-icon">
-          <slot name="icon" class="header-icon" />
-        </div>
+  <BringOutAni>
+    <div class="side-ctx-menu">
+      <div class="header">
+        <BringOutAni class="flex-header" v-if="true">
+          <div class="header-icon">
+            <slot name="icon" class="header-icon" />
+          </div>
 
-        <div class="header-title">
-          <slot name="header" class="header-title" />
-        </div>
-        <div class="header-actions">
-          <slot name="actions" class="header-title" />
-        </div>
-      </BringOutAni>
+          <div class="header-title">
+            <slot name="header" class="header-title" />
+          </div>
+          <div class="header-actions">
+            <slot name="actions" class="header-title" />
+          </div>
+        </BringOutAni>
+      </div>
+      <div class="body">
+        <slot name="body" />
+      </div>
     </div>
-    <div class="body">
-        <slot name="body"/>
-    </div>
-  </div>
   </BringOutAni>
 </template>
 
@@ -33,6 +33,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .side-ctx-menu {
+
   .header {
     border-bottom: var(--gray) 1px solid;
     height: 50px;
@@ -40,12 +41,14 @@ export default defineComponent({
     flex-direction: row;
     align-items: center;
     width: 100%;
+    
+
     .flex-header {
-         height: 50px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
+      height: 50px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
     }
     .header-title {
       font-size: calc(var(--font-size) + 18px);
@@ -65,11 +68,15 @@ export default defineComponent({
   }
   height: 100vh;
   background-color: var(--titlebar);
-  width: 250px;
+  min-width: 250px;
+  overflow-y: scroll;
 }
 .body {
-  height:100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
+}
+::-webkit-scrollbar {
+    display: none;
 }
 </style>

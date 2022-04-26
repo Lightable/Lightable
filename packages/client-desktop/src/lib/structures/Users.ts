@@ -131,7 +131,6 @@ export class User {
     }
     $update(data: Partial<IUser>) {
         for (const update in data) {
-            console.log(update)
             const key = update as keyof IUser;
             (this[key] as any) = data[key];
         }

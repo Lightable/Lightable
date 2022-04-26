@@ -41,7 +41,6 @@ export const AppStore = defineStore('AppStore', {
             this.save();
         },
         setCurrentlyActiveProfile(d: string | User | null) {
-            console.log(d);
             this.currentlyActiveProfile = d;
         },
         setOffline(bool: boolean) {
