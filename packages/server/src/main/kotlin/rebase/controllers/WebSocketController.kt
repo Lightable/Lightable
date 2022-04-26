@@ -18,6 +18,7 @@ import rebase.compression.CompressionUtil
 import java.nio.ByteBuffer
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.*
+import me.kosert.flowbus.dropEvent
 import okhttp3.internal.notify
 import okhttp3.internal.userAgent
 
@@ -93,6 +94,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                         userSession.user.save()
                         GlobalBus.post(FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "state", UserState.ONLINE.ordinal))
                         GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "state", UserState.ONLINE.ordinal))
+                        return
                     }
                     SocketMessageType.ClientStatusAway.ordinal -> {
                         userSession.user.state = UserState.AWAY.ordinal
@@ -100,17 +102,20 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                         GlobalBus.post(
                             FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "state", UserState.AWAY.ordinal))
                         GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "state", UserState.AWAY.ordinal))
+                        return
                     }
                     SocketMessageType.ClientStatusDND.ordinal -> {
                         userSession.user.state = UserState.DND.ordinal
                         userSession.user.save()
                         GlobalBus.post(FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "state", UserState.DND.ordinal))
                         GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "state", UserState.DND.ordinal))
+                        return
                     }
                     SocketMessageType.ClientTyping.ordinal -> {
                         val typingTo = connections.values.find{ f -> f.user.identifier == jsonWrap.convertValue(rawMessage["d"], String::class.java).toLong() }
                         if (typingTo != null) {
                             GlobalBus.post(ClientTyping(userSession, typingTo))
+                            return
                         } else {
                             send(userSession.ws.session, userSession.ws.type, object { val t = "DoesNotExist"})
                         }
@@ -160,6 +165,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                 val friendSession = connections.values.find { f -> f.user.identifier == friend.id }!!
                 send(friendSession.ws.session, friendSession.ws.type, jsonStr = payload.toJSON())
             }
+            GlobalBus.dropAll()
             return@subscribe
         }
         events.subscribe<SelfUpdatePayload> { payload ->
@@ -168,6 +174,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             if (selfSocket != null) {
                 send(selfSocket.ws.session, selfSocket.ws.type, jsonStr = payload.toJSON())
             }
+            GlobalBus.dropAll()
             return@subscribe
         }
         events.subscribe<ClientTyping> { payload ->
@@ -176,6 +183,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             send(payload.to.ws.session, payload.to.ws.type, payload)
             payload.t = SocketMessageType.ServerSelfTyping.ordinal
             send(payload.self.ws.session, payload.self.ws.type, payload)
+            GlobalBus.dropAll()
             return@subscribe
         }
 
@@ -188,6 +196,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             if (friendSocket != null) {
                 send(friendSocket.ws.session, friendSocket.ws.type, payload)
             }
+            GlobalBus.dropAll()
             return@subscribe
         }
 
@@ -198,6 +207,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             if (selfSocket != null) {
                 send(selfSocket.ws.session, selfSocket.ws.type, payload)
             }
+            GlobalBus.dropAll()
             return@subscribe
         }
 
@@ -208,6 +218,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             if (friendSocket != null) {
                 send(friendSocket.ws.session, friendSocket.ws.type, payload)
             }
+            GlobalBus.dropAll()
         }
 
         // Self Deny friendship request
@@ -217,6 +228,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             if (selfSocket != null) {
                 send(selfSocket.ws.session, selfSocket.ws.type, payload)
             }
+            GlobalBus.dropAll()
         }
 
         // External accept friendship
@@ -226,6 +238,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             if (friendSocket != null) {
                 send(friendSocket.ws.session, friendSocket.ws.type, payload)
             }
+            GlobalBus.dropAll()
         }
 
         // Self accept friendship
@@ -235,6 +248,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             if (selfSocket != null) {
                 send(selfSocket.ws.session, selfSocket.ws.type, payload)
             }
+            GlobalBus.dropAll()
         }
     }
 }

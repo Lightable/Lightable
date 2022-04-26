@@ -1,17 +1,28 @@
-Apr 24, 2022 7:41:10 PM rebase.ImageEditor createResizedImageMaintainingAspect
-INFO: [31mResize[39m Resize on image took [35m37ms[39m
-Apr 24, 2022 7:42:44 PM rebase.ImageEditor createResizedImageMaintainingAspect
-INFO: [31mResize[39m Resize on image took [35m1ms[39m
-Apr 24, 2022 7:43:01 PM rebase.ImageEditor createResizedImageMaintainingAspect
-INFO: [31mResize[39m Resize on image took [35m1ms[39m
-java.lang.IllegalArgumentException: Instantiation of [simple type, class rebase.controllers.SessionProperties] value failed for JSON property properties due to missing (therefore NULL) value for creator parameter properties which is a non-nullable type
- at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: rebase.controllers.SessionProperties["properties"])
-	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4393)
-	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4324)
-	at rebase.controllers.WebSocketController.message(WebSocketController.kt:51)
-	at rebase.Server$2$1$2.invoke(Server.kt:93)
-	at rebase.Server$2$1$2.invoke(Server.kt:33)
-	at rebase.ServerKt$sam$io_javalin_websocket_WsMessageHandler$0.handleMessage(Server.kt)
+com.fasterxml.jackson.core.JsonParseException: Unexpected character ('}' (code 125)): was expecting double-quote to start field name
+ at [Source: (String)"{
+  "t": 0,
+  "d": {
+  "auth": "af1201c8-f2ec-4473-b658-d54b0b0ac64e",
+  "properties": {
+      "browser": "Native",
+      "os": "Windows",
+      "build": "1.9.2",
+    }
+  }
+}"; line: 9, column: 6]
+	at com.fasterxml.jackson.core.JsonParser._constructError(JsonParser.java:2391)
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportError(ParserMinimalBase.java:735)
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportUnexpectedChar(ParserMinimalBase.java:659)
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser._handleOddName(ReaderBasedJsonParser.java:1860)
+	at com.fasterxml.jackson.core.json.ReaderBasedJsonParser.nextFieldName(ReaderBasedJsonParser.java:962)
+	at com.fasterxml.jackson.databind.deser.std.BaseNodeDeserializer._deserializeContainerNoRecursion(JsonNodeDeserializer.java:440)
+	at com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer.deserialize(JsonNodeDeserializer.java:84)
+	at com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer.deserialize(JsonNodeDeserializer.java:20)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:322)
+	at com.fasterxml.jackson.databind.ObjectMapper._readTreeAndClose(ObjectMapper.java:4716)
+	at com.fasterxml.jackson.databind.ObjectMapper.readTree(ObjectMapper.java:3076)
+	at rebase.controllers.WebSocketController.message(WebSocketController.kt:44)
+	at rebase.Server$2$1$2.handleMessage(Server.kt:93)
 	at io.javalin.websocket.WsConnection$onMessage$1.invoke(WsConnection.kt:38)
 	at io.javalin.websocket.WsConnection$onMessage$1.invoke(WsConnection.kt:38)
 	at io.javalin.websocket.WsConnection.tryBeforeAndEndpointHandlers(WsConnection.kt:71)
@@ -43,72 +54,7 @@ java.lang.IllegalArgumentException: Instantiation of [simple type, class rebase.
 	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.runTask(EatWhatYouKill.java:338)
 	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:315)
 	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:173)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:131)
-	at org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:409)
+	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.produce(EatWhatYouKill.java:137)
 	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:883)
 	at org.eclipse.jetty.util.thread.QueuedThreadPool$Runner.run(QueuedThreadPool.java:1034)
 	at java.base/java.lang.Thread.run(Thread.java:831)
-Caused by: com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException: Instantiation of [simple type, class rebase.controllers.SessionProperties] value failed for JSON property properties due to missing (therefore NULL) value for creator parameter properties which is a non-nullable type
- at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: rebase.controllers.SessionProperties["properties"])
-	at com.fasterxml.jackson.module.kotlin.KotlinValueInstantiator.createFromObjectWith(KotlinValueInstantiator.kt:84)
-	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:202)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:518)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1405)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:351)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:184)
-	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4388)
-	... 41 more
-java.lang.IllegalArgumentException: Instantiation of [simple type, class rebase.controllers.SessionProperties] value failed for JSON property properties due to missing (therefore NULL) value for creator parameter properties which is a non-nullable type
- at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: rebase.controllers.SessionProperties["properties"])
-	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4393)
-	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4324)
-	at rebase.controllers.WebSocketController.message(WebSocketController.kt:51)
-	at rebase.Server$2$1$2.invoke(Server.kt:93)
-	at rebase.Server$2$1$2.invoke(Server.kt:33)
-	at rebase.ServerKt$sam$io_javalin_websocket_WsMessageHandler$0.handleMessage(Server.kt)
-	at io.javalin.websocket.WsConnection$onMessage$1.invoke(WsConnection.kt:38)
-	at io.javalin.websocket.WsConnection$onMessage$1.invoke(WsConnection.kt:38)
-	at io.javalin.websocket.WsConnection.tryBeforeAndEndpointHandlers(WsConnection.kt:71)
-	at io.javalin.websocket.WsConnection.onMessage(WsConnection.kt:38)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:78)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:567)
-	at org.eclipse.jetty.websocket.common.events.annotated.CallableMethod.call(CallableMethod.java:70)
-	at org.eclipse.jetty.websocket.common.events.annotated.OptionalSessionCallableMethod.call(OptionalSessionCallableMethod.java:68)
-	at org.eclipse.jetty.websocket.common.events.JettyAnnotatedEventDriver.onTextMessage(JettyAnnotatedEventDriver.java:301)
-	at org.eclipse.jetty.websocket.common.message.SimpleTextMessage.messageComplete(SimpleTextMessage.java:69)
-	at org.eclipse.jetty.websocket.common.events.AbstractEventDriver.appendMessage(AbstractEventDriver.java:67)
-	at org.eclipse.jetty.websocket.common.events.JettyAnnotatedEventDriver.onTextFrame(JettyAnnotatedEventDriver.java:287)
-	at org.eclipse.jetty.websocket.common.events.AbstractEventDriver.incomingFrame(AbstractEventDriver.java:152)
-	at org.eclipse.jetty.websocket.common.WebSocketSession.incomingFrame(WebSocketSession.java:326)
-	at org.eclipse.jetty.websocket.common.extensions.AbstractExtension.nextIncomingFrame(AbstractExtension.java:148)
-	at org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension.nextIncomingFrame(PerMessageDeflateExtension.java:111)
-	at org.eclipse.jetty.websocket.common.extensions.compress.CompressExtension.forwardIncoming(CompressExtension.java:169)
-	at org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension.incomingFrame(PerMessageDeflateExtension.java:90)
-	at org.eclipse.jetty.websocket.common.extensions.ExtensionStack.incomingFrame(ExtensionStack.java:202)
-	at org.eclipse.jetty.websocket.common.Parser.notifyFrame(Parser.java:225)
-	at org.eclipse.jetty.websocket.common.Parser.parseSingleFrame(Parser.java:259)
-	at org.eclipse.jetty.websocket.common.io.AbstractWebSocketConnection.onFillable(AbstractWebSocketConnection.java:459)
-	at org.eclipse.jetty.websocket.common.io.AbstractWebSocketConnection.onFillable(AbstractWebSocketConnection.java:440)
-	at org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:311)
-	at org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:105)
-	at org.eclipse.jetty.io.ChannelEndPoint$1.run(ChannelEndPoint.java:104)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.runTask(EatWhatYouKill.java:338)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:315)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:173)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:131)
-	at org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:409)
-	at org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:883)
-	at org.eclipse.jetty.util.thread.QueuedThreadPool$Runner.run(QueuedThreadPool.java:1034)
-	at java.base/java.lang.Thread.run(Thread.java:831)
-Caused by: com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException: Instantiation of [simple type, class rebase.controllers.SessionProperties] value failed for JSON property properties due to missing (therefore NULL) value for creator parameter properties which is a non-nullable type
- at [Source: UNKNOWN; byte offset: #UNKNOWN] (through reference chain: rebase.controllers.SessionProperties["properties"])
-	at com.fasterxml.jackson.module.kotlin.KotlinValueInstantiator.createFromObjectWith(KotlinValueInstantiator.kt:84)
-	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:202)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:518)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1405)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:351)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:184)
-	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4388)
-	... 41 more

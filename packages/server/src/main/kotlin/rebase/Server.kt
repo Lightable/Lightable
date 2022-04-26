@@ -13,10 +13,13 @@ import io.javalin.plugin.openapi.dsl.documented
 import io.javalin.plugin.openapi.ui.ReDocOptions
 import io.javalin.plugin.openapi.ui.SwaggerOptions
 import io.swagger.v3.oas.models.info.Info
+import me.kosert.flowbus.EventsReceiver
 import me.kosert.flowbus.GlobalBus
+import me.kosert.flowbus.subscribe
 import org.slf4j.LoggerFactory
 import rebase.controllers.CDNController
 import rebase.controllers.DeveloperController
+import rebase.controllers.FriendUpdatePayload
 import rebase.controllers.WebSocketController
 import java.io.File
 import java.io.FileOutputStream

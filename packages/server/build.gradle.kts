@@ -41,7 +41,7 @@ dependencies {
     compileOnly(kotlin("serialization", version = kotlinVersion))
     implementation("io.javalin:javalin-bundle:4.4.0")
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta5")
-    testImplementation("org.mockito:mockito-core:4.4.0")
+    testImplementation("org.mockito:mockito-core:4.5.1")
     testImplementation("io.mockk:mockk:1.12.3")
     implementation("org.sejda.imageio:webp-imageio:0.1.6")
 }
