@@ -7,6 +7,6 @@
 https://creativecommons.org/licenses/by-sa/4.0/
 
 # Chatty
- [Beta] Text and play games with your friends 
+ [Beta] Text with your friends 
 
 
