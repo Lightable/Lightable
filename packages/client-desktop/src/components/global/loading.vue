@@ -16,8 +16,8 @@
   </div>
 </template>
 
-<script lang="js">
-import Logo from "./Icons/Logo.vue";
+<script lang="ts">
+import Logo from "@/components/Icons/Logo.vue";
 export default {
     name: "loading",
     props: {

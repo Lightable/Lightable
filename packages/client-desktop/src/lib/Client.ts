@@ -4,15 +4,15 @@ import { State } from "@/stores/ClientStore";
 import { SnackStore } from "@/stores/SnackStore";
 import axios, { Axios, AxiosRequestHeaders } from "axios";
 import EventEmitter from "events";
-import { Store } from "pinia";
-import { ChattySocket, ServerReadyPayload } from "./ChattySocket";
+import IClientStore from "@/stores/ClientStore";
+import { ChattySocket, ServerReadyPayload } from "./Socket/ChattySocket";
 import Logger from "./Logger";
 import { Route, RouteMethod, RoutePath } from "./Routes/Routes";
 import { AttachmentMeta } from "./structures/Attachment";
 import { Device } from "./structures/Device";
 import Messages, { IMessage } from "./structures/Messages";
-import Users, { User } from "./structures/Users";
-import { Nullable } from "./util/null";
+import Users, { IUser, User } from "./structures/Users";
+import { Nullable } from "./utils/null";
 export declare interface Client {
     on(event: 'connecting', listener: () => void): this
     on(event: 'connected', listener: () => void): this
@@ -28,6 +28,7 @@ export class Client extends EventEmitter {
     pending: Users;
     requests: Users;
     apiURL: string;
+    store: IClientStore;
     Axios: Axios;
     ws: ChattySocket;
     gateway: string;
@@ -39,16 +40,17 @@ export class Client extends EventEmitter {
         this.pending = new Users(this);
         this.requests = new Users(this);
         this.apiURL = options.rest?.api!!;
+        this.store = options.store as IClientStore;
         this.Axios = axios.create({ baseURL: this.apiURL });
         this.gateway = "ws://localhost:8081";
         this.ws = new ChattySocket(this);
         this.logger = new Logger();
         this.logger.logInfo('ChattyClient', 'Init', null);
-        this.ws.on('message', (msg: any) => {
-            let message = msg.message as IMessage;
-            console.log(message, msg);
-            this.users.$get(msg.user.id).messages?.create(message);
-        });
+        // this.ws.on('message', (msg: any) => {
+        //     let message = msg.message as IMessage;
+        //     console.log(message, msg);
+        //     this.users.$get(msg.user.id).messages?.create(message);
+        // });
         this.ws.on('dropped', (payload: Device) => {
             this.options.store.setLoggedInDevice(payload);
         });
@@ -66,17 +68,21 @@ export class Client extends EventEmitter {
             this.logger.log('ChattySocket', `Total Friends = ${data.relationships.friends.length}`, null);
             for (let i = 0; data.relationships.pending.length > i; i++) { // Pending Friends
                 let pending = data.relationships.pending[i];
-                this.pending.set(pending.id, new User(this, pending));
+                this.store.setPendingUser(new User(this, pending));
             }
             this.logger.log('ChattySocket', `Total Pending Friends = ${data.relationships.pending.length}`, null);
             for (let i = 0; data.relationships.requests.length > i; i++) { // Pending Requests
                 let request = data.relationships.requests[i];
-                this.requests.set(request.id, new User(this, request));
+                this.store.setRequestedUser(new User(this, request));
             }
             this.logger.log('ChattySocket', `Total Requests = ${data.relationships.requests.length}`, null);
             let prod = payload.d.meta.prod;
             this.options.store.setProduction(prod);
-        })
+        });
+        this.ws.on('pending', (payload: IUser) => {
+            console.log('PENDING => CLIENT', payload);
+            this.store.setPendingUser(new User(this, payload));
+        });
     }
     async req<M extends RouteMethod, T extends RoutePath>(
         method: M,

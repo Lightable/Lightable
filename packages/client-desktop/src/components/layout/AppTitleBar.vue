@@ -38,7 +38,7 @@
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
 import {appWindow} from '@tauri-apps/api/window';
-import Logo from '../global/Icons/Logo.vue';
+import Logo from '@/components/Icons/Logo.vue';
 import {AppStore} from '@/stores/AppStore';
 export default defineComponent({
   name: 'AppTitleBar',

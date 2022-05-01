@@ -14,7 +14,13 @@ import rebase.interfaces.FailImpl
 import java.util.concurrent.ExecutorService
 import kotlin.system.measureTimeMillis
 
-class UserController(val cache: Cache, val snowflake: Snowflake, val executor: ExecutorService, val isProd: Boolean, val fileController: FileController) {
+class UserController(
+    val cache: Cache,
+    val snowflake: Snowflake,
+    val executor: ExecutorService,
+    val isProd: Boolean,
+    val fileController: FileController
+) {
     @OpenApi(
         path = "/user",
         method = HttpMethod.POST,
@@ -31,7 +37,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
     )
     fun createUser(ctx: Context) {
         val body = ctx.bodyAsClass<NewUser>()
-        if (body.validate(ctx) &&
+        if (body.validate(cache, ctx) &&
             cache.users.values.find { user -> user.email == body.email } == null
         ) {
             val user =
@@ -56,6 +62,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             return
         }
     }
+
     fun createTestUsers(ctx: Context) {
         if (isProd) {
             ctx.json(UserDataFail("Nice Try :)"))
@@ -65,7 +72,13 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 val userCreationTiming = measureTimeMillis {
                     val email = "${Constants.getRandomString(10)}@example.com"
                     val password = "TESTPASS_${Constants.getRandomString(20)}"
-                    val user = User(test = true, email = email, password = password, cache = cache, identifier = snowflake.nextId())
+                    val user = User(
+                        test = true,
+                        email = email,
+                        password = password,
+                        cache = cache,
+                        identifier = snowflake.nextId()
+                    )
                     user.save(false)
                 }
                 print("\rCreated user in ${userCreationTiming}ms (${i})")
@@ -74,6 +87,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             ctx.status(201)
         }
     }
+
     fun removeTestUsers(ctx: Context) {
         if (isProd) {
             ctx.json(UserDataFail("Nice Try :)"))
@@ -81,6 +95,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             cache.removeAllTestUsers()
         }
     }
+
     fun getAllUsers(ctx: Context) {
         if (isProd) {
             ctx.json(UserDataFail("Nice Try :)"))
@@ -88,6 +103,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             ctx.status(200).json(cache.users.values)
         }
     }
+
     val getSelfUserDoc =
         document()
             .operation {
@@ -159,9 +175,9 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
         val user = requireAuth(cache, ctx)
         val updatedUser = ctx.bodyAsClass<UpdateUserPatch>()
         if (user != null) {
-            if (updatedUser.name != null) user.name = updatedUser.name
+            if (updatedUser.name != null && NewUser.validateUsername(updatedUser.name, cache, ctx)) user.name = updatedUser.name
             if (updatedUser.status != null) user.status = updatedUser.status
-            if (updatedUser.email != null) user.email = updatedUser.email
+            if (updatedUser.email != null && NewUser.validateEmail(updatedUser.email, ctx)) user.email = updatedUser.email
             if (updatedUser.notice != null) user.notice = updatedUser.notice
             user.save()
             ctx.status(200).json(user.toPublic())
@@ -170,6 +186,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             return
         }
     }
+
     fun updateAvatar(ctx: Context) {
         val user = requireAuth(cache, ctx)
         if (user != null) {
@@ -188,7 +205,14 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                         fileController.addAvatar(user.identifier, image.identifier, file, "png")
                         user.avatar = image
                         user.save()
-                        GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.toPublic().id, "user", user.toPublic()))
+                        GlobalBus.post(
+                            FriendUpdatePayload(
+                                user.toPublic(),
+                                user.toPublic().id,
+                                "user",
+                                user.toPublic()
+                            )
+                        )
                         GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
                         ctx.json(201).json(user.toPublic())
 
@@ -204,6 +228,7 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
         }
 
     }
+
     inner class Relationships {
         val createPendingRelationshipDoc =
             document()
@@ -219,13 +244,17 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                 .result("403", oneOf(documentedContent<RelationshipRequestFail>("json", false)))
                 .result("401", oneOf(documentedContent<UserAuthFail>("json", false)))
                 .header<String>("Authorization")
+                .pathParam<String>("name")
 
         fun addRelationship(ctx: Context) {
             val user = requireAuth(cache, ctx)
-            val friend =
-                cache.users.values.find { u -> u.identifier == ctx.pathParam("id").toLong() }
+            val friend = cache.users.values.find { u -> u.name == ctx.pathParam("name") }
             if (user != null) {
-                if (!user.checkValidFriendRequest(ctx.pathParam("id").toLong())) {
+                if (friend == null) {
+                    ctx.status(400).json(RelationshipRequestFail("Friend doesn't exist"))
+                    return
+                }
+                if (!user.checkValidFriendRequest(friend.identifier)) {
                     ctx.status(403)
                         .json(
                             RelationshipRequestFail(
@@ -233,7 +262,11 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
                             )
                         )
                     return
-                } else if (friend != null) {
+                } else {
+                    if (friend.identifier == user.identifier) {
+                        ctx.status(403).json(RelationshipRequestFail("You can't add yourself"))
+                        return
+                    }
                     user.addRequest(friend.identifier)
                     ctx.status(201).json(friend.toPublic()).run {
                         user.save()
@@ -368,16 +401,11 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
             val relationshipID = ctx.pathParam("id")
             if (user != null) {
                 // Inverse checking for pending / already friends
-                if (!user.checkValidFriendRequest(relationshipID.toLong()) &&
-                    !user.relationships.pending.contains(relationshipID.toLong())
-                ) {
+                if (!user.checkValidFriendRequest(relationshipID.toLong()) && !user.relationships.pending.contains(relationshipID.toLong())) {
                     user.removeFriend(relationshipID.toLong())
                     ctx.status(204)
                 } else {
-                    ctx.status(403)
-                        .json(
-                            UserDataFail("You are only pending or are not friends with this user!")
-                        )
+                    ctx.status(403).json(UserDataFail("You are only pending or are not friends with this user!"))
                 }
             }
         }
@@ -420,39 +448,44 @@ class UserController(val cache: Cache, val snowflake: Snowflake, val executor: E
     data class UserLogin(val email: String, val password: String)
 
     data class NewUser(val email: String, val password: String, val username: String) {
-        fun validate(ctx: Context): Boolean {
-            val emailVal = validateEmail(ctx)
-            val passwordVal = validatePassword(ctx)
-            val usernameVal = validateUsername(ctx)
+
+        fun validate(cache: Cache, ctx: Context): Boolean {
+            val emailVal = validateEmail(email, ctx)
+            val passwordVal = validatePassword(password, ctx)
+            val usernameVal = validateUsername(username, cache, ctx)
             return emailVal.and(passwordVal).and(usernameVal)
         }
 
-        private fun validatePassword(ctx: Context): Boolean {
-            if (password.isBlank() || password.length < 6) {
-                ctx.status(400).json(UserDataFail("Password is empty or less than 6 characters"))
-                return false
-            }
-            return true
-        }
+        companion object {
 
-        private fun validateEmail(ctx: Context): Boolean {
-            if (!email.matches(Constants.REGEX.EMAIL)) {
-                ctx.status(400).json(UserDataFail("Email is not correct format"))
-                return false
+            fun validatePassword(password: String, ctx: Context): Boolean {
+                if (password.isBlank() || password.length < 6) {
+                    ctx.status(400).json(UserDataFail("Password is empty or less than 6 characters"))
+                    return false
+                }
+                return true
             }
-            return true
-        }
 
-        private fun validateUsername(ctx: Context): Boolean {
-            if (username.isBlank()) {
-                ctx.status(400).json(UserDataFail("Username is blank"))
-                return false
+            fun validateEmail(email: String, ctx: Context): Boolean {
+                if (!email.matches(Constants.REGEX.EMAIL)) {
+                    ctx.status(400).json(UserDataFail("Email is not correct format"))
+                    return false
+                }
+                return true
             }
-            return true
+
+            fun validateUsername(username: String, cache: Cache, ctx: Context): Boolean {
+                if (username.isBlank()) {
+                    ctx.status(400).json(UserDataFail("Username is blank"))
+                    return false
+                } else if (cache.sameNameUser(username)) {
+                    ctx.status(400).json(UserDataFail("Username is already used"))
+                    return false
+                }
+                return true
+            }
         }
     }
-
-    init {}
 }
 
 fun requireAuth(cache: Cache, ctx: Context): rebase.User? {

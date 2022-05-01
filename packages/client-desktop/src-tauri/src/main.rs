@@ -49,7 +49,6 @@ fn chatty_notification(title: String, body: String, icon: String) {
     .icon(icon)
     .show();
 }
-
 #[tauri::command]
 async fn open_dev_tools(window: tauri::Window) {
   window.get_window("main").unwrap().open_devtools();

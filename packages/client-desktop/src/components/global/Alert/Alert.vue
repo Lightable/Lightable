@@ -17,9 +17,9 @@
 
 <script lang="ts">
 import {defineComponent, PropType} from 'vue';
-import SuccessIcon from '@/components/global/Icons/Status/SuccessIcon.vue';
-import WarningIcon from '@/components/global/Icons/Status/WarningIcon.vue';
-import ErrorIcon from '@/components/global/Icons/Status/ErrorIcon.vue';
+import SuccessIcon from '@/components/Icons/Status/SuccessIcon.vue';
+import WarningIcon from '@/components/Icons/Status/WarningIcon.vue';
+import ErrorIcon from '@/components/Icons/Status/ErrorIcon.vue';
 import {AlertTypes} from './AlertTypes';
 export default defineComponent({
   props: {

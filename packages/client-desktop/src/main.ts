@@ -26,5 +26,4 @@ const invokedApp = createApp(App)
     .use(devtools)
     .use(ClipboardPlugin)
     .use(MotionPlugin);
-
 invokedApp.mount('#app');

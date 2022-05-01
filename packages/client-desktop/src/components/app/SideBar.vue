@@ -22,10 +22,10 @@
 <script lang="ts">
 import {defineComponent, computed} from 'vue';
 import SelfItem from './SelfItem.vue';
-import Friend from '../global/Icons/Friend.vue';
+import Friend from '@/components/Icons/Friend.vue';
 import SidebarItem from './SidebarItem.vue';
-import Group from '../global/Icons/Group.vue';
-import Settings from '../global/Icons/Settings.vue';
+import Group from '@/components/Icons/Group.vue';
+import Settings from '@/components/Icons/Settings.vue';
 import { AppStore } from '@/stores/AppStore';
 
 export default defineComponent({

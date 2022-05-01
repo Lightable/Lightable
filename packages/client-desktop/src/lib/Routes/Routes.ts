@@ -1,5 +1,5 @@
 import { ISelf, IUser, User } from "../structures/Users";
-import { Nullable } from "../util/null";
+import { Nullable } from "../utils/null";
 import { Device } from "./interfaces/Devices";
 import { Release } from "./interfaces/Releases";
 import { UserCreate } from "./interfaces//UserCreate";

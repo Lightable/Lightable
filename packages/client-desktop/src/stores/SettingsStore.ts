@@ -7,7 +7,32 @@ export const SettingsStore = defineStore('SettingsStore', {
         element: document.documentElement,
         themes: {
             default: "dark" as DefaultThemes,
-            current: 'dark'
+            current: 'dark',
+            varNames: [
+                'bg',
+                'fg',
+                'text',
+                'sb',
+                'sf',
+                'sc-bg',
+                'highlight',
+                'notification',
+                'ac',
+                'green',
+                'yellow',
+                'blue',
+                'red',
+                'purple',
+                'orange',
+                'cyan',
+                'gray',
+                'white',
+                'error',
+                'link'
+            ],
+            defaults: {
+                dark: new Map<string, string>([])
+            }
         },
         notifications: {
             allowed: true,

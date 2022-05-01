@@ -244,3 +244,7 @@ body {
       background-color: var(--yellow);
     }
 }
+.vue-advanced-cropper__background, .vue-advanced-cropper__foreground {
+  background:  var(--modal) !important;
+  max-height: 50vh;
+}

@@ -1,5 +1,5 @@
 import { Client } from "../Client";
-import { Nullable } from "../util/null";
+import { Nullable } from "../utils/null";
 import { Attachment } from "./Attachment";
 import { User } from "./Users";
 

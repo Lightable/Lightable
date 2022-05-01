@@ -9,10 +9,11 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, computed} from 'vue';
+import {defineComponent, computed, PropType} from 'vue';
 import {ClientStore} from '../../../../stores/ClientStore';
-import {Filter} from './AvatarFilter';
-import Missing from '@/components/global/Icons/Missing.vue';
+import {Filter} from './_extensions/AvatarFilter';
+import Missing from '@/components/Icons/Missing.vue';
+import { User } from '@/lib/structures/Users';
 
 export default defineComponent({
   name: 'Avatar',
@@ -28,14 +29,13 @@ export default defineComponent({
       default: () => 'None' as Filter,
     },
     user: {
-      type: Object,
+      type: Object as PropType<User>,
       required: true,
     },
     circle: Boolean
   },
-  setup(props) {
+  setup() {
     let client = ClientStore();
-    console.log(props);
     return {
       client: computed(() => client.client),
     };

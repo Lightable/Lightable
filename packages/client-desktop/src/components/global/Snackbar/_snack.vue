@@ -18,11 +18,11 @@
 
 <script lang="ts">
 import {defineComponent, PropType} from 'vue';
-import {Snack, SnackStore} from '../../../stores/SnackStore';
-import SuccessIcon from '../Icons/Status/SuccessIcon.vue';
-import WarningIcon from '../Icons/Status/WarningIcon.vue';
-import ErrorIcon from '../Icons/Status/ErrorIcon.vue';
-import LoadingIcon from '../Icons/Status/LoadingIcon.vue';
+import {Snack, SnackStore} from '@/stores/SnackStore';
+import SuccessIcon from '@/components/Icons/Status/SuccessIcon.vue';
+import WarningIcon from '@/components/Icons/Status/WarningIcon.vue';
+import ErrorIcon from '@/components/Icons/Status/ErrorIcon.vue';
+import LoadingIcon from '@/components/Icons/Status/LoadingIcon.vue';
 export default defineComponent({
   props: {
     snack: {

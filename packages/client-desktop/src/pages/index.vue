@@ -6,10 +6,18 @@ import { defineComponent } from "vue";
    export default defineComponent({
         name: 'index',
         beforeCreate() {
-            // let authentication = AuthenticationStore();
+            let authStore = AuthenticationStore();
+            if (authStore.accounts.size === 1) {
+                return this.$router.push('/app/channels/@me');
+            } else if (authStore.accounts.size <= 0) {
+                return this.$router.push('login');
+            } else {
+                return this.$router.push('accounts');
+            }
+            // 
             // if (authentication.accounts.entries.length < 1) 
             // this.$router.push('/app');
-            return this.$router.push('/login');
+            // return this.$router.push('/login');
         }
    });
 </script>

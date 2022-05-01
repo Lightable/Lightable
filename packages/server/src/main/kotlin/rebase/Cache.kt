@@ -19,6 +19,7 @@ class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, 
     val userColl = db.getUserCollection()
     val users = HashMap<Long, User>()
     val userAvatarCache = HashMap<Long, ByteArrayOutputStream>()
+    val sameNameUser: (name: String) -> Boolean = { name -> users.values.find { u -> u.name == name } != null }
     fun saveOrReplaceUser(user: User, saveToDB: Boolean = true) {
         users[user.identifier] = user
         if (saveToDB) {

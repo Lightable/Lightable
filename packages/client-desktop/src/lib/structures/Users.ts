@@ -1,6 +1,6 @@
 import { PartialSelfUser } from "@/stores/AuthenticationStore";
 import { Client } from "../Client";
-import { Nullable } from "../util/null";
+import { Nullable } from "../utils/null";
 import { Attachment } from "./Attachment";
 import Messages from "./Messages";
 
@@ -48,6 +48,7 @@ export interface IUser {
 }
 export interface ISelf extends IUser {
     authentication: string
+    email: string
 }
 export interface IAvatar {
     animated: boolean,
@@ -64,6 +65,7 @@ export class User {
     online: OnlineStatus;
     flags: Nullable<number>;
     auth?: string;
+    email: string;
     messages: Nullable<Messages>;
     constructor(client: Client, data: IUser | ISelf) {
         this.client = client;
@@ -75,19 +77,21 @@ export class User {
         this.online = data.online;
         this.flags = null;
         this.auth = (data as ISelf).authentication
+        this.email = (data as ISelf).email;
         this.messages = new Messages(this.client);
     }
     async addFriend(id: string) {
-        console.log(this);
         try {
-            return await this.client.req(`PUT`, `/v2/user/@me/relationships/${id}`, { Authorization: this.client.self?.auth!! });
+            let req = await this.client.req(`POST`, `/user/@me/relationships/${id}`, { Authorization: this.client.self?.auth!! }) as IUser;
+            this.client.requests.set(req.id, new User(this.client, req));
+            return req;
         } catch (e: any) {
             return null;
         }
     }
     async acceptFriend() {
         try {
-            let friend = await this.client.req(`POST`, `/v2/user/@me/relationships/pending/${this._id}/accept`, { Authorization: this.client.self?.auth!! }) as IUser;
+            let friend = await this.client.req(`POST`, `/user/@me/relationships/pending/${this._id}`, { Authorization: this.client.self?.auth!! }) as IUser;
             this.client.users.set(friend.id, new User(this.client, friend));
             this.client.pending.delete(this._id);
             return friend;
@@ -97,25 +101,45 @@ export class User {
     }
     async denyFriend() {
         try {
-            let friend = await this.client.req(`DELETE`, `/v2/user/@me/relationships/pending/${this._id}/deny`, { Authorization: this.client.self?.auth!! });
+            let friend = await this.client.req(`DELETE`, `/user/@me/relationships/pending/${this._id}`, { Authorization: this.client.self?.auth!! });
             this.client.pending.delete(this._id);
             return friend;
         } catch (e: any) {
             return null;
         }
     }
-    async removeFriend() { 
+    async removeFriend() {
         try {
-            let friend = await this.client.req('DELETE', `/v2/user/@me/relationships/${this._id}`, { Authorization: this.client.self?.auth!! });
-            console.log(friend);
+            let friend = await this.client.req('DELETE', `/user/@me/relationships/${this._id}`, { Authorization: this.client.self?.auth!! });
             this.client.users.delete(this._id);
-        } catch(e: any) {
+        } catch (e: any) {
             return null;
         }
     }
     async setRelationship() { }
     async openDM() { }
+    async uploadAvatar(avatar: File) {
+        let form = new FormData();
+        form.append('avatar', avatar, 'avatar');
+        let request = new XMLHttpRequest();
+        request.open('POST', `${this.client.apiURL}/user/@me/avatar`);
+        //@ts-ignore
+        request.setRequestHeader('Authorization', this.client.self.auth);
+        request.upload.onprogress = (e: ProgressEvent) => {
+            let { loaded, total } = e;
+            let percentage = Math.ceil((loaded / total) * 100);
+            //@ts-ignore
+            this.client.emit('user/uploadavatar/progress', percentage);
+        }
+        request.send(form);
+        request.onload = (d) => {
+            let response = JSON.parse(request.responseText);
+            this.$update(response);
+            //@ts-ignore
+            return Promise.resolve(this.client.emit('user/uploadavatar/finish', response));
+        }
 
+    }
     async changeName(name: string) {
         try {
             let updatedUser = await this.client.req('PATCH', '/user/@me', {
@@ -125,18 +149,20 @@ export class User {
             });
             this.$update(updatedUser);
             return updatedUser.name;
-        } catch(e: any) {
-           return null;
+        } catch (e: any) {
+            return null;
         }
     }
     $update(data: Partial<IUser>) {
         for (const update in data) {
             const key = update as keyof IUser;
+            //@ts-ignore
             (this[key] as any) = data[key];
         }
     }
     getAvatar() {
-       return `${this.client.apiURL}/cdn/user/${this._id}/avatars/avatar_${this.avatar.id}`; 
+        //@ts-ignore
+        return `${this.client.apiURL}/cdn/user/${this._id}/avatars/avatar_${this.avatar.id}`;
     }
 }
 
@@ -155,6 +181,7 @@ export default class Users extends Map<string, User> {
     create(data: IUser) {
         if (this.has(data.id)) return this.$get(data.id, data);
         const user = new User(this.client, data);
+        //@ts-ignore
         this.client.emit('user/relationship', user);
         return user;
     }

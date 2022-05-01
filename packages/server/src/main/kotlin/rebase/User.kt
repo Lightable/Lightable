@@ -113,7 +113,7 @@ data class User constructor(
     @BsonIgnore
     fun acceptRequest(id: Long): Boolean {
         val friend = cache?.users?.get(id) ?: return false
-        return if (!this.relationships.pending.contains(id) || !friend.relationships.requests.contains(id)) {
+        return if (!this.relationships.pending.contains(id)) {
             false
         } else {
             this.relationships.pending.remove(id)
@@ -122,6 +122,8 @@ data class User constructor(
             this.relationships.friends.add(id)
             GlobalBus.post(ServerRequestAccept(this.toPublic(), friend.toPublic()))
             GlobalBus.post(ServerSelfRequestAccept(this.toPublic(), friend.toPublic()))
+            friend.save()
+            this.save()
             true
         }
     }
@@ -165,6 +167,7 @@ data class PrivateUser(@JsonIgnore private val user: User) {
     val status = user.status
     val token = user.token
     val admin = user.admin
+    val avatar = user.avatar
     val enabled = user.enabled
 }
 

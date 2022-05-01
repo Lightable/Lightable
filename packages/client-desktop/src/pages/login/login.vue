@@ -65,7 +65,7 @@ import LoginBG from './LoginBG.vue';
 import {appWindow, LogicalSize} from '@tauri-apps/api/window';
 import {SnackStore} from '@/stores/SnackStore';
 import {ClientStore} from '@/stores/ClientStore';
-import hash from '@/lib/structures/hash';
+import hash from '@/lib/utils/hash';
 import {AuthenticationStore} from '@/stores/AuthenticationStore';
 export default defineComponent({
   name: 'login',
@@ -109,8 +109,8 @@ export default defineComponent({
         if (user.token) {
           // @ts-ignore
           snackstore.create('success', `Welcome Back  ${user.name}`, true, 2000);
+          user!!.authentication = user.token.token;
           auth.addAccount(user!!);
-          // @ts-ignore
           await client?.loginWT(user.token.token);
           await auth.save();
 

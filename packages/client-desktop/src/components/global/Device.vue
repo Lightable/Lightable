@@ -39,8 +39,8 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue';
 import {BrowserType, Device} from '@/lib/structures/Device';
-import Firefox from './Icons/Browser/firefox.vue';
-import Desktop from './Icons/Browser/Desktop.vue';
+import Firefox from '@/components/Icons/Browser/firefox.vue';
+import Desktop from '@/components/Icons/Browser/desktop.vue';
 import { computed } from '@vue/reactivity';
 import { ClientStore } from '@/stores/ClientStore';
 export default defineComponent({

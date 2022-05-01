@@ -16,9 +16,13 @@ export const AppStore = defineStore('AppStore', {
         currentlyActiveProfile: null as string | null | User,
         currentPanelAct: "None" as CurrentPanelAct,
         debug: false as boolean,
+        notFoundModal: false as boolean, 
         offline: false as boolean
     }),
     actions: {
+        showNotFoundModal(show: boolean) {
+            this.notFoundModal = show; 
+        },
         allowTitlebar(bool: boolean) {
             this.titlebar = bool;
         },

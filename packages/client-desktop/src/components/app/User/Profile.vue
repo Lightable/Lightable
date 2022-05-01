@@ -24,12 +24,12 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import BaseModal from '@/components/global/BaseModal.vue';
-import Friend from '@/components/global/Icons/Friend.vue';
+import BaseModal from '@/components/app/Modal/BaseModal.vue';
+import Friend from '@/components/Icons/Friend.vue';
 import parseMarkdown from '@/lib/utils/parseMarkdown';
 import { AppStore } from '@/stores/AppStore';
 import { IUser } from '@/lib/structures/Users';
-import DebugModalData from '@/components/global/DebugModalData.vue';
+import DebugModalData from '@/components/app/Modal/DebugModalData.vue';
 export default defineComponent({
   name: 'ProfileModal',
   components: {BaseModal, Friend, DebugModalData},

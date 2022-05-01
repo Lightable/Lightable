@@ -117,21 +117,21 @@ class Server {
                     path("/relationships") {
                         val relationship = user.Relationships()
                         post(
-                            "{id}",
+                            "{name}",
                             documented(relationship.createPendingRelationshipDoc, relationship::addRelationship)
                         )
                         get(documented(relationship.getSelfRelationshipsDoc, relationship::getRelationships))
                         get("{id}", documented(relationship.getSelfRelationshipDoc, relationship::getRelationship))
                         path("/pending") {
                             post(
-                                "/pending/{id}",
+                                "{id}",
                                 documented(
                                     relationship.addPendingRelationshipDoc,
                                     relationship::acceptPendingRelationship
                                 )
                             )
                             delete(
-                                "/pending/{id}",
+                                "{id}",
                                 documented(
                                     relationship.removePendingRelationshipDoc,
                                     relationship::removePendingRelationship

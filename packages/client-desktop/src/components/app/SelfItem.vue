@@ -28,10 +28,10 @@
 import {ClientStore} from '@/stores/ClientStore';
 import {computed, defineComponent} from 'vue';
 import Avatar from './User/Avatar/Avatar.vue';
-import OnlineStatusSymb from '../global/User/OnlineStatusSymb.vue';
-import IdleStatusSymb from '../global/User/IdleStatusSymb.vue';
-import DoNotDisturbStatusSymb from '../global/User/DoNotDisturbStatusSymb.vue';
-import OfflineStatusSymb from '../global/User/OfflineStatusSymb.vue';
+import OnlineStatusSymb from '@/components/app/User/Avatar/_extensions/status/OnlineStatusSymb.vue';
+import IdleStatusSymb from '@/components/app/User/Avatar/_extensions/status/IdleStatusSymb.vue';
+import DoNotDisturbStatusSymb from '@/components/app/User/Avatar/_extensions/status/DoNotDisturbStatusSymb.vue';
+import OfflineStatusSymb from '@/components/app/User/Avatar/_extensions/status/OfflineStatusSymb.vue';
 
 export default defineComponent({
   name: 'SelfItem',

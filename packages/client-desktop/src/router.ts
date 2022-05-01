@@ -23,6 +23,13 @@ let routes = [
         }
     },
     {
+        path: '/accounts',
+        component() {
+            // @ts-ignore
+            return import('./pages/accounts.vue');
+        }
+    },
+    {
         path: '/app',
         component() {
             // @ts-ignore

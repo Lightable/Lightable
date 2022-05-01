@@ -1,6 +1,7 @@
 <template>
   <AppTitleBar v-if="titlebar" />
   <Snackbar />
+  <NotFoundModal v-if="notFoundModal" />
   <div class="embedded">
     <router-view />
   </div>
@@ -15,8 +16,14 @@ import {AuthenticationStore} from './stores/AuthenticationStore';
 import {AppStore} from './stores/AppStore';
 import {ClientStore} from './stores/ClientStore';
 import {Client} from './lib/Client';
+import NotFoundModal from './components/app/Modal/NotFoundModal.vue';
+import {User} from './lib/structures/Users';
 export default defineComponent({
   name: 'App',
+  beforeCreate() {
+    this.$.appContext.config.globalProperties.$prod = window.prod;
+    console.log(this.$prod);
+  },
   setup() {
     let app = AppStore();
     let client = ClientStore();
@@ -45,11 +52,20 @@ export default defineComponent({
       },
     });
     client.setClient(instance);
-    return {titlebar: computed(() => app.titlebar)};
+    let authentication = AuthenticationStore();
+    authentication.load().then(() => {
+      authentication.accounts.forEach((v, k) => {
+        // @ts-ignore
+        client.accounts.set(k, new User(client.client, v));
+      });
+    });
+
+    return {
+      titlebar: computed(() => app.titlebar),
+      notFoundModal: computed(() => app.notFoundModal),
+    };
   },
   async mounted() {
-    let authentication = AuthenticationStore();
-    await authentication.load();
     // invoke('get_battery_percentage').then(percent => {
     //   let batt = Number(5)
     //   if (batt <= 30) {
@@ -59,10 +75,9 @@ export default defineComponent({
     //         snackbar.create('warning', `Device running low on power ${batt}%`, true, 1500);
     //       }
     //   }
-
     // })
   },
-  components: {AppTitleBar, Snackbar},
+  components: {AppTitleBar, Snackbar, NotFoundModal},
 });
 </script>
 
@@ -74,23 +89,27 @@ body,
 .embedded {
   height: 100vh;
 }
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .4s;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s;
 }
-.fade-enter, .fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 
-.slither-enter-active, .slither-leave-active {
+.slither-enter-active,
+.slither-leave-active {
   transition: transform 1s;
 }
 
-.slither-enter, .slither-leave-to {
+.slither-enter,
+.slither-leave-to {
   transform: translateX(-100%);
 }
 
-.slither-enter-to, .slither-leave {
+.slither-enter-to,
+.slither-leave {
   transform: translateX(0);
 }
-
 </style>
