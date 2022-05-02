@@ -20,4 +20,8 @@ class RebaseMongoDatabase {
     fun getUserCollection(): MongoCollection<User> {
         return database.getCollection<User>().withCodecRegistry(codecRegistry)
     }
+
+    fun getReleaseCollection(): MongoCollection<rebase.ChattyRelease> {
+        return database.getCollection<rebase.ChattyRelease>().withCodecRegistry(codecRegistry)
+    }
 }

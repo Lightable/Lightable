@@ -9,7 +9,9 @@
     </SidebarItem>
     <div class="bottom">
 
-   
+     <SidebarItem @hover="hover.admin = true" @leave="hover.admin = false" @click="(currentPanel == 'Admin') ? setCurrentPanel('None') : setCurrentPanel('Admin')" v-if="userAdmin">
+       <Admin :color="(hover.admin) ? 'var(--ac)' : 'var(--white)'" height="32px" width="32px" class="icon-tran"/>
+     </SidebarItem> 
     <SidebarItem @hover="hover.settings = true" @leave="hover.settings = false" @click="(currentPanel == 'Settings') ? setCurrentPanel('None') : setCurrentPanel('Settings')">
       <Settings :color="(hover.settings) ? 'var(--ac)' : 'var(--white)'" class="icon-tran" height="28px" width="28px"/>
     </SidebarItem>
@@ -25,16 +27,20 @@ import SelfItem from './SelfItem.vue';
 import Friend from '@/components/Icons/Friend.vue';
 import SidebarItem from './SidebarItem.vue';
 import Group from '@/components/Icons/Group.vue';
+// @ts-ignore
 import Settings from '@/components/Icons/Settings.vue';
+import Admin from '../Icons/Admin.vue';
 import { AppStore } from '@/stores/AppStore';
-
+import { ClientStore } from '@/stores/ClientStore';
 export default defineComponent({
     name: "sidebar",
     setup() {
         let appStore = AppStore();
         return {
           currentPanel: computed(() => appStore.currentPanelAct),
-          setCurrentPanel: appStore.setCurrentPanel
+          setCurrentPanel: appStore.setCurrentPanel,
+          // @ts-ignore
+          userAdmin: computed(() => ClientStore().client.self.admin)
         }
      },
     data() {
@@ -43,11 +49,12 @@ export default defineComponent({
           friend: false,
           group: false,
           settings: false,
+          admin: false
         },
         
       }
     },
-    components: { SelfItem, Friend, SidebarItem, Group, Settings }
+    components: { SelfItem, Friend, SidebarItem, Group, Settings, Admin }
 });
 </script>
 
@@ -69,6 +76,7 @@ export default defineComponent({
     margin-top: auto;
     margin-bottom: 25px;
     width: 100%;
+    flex-direction: column;
   }
   &::-webkit-scrollbar {
     display: none;

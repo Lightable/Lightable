@@ -6,7 +6,16 @@ import rebase.FileController
 import java.io.ByteArrayOutputStream
 
 class CDNController(val cache: Cache, val fileController: FileController) {
-
+    fun getRelease(ctx: Context) {
+        val release = ctx.pathParam("release").replace(".", "").toInt()
+        val latest = cache.latestRelease
+        if (latest == null || release > latest.tag.replace(".", "").toInt()) {
+            ctx.status(204)
+            return
+        } else {
+            ctx.status(200).json(latest)
+        }
+    }
     fun getUserAvatar(ctx: Context) {
             val size = ctx.queryParam("size")?.toInt() ?: 512
             val userid = ctx.pathParam("user").toLong()

@@ -2,9 +2,11 @@ package rebase.controllers
 
 import io.javalin.http.Context
 import me.kosert.flowbus.EventsReceiver
+import me.kosert.flowbus.GlobalBus
 import me.kosert.flowbus.subscribe
 import org.joda.time.Instant
 import rebase.Cache
+import rebase.ChattyRelease
 
 class DeveloperController(val cache: Cache) {
    val events = EventsReceiver()
@@ -19,6 +21,19 @@ class DeveloperController(val cache: Cache) {
            ctx.status(204)
         } else {
             ctx.status(400).json(UserController.UserDataFail("User doesn't exist or you are not an Admin"))
+        }
+    }
+
+    fun createRelease(ctx: Context) {
+        val user = requireAuth(cache, ctx)
+        val body = ctx.bodyAsClass<ReleasePayload>()
+        if (user != null && user.admin) {
+            val release = ChattyRelease(body.tag.replace(".", "").toInt(), body.tag, body.title, body.notes, body.signature, body.url)
+            cache.saveOrReplaceRelease(release)
+            ctx.status(201).json(release)
+            GlobalBus.post(release)
+        } else {
+            ctx.status(400).json(UserController.UserDataFail("You are not an Admin"))
         }
     }
     init {
@@ -41,6 +56,7 @@ class DeveloperController(val cache: Cache) {
     }
 
     data class ConnectedClient(val inc: Boolean)
+    data class ReleasePayload(val tag: String, val notes: String, val title: String, val url: String, val signature: String)
     object SentMessage {}
 
 }

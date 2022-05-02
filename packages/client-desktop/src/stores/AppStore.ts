@@ -61,4 +61,4 @@ export const AppStore = defineStore('AppStore', {
     }
 })
 
-export type CurrentPanelAct = "Friends" | "Groups" | "Settings" | "None"
+export type CurrentPanelAct = "Friends" | "Groups" | "Settings" | "Admin" | "None"

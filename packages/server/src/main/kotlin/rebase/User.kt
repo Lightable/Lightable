@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.feuer.chatty.auth.StandardToken
 import me.kosert.flowbus.GlobalBus
 import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import org.bson.codecs.pojo.annotations.BsonProperty
 import org.eclipse.jetty.websocket.common.WebSocketSession
+import rebase.auth.StandardToken
 import rebase.controllers.*
 import rebase.interfaces.BucketImpl
 import rebase.interfaces.ISnowflake

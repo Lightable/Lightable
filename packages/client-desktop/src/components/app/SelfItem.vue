@@ -13,7 +13,7 @@
         <OfflineStatusSymb height="20px" class="icon"/> Offline
     </div>
 </div>
-  <div class="self">
+  <div class="self" @click="active = !active">
     <div class="details">
       <span class="name">{{me.name}}</span>
     </div>
@@ -37,7 +37,7 @@ export default defineComponent({
   name: 'SelfItem',
   setup() {
     let self = ClientStore().client?.self;
-    return {me: computed(() => self)};
+    return {me: computed(() => self), name: computed(() => self.name)};
   },
   components: { Avatar, OnlineStatusSymb, IdleStatusSymb, DoNotDisturbStatusSymb, OfflineStatusSymb },
   data() {

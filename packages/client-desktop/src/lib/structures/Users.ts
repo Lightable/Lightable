@@ -45,6 +45,7 @@ export interface IUser {
     about: Nullable<string>;
     developer: Nullable<boolean>;
     online: OnlineStatus;
+    admin: boolean;
 }
 export interface ISelf extends IUser {
     authentication: string
@@ -67,6 +68,7 @@ export class User {
     auth?: string;
     email: string;
     messages: Nullable<Messages>;
+    admin: boolean;
     constructor(client: Client, data: IUser | ISelf) {
         this.client = client;
         this._id = data.id;
@@ -79,6 +81,7 @@ export class User {
         this.auth = (data as ISelf).authentication
         this.email = (data as ISelf).email;
         this.messages = new Messages(this.client);
+        this.admin = data.admin;
     }
     async addFriend(id: string) {
         try {
@@ -134,7 +137,7 @@ export class User {
         request.send(form);
         request.onload = (d) => {
             let response = JSON.parse(request.responseText);
-            this.$update(response);
+            this.avatar = response.avatar;
             //@ts-ignore
             return Promise.resolve(this.client.emit('user/uploadavatar/finish', response));
         }
@@ -147,18 +150,33 @@ export class User {
             }, {
                 name: name
             });
-            this.$update(updatedUser);
+            this.name = updatedUser.name;
             return updatedUser.name;
         } catch (e: any) {
             return null;
         }
     }
     $update(data: Partial<IUser>) {
-        for (const update in data) {
-            const key = update as keyof IUser;
-            //@ts-ignore
-            (this[key] as any) = data[key];
+        const apply = (key: string) => {
+            // This code has been tested.
+            if (
+                // @ts-expect-error TODO: clean up types here
+                typeof data[key] !== "undefined" &&
+                // @ts-expect-error TODO: clean up types here
+                !isEqual(this[key], data[key])
+            ) {
+                // @ts-expect-error TODO: clean up types here
+                this[key] = data[key];
+            }
         }
+        apply("username");
+        apply("avatar");
+        apply("badges");
+        apply("status");
+        apply("relationship");
+        apply("online");
+        apply("flags");
+        apply("bot");
     }
     getAvatar() {
         //@ts-ignore

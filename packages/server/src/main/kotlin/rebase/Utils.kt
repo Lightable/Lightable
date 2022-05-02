@@ -1,5 +1,4 @@
-package com.feuer.chatty
-
+package rebase
 import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonProperty
 import java.lang.management.ManagementFactory
@@ -13,11 +12,11 @@ import kotlin.collections.ArrayList
 object Utils {
     // Banner :P Because why not?
     const val BANNER = " ██████╗  ██╗  ██╗   █████╗   ████████╗  ████████╗ ██╗   ██╗\n" +
-                       "██╔════╝  ██║  ██║  ██╔══██╗  ╚══██╔══╝  ╚══██╔══╝ ╚██╗ ██╔╝\n" +
-                       "██║       ███████║  ███████║     ██║        ██║     ╚████╔╝ \n" +
-                       "██║       ██╔══██║  ██╔══██║     ██║        ██║      ╚██╔╝  \n" +
-                       "╚██████╗  ██║  ██║  ██║  ██║     ██║        ██║       ██║   \n" +
-                       " ╚═════╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝     ╚═╝        ╚═╝       ╚═╝     "
+            "██╔════╝  ██║  ██║  ██╔══██╗  ╚══██╔══╝  ╚══██╔══╝ ╚██╗ ██╔╝\n" +
+            "██║       ███████║  ███████║     ██║        ██║     ╚████╔╝ \n" +
+            "██║       ██╔══██║  ██╔══██║     ██║        ██║      ╚██╔╝  \n" +
+            "╚██████╗  ██║  ██║  ██║  ██║     ██║        ██║       ██║   \n" +
+            " ╚═════╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝     ╚═╝        ╚═╝       ╚═╝     "
     const val VERSION = "1.9.12"
     fun generateID(): String {
         val rand = (10000000..99999999).random()

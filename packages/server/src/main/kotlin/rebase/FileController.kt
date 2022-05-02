@@ -1,6 +1,5 @@
 package rebase
 
-import com.feuer.chatty.server.controllers.WebsocketController
 import com.luciad.imageio.webp.WebPWriteParam
 import io.javalin.core.util.FileUtil
 import io.javalin.http.UploadedFile

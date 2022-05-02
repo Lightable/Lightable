@@ -2,7 +2,6 @@ package rebase
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
-import com.feuer.chatty.Utils
 import com.github.ajalt.mordant.terminal.Terminal
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
@@ -13,13 +12,9 @@ import io.javalin.plugin.openapi.dsl.documented
 import io.javalin.plugin.openapi.ui.ReDocOptions
 import io.javalin.plugin.openapi.ui.SwaggerOptions
 import io.swagger.v3.oas.models.info.Info
-import me.kosert.flowbus.EventsReceiver
-import me.kosert.flowbus.GlobalBus
-import me.kosert.flowbus.subscribe
 import org.slf4j.LoggerFactory
 import rebase.controllers.CDNController
 import rebase.controllers.DeveloperController
-import rebase.controllers.FriendUpdatePayload
 import rebase.controllers.WebSocketController
 import java.io.File
 import java.io.FileOutputStream
@@ -97,13 +92,17 @@ class Server {
                 it.onClose(websocketController::close)
             }
             path("/cdn") {
+                path("/releases") {
+
+                    get("{release}", cdnController::getRelease)
+                }
                 path("/user") {
                     get("/{user}/avatars/avatar_{avatar}", cdnController::getUserAvatar)
                 }
             }
             path("/admin") {
                 patch("/disable/{id}", developerController::disableUser)
-
+                post("/release", developerController::createRelease)
             }
             path("/user") {
                 post("/test", user::createTestUsers)
@@ -149,13 +148,13 @@ class Server {
 
 
     fun determineMethodColor(method: String): String {
-        val GETBG = t.colors.blue.bg("     $method     ")
-        val POSTBG = t.colors.brightBlue.bg("   $method   ")
-        val DELETEBG = t.colors.red.bg("   $method   ")
-        val PATCHBG = t.colors.green.bg("   $method   ")
-        val OPTIONBG = t.colors.gray.bg("   $method   ")
-        val HEADBG = t.colors.magenta.bg("   $method   ")
-        val PUTBG = t.colors.yellow.bg("   $method   ")
+        val GETBG = t.colors.blue.bg(        "      $method       ")
+        val POSTBG = t.colors.brightBlue.bg("       $method       ")
+        val DELETEBG = t.colors.red.bg(     "       $method       ")
+        val PATCHBG = t.colors.green.bg(    "       $method       ")
+        val OPTIONBG = t.colors.gray.bg(    "       $method       ")
+        val HEADBG = t.colors.magenta.bg(   "       $method       ")
+        val PUTBG = t.colors.yellow.bg(     "       $method       ")
         return when (method) {
             "GET" -> GETBG
             "POST" -> POSTBG

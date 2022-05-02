@@ -1,7 +1,7 @@
 <template>
   <div class="profile">
     <div class="left">
-      <Avatar :user="user" size="64" class="avatar" :circle="true">
+      <Avatar :user="user" size="60" class="avatar" :circle="true">
         <Edit
           class="avatar-edit"
           color="var(--white)"
@@ -42,6 +42,7 @@ import {open} from '@tauri-apps/api/dialog';
 import {readBinaryFile} from '@tauri-apps/api/fs';
 import {User} from '@/lib/structures/Users';
 import AvatarEditor from '@/components/app/User/Avatar/_extensions/AvatarEditor.vue';
+import { convertFileSrc } from '@tauri-apps/api/tauri';
 export default defineComponent({
   name: 'ProfileCard',
   components: {Avatar, Edit, ProgressBar, AvatarEditor},
@@ -73,8 +74,8 @@ export default defineComponent({
           },
         ],
       })) as string;
-      let rawFile = (await readBinaryFile(path)) as Uint8Array;
-      let file = new File([new Blob([rawFile])], 'avatar', {
+      let assetURL = await fetch(await convertFileSrc(path));
+      let file = new File([await assetURL.blob()], 'avatar', {
         type: 'image/jpeg',
       });
       this.user.client.on('user/uploadavatar/progress', progress => {
@@ -88,6 +89,7 @@ export default defineComponent({
   data() {
     return {
       upload: 0,
+      assetProt: ''
     };
   },
 });
@@ -101,6 +103,7 @@ export default defineComponent({
   background: var(--sb);
   border-radius: 8px;
   width: 90%;
+  padding: 4px;
   .left {
     .avatar {
       margin-top: auto;
@@ -125,6 +128,7 @@ export default defineComponent({
     align-items: center;
     height: 100%;
     flex-direction: column;
+    margin-left: 5px;
     .name {
       font-size: calc(var(--font-size) + 12px);
       font-weight: bold;

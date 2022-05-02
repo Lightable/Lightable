@@ -436,5 +436,6 @@ enum class SocketMessageType {
     ServerTyping,
     ServerSelfTyping,
     ServerDropGateway,
-    ServerSelfDisabledUser
+    ServerSelfDisabledUser,
+    ServerUpdate
 }

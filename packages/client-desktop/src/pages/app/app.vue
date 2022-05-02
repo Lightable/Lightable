@@ -6,6 +6,7 @@
       <NewNameModal v-if="newNameModalVis" />
       <SideBar v-if="state == 2" />
       <FriendContextMenu v-if="currentPanel == 'Friends'" />
+      <AdminContextMenu v-if="currentPanel == 'Admin'"/>
       <SettingsContextMenu v-if="currentPanel == 'Settings'" />
       <Profile v-if="currentlyActiveProfile != null" :profile="currentlyActiveProfile" />
       <OfflineModal v-if="offline" />
@@ -26,6 +27,7 @@ import UnravelAni from '@/components/layout/SideTab/_extensions/UnravelAni.vue';
 import SideContextMenu from '@/components/layout/SideTab/index.vue';
 import Friend from '@/components/Icons/Friend.vue';
 import FriendContextMenu from '@/components/layout/SideTab/Friends/index.vue';
+import AdminContextMenu from '@/components/layout/SideTab/Admin/index.vue';
 import AddFriendModal from '@/components/app/Modal/AddFriendModal.vue';
 import SettingsContextMenu from '@/components/layout/SideTab/Settings/index.vue';
 import NewNameModal from '@/components/app/Modal/NewNameModal.vue';
@@ -50,6 +52,7 @@ export default defineComponent({
     OfflineModal,
     TooManyConnections,
     AvatarEditor,
+    AdminContextMenu
   },
   name: 'app',
   setup() {

@@ -1,23 +1,20 @@
 package rebase
 
-import com.feuer.chatty.getResizedMaintainingAspect
-import io.javalin.core.util.FileUtil
-import me.kosert.flowbus.EventsReceiver
-import me.kosert.flowbus.subscribe
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOne
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
-import java.util.*
 import java.util.concurrent.ExecutorService
-import javax.imageio.ImageIO
 import kotlin.collections.HashMap
 
 
 class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, private val snowflake: Snowflake, val server: Server, val fileController: FileController) {
     val logger = LoggerFactory.getLogger("Rebase -> CACHE")
     val userColl = db.getUserCollection()
+    val releaseColl = db.getReleaseCollection()
     val users = HashMap<Long, User>()
+    val releases = HashMap<String, ChattyRelease>()
+    var latestRelease: ChattyRelease? = null
     val userAvatarCache = HashMap<Long, ByteArrayOutputStream>()
     val sameNameUser: (name: String) -> Boolean = { name -> users.values.find { u -> u.name == name } != null }
     fun saveOrReplaceUser(user: User, saveToDB: Boolean = true) {
@@ -32,6 +29,7 @@ class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, 
             }
         }
     }
+
     fun removeAllTestUsers() {
         db.getUserCollection().find().forEach { u -> if (u.test) println("DELETE Test user found ${u.email}") }
         users.values.forEach { u ->
@@ -43,6 +41,18 @@ class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, 
         }
 
     }
+    fun saveOrReplaceRelease(release: ChattyRelease) {
+        releases[release.tag] = release
+        println(release.tag)
+        latestRelease = release
+        executor.submit {
+            if (releaseColl.findOne(ChattyRelease::version eq release.version) == null) {
+                releaseColl.insertOne(release)
+            } else {
+                releaseColl.findOneAndReplace(ChattyRelease::version eq release.version, release)
+            }
+        }
+    }
     init {
         logger.info("Initialized")
         userColl.find().forEach { user ->
@@ -51,7 +61,11 @@ class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, 
             users[user.identifier] = user
             user.avatar?.idJSON = user.avatar?.identifier.toString()
             FileController().createUserDir(user.identifier)
-
+        }
+        releaseColl.find().forEach { release ->
+            releases[release.tag] = release
+            println(release)
+            latestRelease = release
         }
         logger.info("Creating test user account")
         val testID = snowflake.nextId()
