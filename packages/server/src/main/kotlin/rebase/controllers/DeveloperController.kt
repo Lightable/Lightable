@@ -31,7 +31,7 @@ class DeveloperController(val cache: Cache) {
             val release = ChattyRelease(body.version.replace(".", "").toInt(), body.version, body.title, body.notes, body.signature, body.url)
             cache.saveOrReplaceRelease(release)
             ctx.status(201).json(release)
-            GlobalBus.post(release)
+            GlobalBus.post(ServerUpdate(release))
         } else {
             ctx.status(400).json(UserController.UserDataFail("You are not an Admin"))
         }

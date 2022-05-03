@@ -81,9 +81,18 @@ export class Client extends EventEmitter {
             this.options.store.setProduction(prod);
         });
         this.ws.on('pending', (payload: IUser) => {
-            console.log('PENDING => CLIENT', payload);
             this.store.setPendingUser(new User(this, payload));
+            this.logger.logInfo('ChattySocket', 'New Pending Friend', payload);
         });
+        this.ws.on('friend://update', (payload: IUser) => {
+            this.store.setUser(payload);
+            this.logger.logInfo('ChattySocket', 'Friend Update', payload);
+        })
+        this.ws.on('release', (payload: Release) => {
+            this.logger.logInfo('ChattySocket', 'New Release', payload);
+            AppStore().setRelease(payload);
+            
+        })
     }
     async req<M extends RouteMethod, T extends RoutePath>(
         method: M,
@@ -163,7 +172,7 @@ export class Client extends EventEmitter {
     }
     async saveRelease(release: Release) {
         // @ts-ignore 
-        return await this.req('POST', '/admin/release', {'Authorization': this.self?.auth!!}, release);
+        return await this.req('POST', '/admin/release', { 'Authorization': this.self?.auth!! }, release);
     }
     async $connect() {
         await this

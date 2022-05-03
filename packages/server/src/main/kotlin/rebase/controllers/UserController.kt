@@ -214,6 +214,7 @@ class UserController(
                             )
                         )
                         GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
+                        GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.identifier, "user", user.toPublic()))
                         ctx.json(201).json(user.toPublic())
 
                         return

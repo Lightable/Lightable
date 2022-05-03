@@ -13,7 +13,13 @@
           <div class="__header">
             <h2>Releases</h2>
           </div>
-          <Release v-for="(release, index) in releases" v-bind:key="index" :release="release"/>
+          <button class="db" dbt="default" @click="setReleaseModal(true)">
+            Create Release
+          </button>
+          <div class="releases">
+            <Release v-for="(release, index) in releases" v-bind:key="index" :release="release"/>
+          </div>
+          
         </div>
       </template>
     </SideContextMenu>
@@ -35,9 +41,8 @@ export default defineComponent({
   components: {SideContextMenu, Admin, Release},
   setup() {
     let appStore = AppStore();
-    let clientStore = ClientStore();
     return {
-      setActiveModal: appStore.setFriendModalVis,
+      setReleaseModal: appStore.setNewReleaseModalVis,
     };
   },
   mounted() {

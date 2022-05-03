@@ -268,3 +268,6 @@ body {
   border: 2px solid #282a2d;
   border-radius: 10px;
 }
+:focus {
+  outline: none !important;
+}

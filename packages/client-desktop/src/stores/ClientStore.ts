@@ -35,7 +35,8 @@ export const ClientStore = defineStore('ClientStore', {
             if (user instanceof User) {
                 this.users?.set(user._id, user);
             } else {
-                let instanceUser = this.users?.create(user)!!;
+                // @ts-ignore
+                let instanceUser = new User(this.client!!, user);
                 this.users?.set(instanceUser._id, instanceUser);
             }
             this.logger.logInfo('ClientStore', 'CreateUser', user);

@@ -42,7 +42,8 @@ export enum SocketMessageType {
     ServerTyping,
     ServerSelfTyping,
     ServerDropGateway,
-    ServerSelfDisabledUser
+    ServerSelfDisabledUser,
+    ServerUpdate
 }
 export enum RecieveCodes {
     INVALID_AUTH = -1,

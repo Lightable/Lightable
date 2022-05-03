@@ -10,6 +10,7 @@ import ZLibDecoder from "./_decoders/ZLibDecoder";
 import { Device } from "../structures/Device";
 import { IMessage } from "../structures/Messages";
 import { IUser, ISelf, OnlineStatus } from "../structures/Users";
+import { Release } from "../structures/Release";
 
 
 interface ChattySocketEvents {
@@ -19,7 +20,8 @@ interface ChattySocketEvents {
     'pong': () => void;
     'pending': (payload: IUser) => void;
     'error': (payload: any) => void;
-    
+    'friend://update': (payload: IUser) => void;
+    'release': (payload: Release) => void;
 }
 export declare interface ChattySocket {
     on<U extends keyof ChattySocketEvents>(
@@ -178,7 +180,17 @@ export class ChattySocket extends EventEmitter {
                     this.emit('pending', data);
                     break;
                 }
-                
+                case SocketMessageType.ServerFriendUpdate: {
+                    let data = message.d.user as IUser
+                    this.emit('friend://update', data);
+                    break;
+                }
+                case SocketMessageType.ServerUpdate: {
+                    let release = message.d as Release
+                    this.emit('release', release);
+                    console.log('CHATSOCK', release);
+                    break;
+                }
                 // case OPCodes.Heartbeat: {
                 //     this.emit('internal://heartbeat');
                 //     break;

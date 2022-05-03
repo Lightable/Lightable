@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "chatty",
+    "productName": "ZenSpace",
     "version": "0.0.1"
   },
   "build": {
@@ -13,7 +13,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "org.feuer.chatty",
+      "identifier": "com.zenspace.desktop",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -48,7 +48,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-          "https://chatty-api.feuer.tech/release/{{current_version}}"
+          "https://zenspace.cf/cdn/releases/{{current_version}}"
       ],
       "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM3MDg0RkNGQjZEMjQ1OTgKUldTWVJkSzJ6MDhJeHhLSzF2Q3c1NUFOQmFVcjNPY0ZSMUoxWmV3YllreGRLWHVtciszSDdEU1AK"

@@ -6,11 +6,15 @@
       <NewNameModal v-if="newNameModalVis" />
       <SideBar v-if="state == 2" />
       <FriendContextMenu v-if="currentPanel == 'Friends'" />
-      <AdminContextMenu v-if="currentPanel == 'Admin'"/>
+      <AdminContextMenu v-if="currentPanel == 'Admin'" />
       <SettingsContextMenu v-if="currentPanel == 'Settings'" />
       <Profile v-if="currentlyActiveProfile != null" :profile="currentlyActiveProfile" />
       <OfflineModal v-if="offline" />
       <TooManyConnections v-if="(loggedInDevice != null) | (loggedInDevice != undefined)" />
+      <KeepAlive>
+        <NewReleaseModal v-if="createReleaseModalVis" />
+      </KeepAlive>
+      <UpdateModal/>
       <AvatarEditor v-if="false" />
     </div>
   </div>
@@ -36,7 +40,9 @@ import OfflineModal from '@/components/app/Modal/OfflineModal.vue';
 import TooManyConnections from '@/components/app/Modal/TooManyConnections.vue';
 import AvatarEditor from '@/components/app/User/Avatar/_extensions/AvatarEditor.vue';
 import {AuthenticationStore} from '@/stores/AuthenticationStore';
-import { appWindow, LogicalSize } from '@tauri-apps/api/window';
+import {appWindow, LogicalSize} from '@tauri-apps/api/window';
+import NewReleaseModal from '../../components/app/Modal/_admin/NewReleaseModal.vue';
+import UpdateModal from '@/components/app/Modal/UpdateModal.vue';
 export default defineComponent({
   components: {
     Loading,
@@ -52,7 +58,9 @@ export default defineComponent({
     OfflineModal,
     TooManyConnections,
     AvatarEditor,
-    AdminContextMenu
+    AdminContextMenu,
+    NewReleaseModal,
+    UpdateModal
   },
   name: 'app',
   setup() {
@@ -63,11 +71,11 @@ export default defineComponent({
       if (authStore.default == null) return this.$router.push('/login');
       console.log(authStore.default);
       clientStore.client?.loginWT(authStore.default.authentication);
-        appWindow.setSize(new LogicalSize(1220, 700));
-          appWindow.setResizable(true);
-          appWindow.center();
-          appStore.allowTitlebar(true);
-          appStore.setTitleDetails('Home');
+      appWindow.setSize(new LogicalSize(1220, 700));
+      appWindow.setResizable(true);
+      appWindow.center();
+      appStore.allowTitlebar(true);
+      appStore.setTitleDetails('Home');
     }
     return {
       notice: computed(() => clientStore.notice),
@@ -75,6 +83,7 @@ export default defineComponent({
       currentPanel: computed(() => appStore.currentPanelAct),
       addFriendModalVis: computed(() => appStore.addFriendModalVis),
       newNameModalVis: computed(() => appStore.newNameModalVis),
+      createReleaseModalVis: computed(() => appStore.newReleaseModalVis),
       currentlyActiveProfile: computed(() => appStore.currentlyActiveProfile),
       offline: computed(() => appStore.offline),
       loggedInDevice: computed(() => clientStore.connectedDevice),

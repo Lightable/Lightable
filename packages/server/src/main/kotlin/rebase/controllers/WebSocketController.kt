@@ -67,6 +67,9 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                     return
                 }
                 connections[session.session.sessionId] = ChattySession(session, true, user, properties)
+                if (cache.releases.size >= 1 && properties.properties.build != cache.releases.values.last().tag) {
+                    send(session.session, session.type, ServerUpdate(cache.releases.values.last()))
+                }
                 println(blue("  ${underline(">> Authenticated Connection <<")}"))
                 println("   ${yellow("Session")} >> ${magenta(session.session.sessionId)}")
                 println("   ${yellow("Authenticated")} >> ${green("true")}")
@@ -252,6 +255,14 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             }
             GlobalBus.dropAll()
         }
+
+        events.subscribe<ServerUpdate> { payload ->
+            val sockets = connections.values.filter { u -> u.session.properties.build != payload.d.tag }
+            for (socket in sockets) {
+                send(socket.ws.session, socket.ws.type, payload)
+            }
+            GlobalBus.dropAll()
+        }
     }
 }
 
@@ -394,6 +405,9 @@ data class ServerSelfRequestAccept(
 }
 data class ServerDropGateway(val d: Device) {
     val t = SocketMessageType.ServerDropGateway.ordinal
+}
+data class ServerUpdate(val d: ChattyRelease) {
+    val t = SocketMessageType.ServerUpdate.ordinal
 }
 object DisabledUser {
     val t = SocketMessageType.ServerSelfDisabledUser.ordinal

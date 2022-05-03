@@ -117,8 +117,8 @@ data class User constructor(
             false
         } else {
             this.relationships.pending.remove(id)
-            friend.relationships.requests.remove(id)
-            friend.relationships.friends.add(id)
+            friend.relationships.requests.remove(this.identifier)
+            friend.relationships.friends.add(this.identifier)
             this.relationships.friends.add(id)
             GlobalBus.post(ServerRequestAccept(this.toPublic(), friend.toPublic()))
             GlobalBus.post(ServerSelfRequestAccept(this.toPublic(), friend.toPublic()))

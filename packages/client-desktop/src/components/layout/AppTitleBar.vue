@@ -2,7 +2,7 @@
   <div group="window-decorations" class="window-decorations" data-tauri-drag-region>
     <span id="titlebar-title" data-tauri-drag-region>
       <Logo color="var(--white)" height="18px" width="18px" data-tauri-drag-region/>
-      <div class="name-details" data-tauri-drag-region><span data-tauri-drag-region>Chatty</span><span class="title-details" v-if="titleDetails" data-tauri-drag-region>• {{titleDetails}}</span></div>
+      <div class="name-details" data-tauri-drag-region><span data-tauri-drag-region>ZenSpace</span><span class="title-details" v-if="titleDetails" data-tauri-drag-region>• {{titleDetails}}</span></div>
     </span>
     <div class="titlebar">
       <div class="titlebar-button" id="titlebar-minimize" @click="minimize">
@@ -47,7 +47,7 @@ export default defineComponent({
     return {titleDetails: computed(() => appStore.titleDetails)};
   },
   mounted() {
-    appWindow.setTitle(`Chatty • ${this.titleDetails}`);
+    appWindow.setTitle(`ZenSpace • ${this.titleDetails}`);
   },
   methods: {
     minimize() {

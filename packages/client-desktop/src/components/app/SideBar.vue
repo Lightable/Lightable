@@ -45,7 +45,7 @@
         />
       </SidebarItem>
 
-      <SidebarItem v-if="true">
+      <SidebarItem v-if="release">
         <BringOutAni>
           <Download
             color="var(--green)"
@@ -98,6 +98,7 @@ export default defineComponent({
       setCurrentPanel: appStore.setCurrentPanel,
       // @ts-ignore
       userAdmin: computed(() => ClientStore().client.self.admin),
+      release: computed(() => appStore.update)
     };
   },
   data() {
