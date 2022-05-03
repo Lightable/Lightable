@@ -8054,10 +8054,10 @@
   "resolved" "https://registry.npmjs.org/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz"
   "version" "1.9.1"
 
-"vue-tippy@^6.0.0-alpha.52":
-  "integrity" "sha512-5P04Kq5UjmoHyquMmwUE5HKYv8UzgJxgfM7fDlOPT/kKApCCXMctEhgmLoH4mWR/FHsikk5VVtZcxNnEz7s6Bw=="
-  "resolved" "https://registry.npmjs.org/vue-tippy/-/vue-tippy-6.0.0-alpha.57.tgz"
-  "version" "6.0.0-alpha.57"
+"vue-tippy@^6.0.0-alpha.58":
+  "integrity" "sha512-kfpkFZMvua+nTn9Mqx3v5UrY8rlu3nHiOoGKO1bhSM0CUG8ISygfofSDwLDUW6wAcAHABkF7vcp5sPqhTb26CA=="
+  "resolved" "https://registry.npmjs.org/vue-tippy/-/vue-tippy-6.0.0-alpha.58.tgz"
+  "version" "6.0.0-alpha.58"
   dependencies:
     "tippy.js" "^6.3.7"
 

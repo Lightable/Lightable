@@ -1,24 +1,79 @@
 <template>
   <div class="sidebar">
-    <SelfItem/>
-    <SidebarItem @hover="hover.friend = true" @leave="hover.friend = false" @click="(currentPanel == 'Friends') ? setCurrentPanel('None') : setCurrentPanel('Friends')">
-      <Friend :color="(hover.friend) ? 'var(--ac)' : 'var(--white)'" class="icon-tran" height="28px" width="28px"/>
+    <SelfItem />
+    <SidebarItem
+      @hover="hover.friend = true"
+      @mouseleave="hover.friend = false"
+      @click="currentPanel == 'Friends' ? setCurrentPanel('None') : setCurrentPanel('Friends')"
+    >
+      <Friend
+        :color="hover.friend ? 'var(--ac)' : 'var(--white)'"
+        class="icon-tran"
+        height="28px"
+        width="28px"
+        content="Friends"
+        v-tippy
+      />
     </SidebarItem>
-    <SidebarItem @click="(currentPanel == 'Groups') ? setCurrentPanel('None') : setCurrentPanel('Groups')" type="disabled">
-      <Group color="var(--gray)" class="icon-tran" height="28px" width="28px"/>
+    <SidebarItem
+      @click="currentPanel == 'Groups' ? setCurrentPanel('None') : setCurrentPanel('Groups')"
+      type="disabled"
+    >
+      <Group
+        color="var(--gray)"
+        class="icon-tran"
+        height="28px"
+        width="28px"
+        content="Currently Disabled"
+        v-tippy
+      />
     </SidebarItem>
     <div class="bottom">
+      <SidebarItem
+        @hover="hover.admin = true"
+        @leave="hover.admin = false"
+        @click="currentPanel == 'Admin' ? setCurrentPanel('None') : setCurrentPanel('Admin')"
+        v-if="userAdmin"
+      >
+        <Admin
+          :color="hover.admin ? 'var(--ac)' : 'var(--white)'"
+          height="32px"
+          width="32px"
+          class="icon-tran"
+          content="Admin Panel"
+          v-tippy
+        />
+      </SidebarItem>
 
-     <SidebarItem @hover="hover.admin = true" @leave="hover.admin = false" @click="(currentPanel == 'Admin') ? setCurrentPanel('None') : setCurrentPanel('Admin')" v-if="userAdmin">
-       <Admin :color="(hover.admin) ? 'var(--ac)' : 'var(--white)'" height="32px" width="32px" class="icon-tran"/>
-     </SidebarItem> 
-    <SidebarItem @hover="hover.settings = true" @leave="hover.settings = false" @click="(currentPanel == 'Settings') ? setCurrentPanel('None') : setCurrentPanel('Settings')">
-      <Settings :color="(hover.settings) ? 'var(--ac)' : 'var(--white)'" class="icon-tran" height="28px" width="28px"/>
-    </SidebarItem>
-     </div>
-     
+      <SidebarItem v-if="true">
+        <BringOutAni>
+          <Download
+            color="var(--green)"
+            class="icon-tran"
+            height="28px"
+            width="28px"
+            content="Update Available"
+            v-tippy
+          />
+        </BringOutAni>
+      </SidebarItem>
+
+      <SidebarItem
+        @hover="hover.settings = true"
+        @leave="hover.settings = false"
+        @click="currentPanel == 'Settings' ? setCurrentPanel('None') : setCurrentPanel('Settings')"
+      >
+        <Settings
+          :color="hover.settings ? 'var(--ac)' : 'var(--white)'"
+          class="icon-tran"
+          height="28px"
+          width="28px"
+          content="Settings"
+          v-tippy
+        />
+      </SidebarItem>
+    </div>
   </div>
-
 </template>
 
 <script lang="ts">
@@ -30,31 +85,32 @@ import Group from '@/components/Icons/Group.vue';
 // @ts-ignore
 import Settings from '@/components/Icons/Settings.vue';
 import Admin from '../Icons/Admin.vue';
-import { AppStore } from '@/stores/AppStore';
-import { ClientStore } from '@/stores/ClientStore';
+import {AppStore} from '@/stores/AppStore';
+import {ClientStore} from '@/stores/ClientStore';
+import Download from '../Icons/Download.vue';
+import BringOutAni from '../layout/SideTab/_extensions/BringOutAni.vue';
 export default defineComponent({
-    name: "sidebar",
-    setup() {
-        let appStore = AppStore();
-        return {
-          currentPanel: computed(() => appStore.currentPanelAct),
-          setCurrentPanel: appStore.setCurrentPanel,
-          // @ts-ignore
-          userAdmin: computed(() => ClientStore().client.self.admin)
-        }
-     },
-    data() {
-      return {
-        hover: {
-          friend: false,
-          group: false,
-          settings: false,
-          admin: false
-        },
-        
-      }
-    },
-    components: { SelfItem, Friend, SidebarItem, Group, Settings, Admin }
+  name: 'sidebar',
+  setup() {
+    let appStore = AppStore();
+    return {
+      currentPanel: computed(() => appStore.currentPanelAct),
+      setCurrentPanel: appStore.setCurrentPanel,
+      // @ts-ignore
+      userAdmin: computed(() => ClientStore().client.self.admin),
+    };
+  },
+  data() {
+    return {
+      hover: {
+        friend: false,
+        group: false,
+        settings: false,
+        admin: false,
+      },
+    };
+  },
+  components: {SelfItem, Friend, SidebarItem, Group, Settings, Admin, Download, BringOutAni},
 });
 </script>
 

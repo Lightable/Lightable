@@ -9,20 +9,25 @@ import 'tippy.js/dist/tippy.css';
 import { devtools } from './devtools';
 import { ClipboardPlugin } from './plugins/Clipboard';
 import { MotionPlugin } from '@vueuse/motion';
-import '@vueform/toggle/themes/default.css'
+import '@vueform/toggle/themes/default.css';
+import 'tippy.js/animations/scale.css';
 const invokedApp = createApp(App)
     .use(router)
     .use(createPinia())
     .use(ContextMenu)
-    .use(VueTippy, {
-        directive: 'tippy', // => v-tippy
-        component: 'tippy', // => <tippy/>
-        componentSingleton: 'tippy-singleton', // => <tippy-singleton/>,
-        defaultProps: {
-            placement: 'auto-end',
-            allowHTML: true,
-        }, // => Global default options * see all props
-    })
+    .use(VueTippy,
+        // optional
+        {
+            directive: 'tippy', // => v-tippy
+            component: 'tippy', // => <tippy/>
+            componentSingleton: 'tippy-singleton', // => <tippy-singleton/>,
+            defaultProps: {
+                placement: 'auto',
+                animation: 'scale',
+                allowHTML: true,
+            }, // => Global default options * see all props
+        }
+    )
     .use(devtools)
     .use(ClipboardPlugin)
     .use(MotionPlugin);

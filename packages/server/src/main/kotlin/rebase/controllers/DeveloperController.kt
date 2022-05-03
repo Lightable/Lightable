@@ -28,7 +28,7 @@ class DeveloperController(val cache: Cache) {
         val user = requireAuth(cache, ctx)
         val body = ctx.bodyAsClass<ReleasePayload>()
         if (user != null && user.admin) {
-            val release = ChattyRelease(body.tag.replace(".", "").toInt(), body.tag, body.title, body.notes, body.signature, body.url)
+            val release = ChattyRelease(body.version.replace(".", "").toInt(), body.version, body.title, body.notes, body.signature, body.url)
             cache.saveOrReplaceRelease(release)
             ctx.status(201).json(release)
             GlobalBus.post(release)
@@ -56,7 +56,7 @@ class DeveloperController(val cache: Cache) {
     }
 
     data class ConnectedClient(val inc: Boolean)
-    data class ReleasePayload(val tag: String, val notes: String, val title: String, val url: String, val signature: String)
+    data class ReleasePayload(val version: String, val notes: String, val title: String, val url: String, val signature: String)
     object SentMessage {}
 
 }

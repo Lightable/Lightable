@@ -93,7 +93,7 @@ class Server {
             }
             path("/cdn") {
                 path("/releases") {
-
+                    get(cdnController::getReleases)
                     get("{release}", cdnController::getRelease)
                 }
                 path("/user") {

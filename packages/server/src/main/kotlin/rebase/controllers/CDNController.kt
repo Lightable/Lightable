@@ -16,6 +16,15 @@ class CDNController(val cache: Cache, val fileController: FileController) {
             ctx.status(200).json(latest)
         }
     }
+    fun getReleases(ctx: Context) {
+        if (cache.releases.size < 1) {
+            ctx.status(204)
+            return
+        } else {
+            ctx.status(200).json(cache.releases.values)
+            return
+        }
+    }
     fun getUserAvatar(ctx: Context) {
             val size = ctx.queryParam("size")?.toInt() ?: 512
             val userid = ctx.pathParam("user").toLong()

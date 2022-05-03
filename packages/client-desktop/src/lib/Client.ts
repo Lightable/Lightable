@@ -13,6 +13,7 @@ import { Device } from "./structures/Device";
 import Messages, { IMessage } from "./structures/Messages";
 import Users, { IUser, User } from "./structures/Users";
 import { Nullable } from "./utils/null";
+import { Release } from "./structures/Release";
 export declare interface Client {
     on(event: 'connecting', listener: () => void): this
     on(event: 'connected', listener: () => void): this
@@ -156,6 +157,13 @@ export class Client extends EventEmitter {
             });
         }
 
+    }
+    async getReleases() {
+        return await this.req('GET', '/cdn/releases') as Nullable<Release[]>
+    }
+    async saveRelease(release: Release) {
+        // @ts-ignore 
+        return await this.req('POST', '/admin/release', {'Authorization': this.self?.auth!!}, release);
     }
     async $connect() {
         await this

@@ -41,7 +41,7 @@
     "vue-kinesis": "^2.0.5",
     "vue-router": "^4.0.0-0",
     "vue-sweetalert2": "^5.0.2",
-    "vue-tippy": "^6.0.0-alpha.52",
+    "vue-tippy": "^6.0.0-alpha.58",
     "vue-toast-notification": "^3.0.0",
     "vue3-clipboard": "^1.0.0",
     "vue3-context-menu": "github:brys0/vue3-context-menu#main",

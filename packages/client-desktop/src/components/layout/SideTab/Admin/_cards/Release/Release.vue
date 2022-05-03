@@ -7,7 +7,7 @@
       {{ updatedTitle }}
     </template>
     <template v-slot:description>
-      {{ release.description }}
+      {{ release.notes }}
     </template>
     <template v-slot:sig>
       <span class="raw-sig">{{ trun(updatedSignature, 20) }}</span>
@@ -19,7 +19,7 @@
       <button class="db" dbt="warning" v-if="!canEdit" @click="canEdit = true">
         <Edit color="var(--white)" />
       </button>
-      <button class="db" dbt="warning" v-if="canEdit" @click="canEdit = false">
+      <button class="db" dbt="warning" v-if="canEdit" @click="() => {canEdit = false; save(release)}">
         <Save color="var(--white)" />
       </button>
       <button class="db" dbt="danger">
@@ -35,23 +35,25 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
+import {defineComponent, PropType} from 'vue';
 import Download from '../../../../../Icons/Download.vue';
 import Edit from '@/components/Icons/Edit.vue';
 import Close from '@/components/Icons/Close.vue';
 import ReleaseBuilder from './ReleaseBuilder.vue';
 import Save from '../../../../../Icons/Save.vue';
 import trunacate from '@/lib/trunacate';
+import { Release } from '@/lib/structures/Release';
+import { ClientStore } from '@/stores/ClientStore';
 export default defineComponent({
   components: {Download, Edit, Close, ReleaseBuilder, Save},
   name: 'Release',
   props: {
     release: {
-      type: Object,
+      type: Object as PropType<Release>,
       required: false,
       default: () => {
         return {
-          tag: '0.0.0',
+          version: '0.0.0',
           title: 'Release Title',
           notes: 'Release Notes',
           signature: 'Release Signature',
@@ -65,15 +67,16 @@ export default defineComponent({
     };
   },
   methods: {
-    newDescript(e: any) {
-      console.log(e);
-    },
+    save(release: Release) {
+      release.notes = this.updatedNotes;
+      ClientStore().client?.saveRelease(release);
+    }
   },
   data() {
     return {
-      updatedTag: this.release.tag,
+      updatedTag: this.release.version,
       updatedTitle: this.release.title,  
-      updatedNotes: this.release.description,
+      updatedNotes: this.release.notes,
       updatedSignature: this.release.signature,
       canEdit: false,
     };
