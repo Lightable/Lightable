@@ -14,7 +14,7 @@
       <KeepAlive>
         <NewReleaseModal v-if="createReleaseModalVis" />
       </KeepAlive>
-      <UpdateModal/>
+      <UpdateModal v-if="downloadingUpdateModalVis"/>
       <AvatarEditor v-if="false" />
     </div>
   </div>
@@ -84,6 +84,7 @@ export default defineComponent({
       addFriendModalVis: computed(() => appStore.addFriendModalVis),
       newNameModalVis: computed(() => appStore.newNameModalVis),
       createReleaseModalVis: computed(() => appStore.newReleaseModalVis),
+      downloadingUpdateModalVis: computed(() => appStore.downloadingUpdateModalVis),
       currentlyActiveProfile: computed(() => appStore.currentlyActiveProfile),
       offline: computed(() => appStore.offline),
       loggedInDevice: computed(() => clientStore.connectedDevice),

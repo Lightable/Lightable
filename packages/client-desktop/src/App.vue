@@ -18,6 +18,7 @@ import {ClientStore} from './stores/ClientStore';
 import {Client} from './lib/Client';
 import NotFoundModal from './components/app/Modal/NotFoundModal.vue';
 import {User} from './lib/structures/Users';
+import { getVersion } from '@tauri-apps/api/app';
 export default defineComponent({
   name: 'App',
   beforeCreate() {
@@ -33,12 +34,12 @@ export default defineComponent({
     let instance = new Client({
       store: client,
       rest: {
-        api: 'http://localhost:8081',
+        api: (window.prod) ? 'https://api.zenspace.cf' : 'http://localhost:8081',
         headers: {
           'x-usmell': true,
         },
         retries: 3,
-        version: 5,
+        version: 2,
       },
       socket: {
         compression: 'zlib',
@@ -47,7 +48,7 @@ export default defineComponent({
         properties: {
           os: 'Windows',
           browser: 'Native',
-          build: '0.0.2',
+          build: AppStore().version,
         },
       },
     });

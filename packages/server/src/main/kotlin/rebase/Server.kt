@@ -6,6 +6,7 @@ import com.github.ajalt.mordant.terminal.Terminal
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.core.util.RouteOverviewPlugin
+import io.javalin.http.staticfiles.Location
 import io.javalin.plugin.openapi.OpenApiOptions
 import io.javalin.plugin.openapi.OpenApiPlugin
 import io.javalin.plugin.openapi.dsl.documented
@@ -48,6 +49,11 @@ class Server {
         it.maxRequestSize = 20971520
         it.registerPlugin(RouteOverviewPlugin("/routes"))
         it.registerPlugin(getConfiguredOpenApiPlugin())
+        it.addStaticFiles { static ->
+            static.directory = "./releases"
+            static.location = Location.EXTERNAL
+            static.hostedPath = "/release"
+        }
         it.requestLogger { ctx, executionTimeMs ->
             val date = Instant.now()
             val dateStr = "${dateFormatter.format(date)} " + "- ${timeFormatter.format(date)}"

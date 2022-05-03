@@ -77,7 +77,7 @@ export default defineComponent({
     appWindow.setResizable(false);
     appWindow.center();
     appWindow.setFocus();
-    appWindow.setTitle('Chatty • Login');
+    appWindow.setTitle('ZenSpace • Login');
     ClientStore().$resetData();
   },
   methods: {

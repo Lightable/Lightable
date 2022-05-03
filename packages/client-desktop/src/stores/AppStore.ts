@@ -16,6 +16,7 @@ export const AppStore = defineStore('AppStore', {
         addFriendModalVis: false as boolean,
         newNameModalVis: false as boolean,
         newReleaseModalVis: false as boolean,
+        downloadingUpdateModalVis: false as boolean,
         currentlyActiveProfile: null as string | null | User,
         currentPanelAct: "None" as CurrentPanelAct,
         debug: false as boolean,
@@ -61,6 +62,9 @@ export const AppStore = defineStore('AppStore', {
         },
         setRelease(release: Release) {
             this.update = release;
+        },
+        setDownloadingModalVis(bool: boolean) {
+            this.downloadingUpdateModalVis = bool;
         },
         async save() {
             await this.store.save();
