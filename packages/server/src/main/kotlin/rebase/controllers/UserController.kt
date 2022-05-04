@@ -1,10 +1,7 @@
 package rebase.controllers
 
 import io.javalin.http.Context
-import io.javalin.plugin.openapi.annotations.HttpMethod
-import io.javalin.plugin.openapi.annotations.OpenApi
-import io.javalin.plugin.openapi.annotations.OpenApiContent
-import io.javalin.plugin.openapi.annotations.OpenApiResponse
+import io.javalin.plugin.openapi.annotations.*
 import io.javalin.plugin.openapi.dsl.document
 import io.javalin.plugin.openapi.dsl.documentedContent
 import io.javalin.plugin.openapi.dsl.oneOf
@@ -34,6 +31,7 @@ class UserController(
     @OpenApi(
         path = "/user",
         method = HttpMethod.POST,
+        requestBody = OpenApiRequestBody(content = arrayOf(OpenApiContent(from = NewUser::class))),
         responses = [
             OpenApiResponse("201", content = [OpenApiContent(UserCreateToken::class, type = "application/json")]),
             OpenApiResponse("401", content = [OpenApiContent(UserAuthFail::class, type = "application/json")]),

@@ -28,20 +28,23 @@ import java.util.concurrent.Executors
 
 val t = Terminal()
 
-class Server {
+class Server(var dbhost: String = "localhost",
+             var dbport: Int = 27017,
+             var dbuser: String = "root",
+             var dbpass: String = "rootpass") {
     val logger: org.slf4j.Logger = LoggerFactory.getLogger("Server")!!
     val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
     var port = 8080
+
     var isProd = false
     private val snowflake = Snowflake()
     private val dateFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd-MM-yyyy").withZone(ZoneId.systemDefault())
     private val timeFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("hh:mm:ss").withZone(ZoneId.systemDefault())
-    private val db = RebaseMongoDatabase()
     private val async: ExecutorService = Executors.newCachedThreadPool()
     private val fileController = FileController()
-
+    private val db: RebaseMongoDatabase = RebaseMongoDatabase(dbuser, dbpass, dbhost, dbport)
     val javalin: Javalin = Javalin.create {
         it.showJavalinBanner = false
         it.enableCorsForAllOrigins()
@@ -197,8 +200,27 @@ class Server {
 }
 
 fun main(args: Array<String>) {
-    val server = Server()
     println(Utils.BANNER)
+    var dbhost: String = "localhost"
+    var dbport: Int = 27017
+    var dbuser: String = "root"
+    var dbpass: String = "rootpass"
+    File("./releases").mkdir()
+    File("./storage").mkdir()
+    if (!System.getenv("dbport").isNullOrBlank()) {
+        dbport = System.getenv("dbport").toInt()
+    }
+    if (!System.getenv("dbuser").isNullOrBlank()) {
+        dbuser = System.getenv("dbuser")
+    }
+    if (!System.getenv("dbhost").isNullOrBlank()) {
+        dbhost = System.getenv("dbhost")
+    }
+     if (!System.getenv("dbpass").isNullOrBlank()) {
+        dbpass = System.getenv("dbpass")
+    }
+    val server = Server(dbhost, dbport, dbuser, dbpass)
+
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (args[args.indexOf("--port") + 1].isNotBlank()) {
         server.port = args[args.indexOf("--port") + 1].toInt()
@@ -219,6 +241,7 @@ fun main(args: Array<String>) {
         println("${t.colors.brightGreen.invoke("Production mode is enabled ")}✅")
         server.isProd = true
     }
+
     if (server.isProd) {
         val file = File("err.clog")
         val fos = FileOutputStream(file)
