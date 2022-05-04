@@ -13,4 +13,4 @@ steps:
     commands:
       - cd ./packages/server
       - chmod +x gradlew
-      - ./gradlew jib --image=github.com/Brys0/ZenSpace -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS
+      - ./gradlew jib --image=ghcr.io/Brys0/ZenSpace -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS
