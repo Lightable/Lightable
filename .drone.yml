@@ -5,14 +5,18 @@ platform:
   os: linux
   arch: amd64
 steps:
-  -  name: ZenSpace ✨
+  -  name: ZenSpace Build ✨
+     image: openjdk:jdk-slim
+     commands:
+       - cd ./packages/server
+       - ./gradlew build --no-daemon
+  -  name: ZenSpace Test 🗒️     
+     image: openjdk:jdk-slim
+     commands: 
+       - cd ./packages/server
+       - ./gradlew check
+  -  name: ZenSpace Run ✅
      image: gradle:jdk17
      commands:
        - cd ./packages/server
-       - chmod +x gradlew
-       - gradle -version
-       - ./gradlew build --no-daemon --scan --stacktrace
-  -  name: Run ✔
-     image: gradle:jdk17
-     commands:
        - ./gradlew run --no-daemon
