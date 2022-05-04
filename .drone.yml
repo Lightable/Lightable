@@ -9,17 +9,17 @@ steps:
      image: openjdk:jdk-slim
      commands:
        - cd ./packages/server
-       - chmod +ux gradlew
+       - chmod +x gradlew
        - ./gradlew build --no-daemon
   -  name: ZenSpace Test 🗒️     
      image: openjdk:jdk-slim
      commands: 
        - cd ./packages/server
-       - chmod +ux gradlew
+       - chmod +x gradlew
        - ./gradlew check
   -  name: ZenSpace Run ✅
      image: gradle:jdk17
      commands:
        - cd ./packages/server
-       - chmod +ux gradlew
+       - chmod +x gradlew
        - ./gradlew run --no-daemon
