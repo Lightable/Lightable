@@ -6,13 +6,12 @@ platform:
   arch: amd64
 steps:
   - name: Debug
-    image: openjdk:jdk-slim
     commands:
       - cd ./packages/server
       - ls
       - ls ./build
   - name: ZenSpace Build ✨
-    image: openjdk:jdk-slim
+    image: gradle:jdk17
     environment:
       PASS:
         from_secret: github-token

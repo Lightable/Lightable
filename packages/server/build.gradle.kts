@@ -1,3 +1,5 @@
+import io.opencensus.common.Clock
+
 val exposedVersion: String by project
 plugins {
     kotlin("jvm") version "1.6.10"
@@ -43,15 +45,18 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.suppressWarnings = true
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_16.toString()
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
 }
-val jar by tasks.getting(Jar::class) {
-    manifest {
-        attributes["Main-Class"] = "rebase.ServerKt"
-    }
-}
-tasks.withType
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     archiveFileName.set("zenspaceapi.jar")
+}
+jib {
+    from {
+        image = "gcr.io/distroless/java17-debian11"
+    }
+    container {
+        mainClass = "rebase.ServerKt"
+        creationTime = com.google.api.client.util.Clock.SYSTEM.currentTimeMillis().toString()
+    }
 }
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
