@@ -13,10 +13,10 @@ steps:
       - ls ./build
   - name: ZenSpace Build ✨
     image: openjdk:jdk-slim
+    environment:
+      PASS:
+        from_secret: github-token
     commands:
       - cd ./packages/server
       - chmod +x gradlew
-      - ./gradlew build
-      - ./gradlew check
-      - ./gradlew shadowJar
-      - java -jar ./build/libs/zenspaceapi.jar -Xmx2G -Xms500M
+      - ./gradlew jib --image=github.com/Brys0/ZenSpace -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS

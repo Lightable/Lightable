@@ -3,6 +3,7 @@ plugins {
     kotlin("jvm") version "1.6.10"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     kotlin("plugin.serialization") version org.gradle.kotlin.dsl.embeddedKotlinVersion
+    id("com.google.cloud.tools.jib") version "3.2.0"
 }
 
 group = "org.example"
@@ -49,6 +50,7 @@ val jar by tasks.getting(Jar::class) {
         attributes["Main-Class"] = "rebase.ServerKt"
     }
 }
+tasks.withType
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     archiveFileName.set("zenspaceapi.jar")
 }
