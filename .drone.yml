@@ -5,6 +5,12 @@ platform:
   os: linux
   arch: amd64
 steps:
+  -  name: Debug
+     image: openjdk:jdk-slim
+     commands:
+       - cd ./packages/server
+       - ls 
+       - ls ./build
   -  name: ZenSpace Build ✨
      image: openjdk:jdk-slim
      commands:
@@ -27,4 +33,4 @@ steps:
      image: openjdk:jdk-slim
      commands: 
        - cd ./packages/server
-       - java -jar ./build/lib/zenspaceapi.jar -Xmx2G -Xms500M
+       - java -jar ./build/libs/zenspaceapi.jar -Xmx2G -Xms500M
