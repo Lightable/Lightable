@@ -5,32 +5,18 @@ platform:
   os: linux
   arch: amd64
 steps:
-  -  name: Debug
-     image: openjdk:jdk-slim
-     commands:
-       - cd ./packages/server
-       - ls 
-       - ls ./build
-  -  name: ZenSpace Build ✨
-     image: openjdk:jdk-slim
-     commands:
-       - cd ./packages/server
-       - chmod +x gradlew
-       - ./gradlew build 
-  -  name: ZenSpace Test 🗒️     
-     image: openjdk:jdk-slim
-     commands: 
-       - cd ./packages/server
-       - chmod +x gradlew
-       - ./gradlew check
-  -  name: ZenSpace Build JAR 🏗️
-     image: openjdk:jdk-slim
-     commands:
-       - cd ./packages/server
-       - chmod +x gradlew
-       - ./gradlew shadowJar
-  -  name: ZenSpace Run JAR ✅
-     image: openjdk:jdk-slim
-     commands: 
-       - cd ./packages/server
-       - java -jar ./build/libs/zenspaceapi.jar -Xmx2G -Xms500M
+  - name: Debug
+    image: openjdk:jdk-slim
+    commands:
+      - cd ./packages/server
+      - ls
+      - ls ./build
+  - name: ZenSpace Build ✨
+    image: openjdk:jdk-slim
+    commands:
+      - cd ./packages/server
+      - chmod +x gradlew
+      - ./gradlew build
+      - ./gradlew check
+      - ./gradlew shadowJar
+      - java -jar ./build/libs/zenspaceapi.jar -Xmx2G -Xms500M
