@@ -56,7 +56,6 @@ jib {
     }
     container {
         mainClass = "rebase.ServerKt"
-        creationTime = com.google.api.client.util.Clock.SYSTEM.currentTimeMillis().toString()
     }
 }
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
