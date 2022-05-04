@@ -1,11 +1,13 @@
 kind: pipeline
 type: docker
 name: default
+workspace:
+  path: /drone/src
+
 steps:
   -  name: ZenSpace Prerequisites ✨
      image: pierrevincent/gradle-java8
      commands:
-       - cd ./packages/server
        - chmod +x gradlew
        - gradle -version
   -  name: ZenSpace Server Build ⚠️
