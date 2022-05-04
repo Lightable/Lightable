@@ -8,6 +8,7 @@ steps:
   -  name: ZenSpace ✨
      image: gradle:jdk17
      commands:
+       - cd ./packages/server
        - chmod +x gradlew
        - gradle -version
        - ./gradlew build --no-daemon --scan --stacktrace
