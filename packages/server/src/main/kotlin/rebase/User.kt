@@ -12,7 +12,6 @@ import org.eclipse.jetty.websocket.common.WebSocketSession
 import rebase.auth.StandardToken
 import rebase.controllers.*
 import rebase.interfaces.BucketImpl
-import rebase.interfaces.ISnowflake
 import rebase.interfaces.Image.ImageImpl
 import java.time.Instant
 
@@ -156,8 +155,6 @@ data class User constructor(
     init {
         jackson.findAndRegisterModules()
     }
-
-
 }
 
 data class PrivateUser(@JsonIgnore private val user: User) {
@@ -182,7 +179,7 @@ data class PublicUser(@JsonIgnore private val user: User) {
 }
 data class UserNotice constructor(@BsonProperty val text: String?, @BsonProperty val icon: Icon?)
 
-data class Status constructor(@BsonProperty("icon") var icon: Icon, @BsonProperty("text")  var text: String)
+data class Status constructor(@BsonProperty("icon") var icon: Icon, @BsonProperty("text") var text: String)
 data class Icon(override val cdn: String, override val animated: Boolean, @JsonIgnore override val id: Long) : ImageImpl {
     @JsonProperty("id") val identifier = id.toString()
 }
@@ -192,7 +189,8 @@ data class Friends constructor(
     // Other people's request show up as "Pending" for you
     @BsonProperty("pending") @JsonProperty("pending") var pending: ArrayList<Long> = arrayListOf(),
     // Your requests that show up as "Pending" for other users
-    @BsonProperty("requests") @JsonProperty("requests") var requests: ArrayList<Long> = arrayListOf())
+    @BsonProperty("requests") @JsonProperty("requests") var requests: ArrayList<Long> = arrayListOf()
+)
 
 data class FriendsPublic @BsonCreator constructor(
     @BsonProperty @BsonIgnore var friends: MutableList<PublicUser>,
@@ -201,18 +199,18 @@ data class FriendsPublic @BsonCreator constructor(
 ) {
     @BsonIgnore
     fun isEmpty(): Boolean {
-       val friendEmpty = friends.isEmpty()
-       val pendingEmpty = pending.isEmpty()
-       val requestsEmpty = requests.isEmpty()
-       if (friendEmpty && pendingEmpty && requestsEmpty) return true
+        val friendEmpty = friends.isEmpty()
+        val pendingEmpty = pending.isEmpty()
+        val requestsEmpty = requests.isEmpty()
+        if (friendEmpty && pendingEmpty && requestsEmpty) return true
         return false
     }
 }
 data class Avatar constructor(
     @BsonProperty var animated: Boolean = false,
     @BsonProperty("identifier") @JsonIgnore var identifier: Long = 0L
-)  {
-   @BsonIgnore @JsonProperty("id") var idJSON = identifier.toString()
+) {
+    @BsonIgnore @JsonProperty("id") var idJSON = identifier.toString()
 }
 enum class UserState {
     OFFLINE,

@@ -1,6 +1,5 @@
 package rebase.implmentation
 
-import rebase.interfaces.ISnowflake
 import rebase.interfaces.Image.AvatarImpl
 
 /**

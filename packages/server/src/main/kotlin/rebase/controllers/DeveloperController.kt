@@ -9,16 +9,16 @@ import rebase.Cache
 import rebase.ChattyRelease
 
 class DeveloperController(val cache: Cache) {
-   val events = EventsReceiver()
+    val events = EventsReceiver()
 
     fun disableUser(ctx: Context) {
         val user = requireAuth(cache, ctx)
         val userPath = ctx.pathParam("id")
         val userExt = cache.users[userPath.toLong()]
         if (user != null && user.admin && userExt != null) {
-           userExt.enabled = false
-           userExt.save()
-           ctx.status(204)
+            userExt.enabled = false
+            userExt.save()
+            ctx.status(204)
         } else {
             ctx.status(400).json(UserController.UserDataFail("User doesn't exist or you are not an Admin"))
         }
@@ -38,7 +38,7 @@ class DeveloperController(val cache: Cache) {
     }
     init {
         events.subscribe<ConnectedClient> {
-             when(it.inc) {
+            when (it.inc) {
                 true -> connectedClients.inc()
                 false -> connectedClients.dec()
             }
@@ -52,11 +52,9 @@ class DeveloperController(val cache: Cache) {
         var connectedClients = 0
         var sentMessages = 0
         val serverStart = Instant.now()
-
     }
 
     data class ConnectedClient(val inc: Boolean)
     data class ReleasePayload(val version: String, val notes: String, val title: String, val url: String, val signature: String)
-    object SentMessage {}
-
+    object SentMessage
 }

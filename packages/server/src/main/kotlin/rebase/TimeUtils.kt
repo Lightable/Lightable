@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.annotation.Nonnull
 
-
 object TimeUtil {
     private const val EPOCH = 1420070400000L
     private const val TIMESTAMP_OFFSET: Long = 22

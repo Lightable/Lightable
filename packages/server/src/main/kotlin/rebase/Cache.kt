@@ -7,7 +7,6 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import kotlin.collections.HashMap
 
-
 class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, private val snowflake: Snowflake, val server: Server, val fileController: FileController) {
     val logger = LoggerFactory.getLogger("Rebase -> CACHE")
     val userColl = db.getUserCollection()
@@ -39,7 +38,6 @@ class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, 
                 users.remove(u.identifier)
             }
         }
-
     }
     fun saveOrReplaceRelease(release: ChattyRelease) {
         releases[release.tag] = release
@@ -74,6 +72,5 @@ class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, 
     }
 
     companion object {
-
     }
 }

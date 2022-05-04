@@ -8,7 +8,6 @@ import rebase.Server
 import java.lang.AssertionError
 import kotlin.system.measureTimeMillis
 
-
 class ClassUnit {
     private val ctx = mockk<Context>(relaxed = true)
     private val server = Server()

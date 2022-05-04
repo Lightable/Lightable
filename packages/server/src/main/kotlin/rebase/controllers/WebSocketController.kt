@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.ajalt.mordant.rendering.TextColors.*
+import com.github.ajalt.mordant.rendering.TextStyles.*
 import io.javalin.websocket.WsCloseContext
 import io.javalin.websocket.WsConnectContext
 import io.javalin.websocket.WsContext
@@ -16,11 +18,6 @@ import org.slf4j.Logger
 import rebase.*
 import rebase.compression.CompressionUtil
 import java.nio.ByteBuffer
-import com.github.ajalt.mordant.rendering.TextColors.*
-import com.github.ajalt.mordant.rendering.TextStyles.*
-import me.kosert.flowbus.dropEvent
-import okhttp3.internal.notify
-import okhttp3.internal.userAgent
 
 class WebSocketController(private val logger: Logger, private val cache: Cache, private val isProd: Boolean) {
     private val rawConnections = mutableMapOf<String, SessionWithCompression>()
@@ -56,7 +53,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                         1010,
                         "Authentication matching ${properties.auth} doesn't exist"
                     )
-                val existingConnection = connections.values.find { u -> u.user.token.token == properties.auth}
+                val existingConnection = connections.values.find { u -> u.user.token.token == properties.auth }
                 if (existingConnection != null) {
                     send(existingConnection.ws.session, existingConnection.ws.type, ServerDropGateway(Device(properties.properties.ip!!, properties.properties.browser, properties.properties.build, properties.properties.os)))
                     existingConnection.ws.session.closeSession(1008, "Can't have 2 connections at once! Security Risk ⚠")
@@ -103,7 +100,8 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                         userSession.user.state = UserState.AWAY.ordinal
                         userSession.user.save()
                         GlobalBus.post(
-                            FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "state", UserState.AWAY.ordinal))
+                            FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "state", UserState.AWAY.ordinal)
+                        )
                         GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "state", UserState.AWAY.ordinal))
                         return
                     }
@@ -115,12 +113,12 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                         return
                     }
                     SocketMessageType.ClientTyping.ordinal -> {
-                        val typingTo = connections.values.find{ f -> f.user.identifier == jsonWrap.convertValue(rawMessage["d"], String::class.java).toLong() }
+                        val typingTo = connections.values.find { f -> f.user.identifier == jsonWrap.convertValue(rawMessage["d"], String::class.java).toLong() }
                         if (typingTo != null) {
                             GlobalBus.post(ClientTyping(userSession, typingTo))
                             return
                         } else {
-                            send(userSession.ws.session, userSession.ws.type, object { val t = "DoesNotExist"})
+                            send(userSession.ws.session, userSession.ws.type, object { val t = "DoesNotExist" })
                         }
                     }
                 }
@@ -163,7 +161,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
         events.subscribe<FriendUpdatePayload> { payload ->
             logger.info("Update Payload -> ${payload.id} ${payload.name} = ${payload.value}")
             connections.values.forEach { v -> println(v.user.identifier) }
-            val friends = connections.values.find { u -> u.user.identifier== payload.id }!!.user.getFriends()
+            val friends = connections.values.find { u -> u.user.identifier == payload.id }!!.user.getFriends()
             for (friend in friends.friends) {
                 val friendSession = connections.values.find { f -> f.user.identifier == friend.id }
                 if (friendSession != null) {
@@ -317,7 +315,6 @@ data class ClientTyping(
     var t: Int = 0
 ) {
     val d = self.user.identifier.toString()
-
 }
 data class ServerReadyPayload(
     @JsonIgnore val userRaw: PublicUser,

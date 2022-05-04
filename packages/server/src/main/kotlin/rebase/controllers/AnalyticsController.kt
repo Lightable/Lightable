@@ -9,6 +9,5 @@ class AnalyticsController(val cache: Cache, val snowflake: Snowflake, val execut
     fun getMessageAnalytic(ctx: Context) {
         val totalMessages = 80000
         val totalDM = 1000
-
     }
 }

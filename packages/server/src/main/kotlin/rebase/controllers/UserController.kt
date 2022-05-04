@@ -9,7 +9,17 @@ import io.javalin.plugin.openapi.dsl.document
 import io.javalin.plugin.openapi.dsl.documentedContent
 import io.javalin.plugin.openapi.dsl.oneOf
 import me.kosert.flowbus.GlobalBus
-import rebase.*
+import rebase.Avatar
+import rebase.Cache
+import rebase.Constants
+import rebase.FileController
+import rebase.Friends
+import rebase.PrivateUser
+import rebase.PublicUser
+import rebase.Snowflake
+import rebase.Status
+import rebase.User
+import rebase.UserNotice
 import rebase.interfaces.FailImpl
 import java.util.concurrent.ExecutorService
 import kotlin.system.measureTimeMillis
@@ -81,7 +91,7 @@ class UserController(
                     )
                     user.save(false)
                 }
-                print("\rCreated user in ${userCreationTiming}ms (${i})")
+                print("\rCreated user in ${userCreationTiming}ms ($i)")
             }
             println()
             ctx.status(201)
@@ -225,9 +235,7 @@ class UserController(
                     }
                 }
             }
-
         }
-
     }
 
     inner class Relationships {

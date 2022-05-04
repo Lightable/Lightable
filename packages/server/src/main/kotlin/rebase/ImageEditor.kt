@@ -4,7 +4,6 @@ import com.github.ajalt.mordant.rendering.TextColors
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.Position
 import com.sksamuel.scrimage.ScaleMethod
-import org.imgscalr.Scalr
 import java.awt.image.BufferedImage
 import java.util.logging.Logger
 import kotlin.system.measureTimeMillis

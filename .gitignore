@@ -32,14 +32,10 @@
 # Ignore Gradle GUI config
 /packages/server/gradle-app.setting
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-/packages/server/!gradle-wrapper.jar
-
 # From https://github.com/github/gitignore/blob/master/Java.gitignore
 /packages/server/*.class
 
 # Package Files #
-/packages/server/*.jar
 /packages/server/*.war
 /packages/server/*.ear
 

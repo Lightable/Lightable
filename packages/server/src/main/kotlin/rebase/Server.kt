@@ -26,7 +26,6 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-
 val t = Terminal()
 
 class Server {
@@ -59,14 +58,14 @@ class Server {
             val dateStr = "${dateFormatter.format(date)} " + "- ${timeFormatter.format(date)}"
             println(
                 "[Rebase]: $dateStr |   ${executionTimeMs}ms   | ${ctx.req.remoteHost}  | ${
-                    determineMethodColor(
-                        ctx.method()
-                    )
+                determineMethodColor(
+                    ctx.method()
+                )
                 }  \"${ctx.path()}\""
             )
         }
     }
-    val cache = Cache(async, db, snowflake,this, fileController)
+    val cache = Cache(async, db, snowflake, this, fileController)
     private val websocketController = WebSocketController(logger, cache, isProd)
 
     private val developerController = DeveloperController(cache)
@@ -146,21 +145,18 @@ class Server {
                         delete("{id}", documented(relationship.removeRelationshipDoc, relationship::removeRelationship))
                     }
                 }
-
-
             }
         }
     }
 
-
     fun determineMethodColor(method: String): String {
-        val GETBG = t.colors.blue.bg(        "      $method       ")
+        val GETBG = t.colors.blue.bg("      $method       ")
         val POSTBG = t.colors.brightBlue.bg("       $method       ")
-        val DELETEBG = t.colors.red.bg(     "       $method       ")
-        val PATCHBG = t.colors.green.bg(    "       $method       ")
-        val OPTIONBG = t.colors.gray.bg(    "       $method       ")
-        val HEADBG = t.colors.magenta.bg(   "       $method       ")
-        val PUTBG = t.colors.yellow.bg(     "       $method       ")
+        val DELETEBG = t.colors.red.bg("       $method       ")
+        val PATCHBG = t.colors.green.bg("       $method       ")
+        val OPTIONBG = t.colors.gray.bg("       $method       ")
+        val HEADBG = t.colors.magenta.bg("       $method       ")
+        val PUTBG = t.colors.yellow.bg("       $method       ")
         return when (method) {
             "GET" -> GETBG
             "POST" -> POSTBG
@@ -183,7 +179,8 @@ class Server {
             path("/swagger-docs") // endpoint for OpenAPI json
             swagger(SwaggerOptions("/swagger-ui")) // endpoint for swagger-ui
             reDoc(ReDocOptions("/redoc")) // endpoint for redoc
-        })
+        }
+    )
 
     fun clearConsole() {
         try {
@@ -231,7 +228,3 @@ fun main(args: Array<String>) {
     println("${t.colors.brightRed.invoke("---->>")} Logs ${t.colors.brightBlue.invoke("<<----\n")}")
     server.javalin.start(server.port)
 }
-
-
-
-

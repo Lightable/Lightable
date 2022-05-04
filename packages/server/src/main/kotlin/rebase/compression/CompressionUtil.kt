@@ -3,10 +3,9 @@ package rebase.compression
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.Base64
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.InflaterOutputStream
-
 
 object CompressionUtil {
     @Throws(IOException::class)

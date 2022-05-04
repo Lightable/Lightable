@@ -8,15 +8,14 @@ import javax.management.AttributeList
 import javax.management.ObjectName
 import kotlin.collections.ArrayList
 
-
 object Utils {
     // Banner :P Because why not?
     const val BANNER = " ██████╗  ██╗  ██╗   █████╗   ████████╗  ████████╗ ██╗   ██╗\n" +
-            "██╔════╝  ██║  ██║  ██╔══██╗  ╚══██╔══╝  ╚══██╔══╝ ╚██╗ ██╔╝\n" +
-            "██║       ███████║  ███████║     ██║        ██║     ╚████╔╝ \n" +
-            "██║       ██╔══██║  ██╔══██║     ██║        ██║      ╚██╔╝  \n" +
-            "╚██████╗  ██║  ██║  ██║  ██║     ██║        ██║       ██║   \n" +
-            " ╚═════╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝     ╚═╝        ╚═╝       ╚═╝     "
+        "██╔════╝  ██║  ██║  ██╔══██╗  ╚══██╔══╝  ╚══██╔══╝ ╚██╗ ██╔╝\n" +
+        "██║       ███████║  ███████║     ██║        ██║     ╚████╔╝ \n" +
+        "██║       ██╔══██║  ██╔══██║     ██║        ██║      ╚██╔╝  \n" +
+        "╚██████╗  ██║  ██║  ██║  ██║     ██║        ██║       ██║   \n" +
+        " ╚═════╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝     ╚═╝        ╚═╝       ╚═╝     "
     const val VERSION = "1.9.12"
     fun generateID(): String {
         val rand = (10000000..99999999).random()
@@ -49,7 +48,8 @@ object Utils {
     data class User(var name: String, var userid: String, var friends: ArrayList<String>?, var auth: String?, var status: String?, var about: String?, var online: Boolean?, var statusIcon: String?, var avatar: String?, var created: Instant)
     class Status @BsonCreator constructor(
         @BsonProperty("text") var text: String?,
-        @BsonProperty("icon") var icon: String?)
+        @BsonProperty("icon") var icon: String?
+    )
 
     object Constants {
         enum class Badges {

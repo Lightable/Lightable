@@ -4,7 +4,6 @@ import java.net.NetworkInterface
 import java.security.SecureRandom
 import java.time.Instant
 
-
 /**
  * Distributed Sequence Generator.
  * Inspired by Twitter snowflake: https://github.com/twitter/snowflake/tree/snowflake-2010
@@ -52,8 +51,10 @@ class Snowflake {
             sequence = 0
         }
         lastTimestamp = currentTimestamp
-        return (currentTimestamp shl NODE_ID_BITS + SEQUENCE_BITS or (nodeId shl SEQUENCE_BITS)
-                or sequence)
+        return (
+            currentTimestamp shl NODE_ID_BITS + SEQUENCE_BITS or (nodeId shl SEQUENCE_BITS)
+                or sequence
+            )
     }
 
     // Get current timestamp in milliseconds, adjust for the custom epoch.
@@ -103,9 +104,11 @@ class Snowflake {
     }
 
     override fun toString(): String {
-        return ("Snowflake Settings [EPOCH_BITS=" + EPOCH_BITS + ", NODE_ID_BITS=" + NODE_ID_BITS
-                + ", SEQUENCE_BITS=" + SEQUENCE_BITS + ", CUSTOM_EPOCH=" + customEpoch
-                + ", NodeId=" + nodeId + "]")
+        return (
+            "Snowflake Settings [EPOCH_BITS=" + EPOCH_BITS + ", NODE_ID_BITS=" + NODE_ID_BITS +
+                ", SEQUENCE_BITS=" + SEQUENCE_BITS + ", CUSTOM_EPOCH=" + customEpoch +
+                ", NodeId=" + nodeId + "]"
+            )
     }
 
     companion object {
