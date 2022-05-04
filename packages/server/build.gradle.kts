@@ -2,8 +2,6 @@ val exposedVersion: String by project
 plugins {
     kotlin("jvm") version "1.6.10"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
-    id("com.faire.gradle.analyze") version "1.0.9"
     kotlin("plugin.serialization") version org.gradle.kotlin.dsl.embeddedKotlinVersion
 }
 
