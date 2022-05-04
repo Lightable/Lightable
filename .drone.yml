@@ -12,7 +12,7 @@ steps:
        - chmod +x gradlew
        - gradle -version
        - ./gradlew build --no-daemon --scan --stacktrace
-  -  name: run ✔️
-     image: pierrevincent/gradle-java8
+  -  name: Run ✔
+     image: gradle:jdk17
      commands:
        - ./gradlew run --no-daemon
