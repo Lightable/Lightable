@@ -27,7 +27,8 @@
 /packages/client-desktop/src-tauri/target
 /packages/client-desktop/build/tauri-codegen-assets
 /packages/server/.gradle
-/packages/server/build/
+**/packages/server/build/*
+!**/packages/server/libs
 
 # Ignore Gradle GUI config
 /packages/server/gradle-app.setting
