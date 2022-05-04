@@ -1,0 +1,18 @@
+kind: pipeline
+type: docker
+name: default
+steps:
+  -  name: ZenSpace Prerequisites ✨
+     image: pierrevincent/gradle-java8
+     commands:
+       - cd ./packages/server
+       - chmod +x gradlew
+       - gradle -version
+  -  name: ZenSpace Server Build ⚠️
+     image: pierrevincent/gradle-java8
+     commands:
+       - ./gradlew build --no-daemon --scan --stacktrace
+  -  name: run ✔️
+     image: pierrevincent/gradle-java8
+     commands:
+       - ./gradlew run --no-daemon
