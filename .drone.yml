@@ -10,16 +10,21 @@ steps:
      commands:
        - cd ./packages/server
        - chmod +x gradlew
-       - ./gradlew build --no-daemon
+       - ./gradlew build 
   -  name: ZenSpace Test 🗒️     
      image: openjdk:jdk-slim
      commands: 
        - cd ./packages/server
        - chmod +x gradlew
        - ./gradlew check
-  -  name: ZenSpace Run ✅
-     image: gradle:jdk17
+  -  name: ZenSpace Build JAR 🏗️
+     image: openjdk:jdk-slim
      commands:
        - cd ./packages/server
        - chmod +x gradlew
-       - ./gradlew run --no-daemon
+       - ./gradlew shadowJar
+  -  name: ZenSpace Run JAR ✅
+     image: openjdk:jdk-slim
+     commands: 
+       - cd ./packages/server
+       - java -jar ./build/lib/zenspaceapi.jar -Xmx2G -Xms500M

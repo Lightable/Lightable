@@ -50,8 +50,6 @@ val jar by tasks.getting(Jar::class) {
     }
 }
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
-    baseName = group
-    classifier = "chattyapi"
-    version = version
+    archiveFileName.set("zenspaceapi.jar")
 }
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
