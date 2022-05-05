@@ -88,11 +88,10 @@ export default defineComponent({
       let appStore = AppStore();
       this.sending = true;
       this.stateLogin = 'Logging In...';
-      let hashed = await hash(this.state.password);
       try {
         let user = await client?.req('POST', '/user/@me/login', undefined, {
           email: this.state.email,
-          password: hashed,
+          password: this.state.password,
         });
 
         if (!user) {
@@ -190,7 +189,7 @@ export default defineComponent({
       align-items: center;
       flex-direction: column;
       .login {
-        width: 100%;
+        width: 90%;
         background: var(--blue);
         margin-top: 35px;
         outline: none;
@@ -225,7 +224,8 @@ export default defineComponent({
       }
       input {
         @include input($border-radius: 6px);
-        margin-top: 25px;
+        margin-top: 15px;
+        width: 85%;
       }
     }
   }

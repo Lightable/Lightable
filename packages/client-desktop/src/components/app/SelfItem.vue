@@ -14,10 +14,6 @@
     </div>
 </div>
   <div class="self" @click="active = !active">
-    <div class="details">
-      <span class="name">{{me.name}}</span>
-    </div>
-
     <div class="inner-self">
       <Avatar size="35" :user="me" :displaywarn="false" @click="active = !active" type="button" :circle="true"/>
     </div>
@@ -37,7 +33,7 @@ export default defineComponent({
   name: 'SelfItem',
   setup() {
     let self = ClientStore().client?.self;
-    return {me: computed(() => self), name: computed(() => self.name)};
+    return {me: computed(() => self) };
   },
   components: { Avatar, OnlineStatusSymb, IdleStatusSymb, DoNotDisturbStatusSymb, OfflineStatusSymb },
   data() {

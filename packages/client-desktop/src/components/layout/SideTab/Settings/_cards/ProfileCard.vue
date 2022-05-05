@@ -74,6 +74,9 @@ export default defineComponent({
           },
         ],
       })) as string;
+      if (path == null) {
+        return
+      }
       let assetURL = await fetch(await convertFileSrc(path));
       let file = new File([await assetURL.blob()], 'avatar', {
         type: 'image/jpeg',

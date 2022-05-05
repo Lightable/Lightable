@@ -72,14 +72,6 @@ export default defineComponent({
           message: 'Username must be longer than 1 character'
         };
         return;
-      } else if (name.length > 6) {
-        this.name = '';
-        this.request.loading = false;
-        this.request.error = {
-          show: true,
-          message: 'Username must be shorter than 6 characters'
-        };
-        return;
       }
       let clientStore = ClientStore();
       this.request.loading = true;

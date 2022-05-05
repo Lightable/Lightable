@@ -23,7 +23,9 @@ export default defineComponent({
   name: 'App',
   beforeCreate() {
     this.$.appContext.config.globalProperties.$prod = window.prod;
-    console.log(this.$prod);
+    if (!window.prod) {
+      window.addScript('http://localhost:8098');
+    }
   },
   setup() {
     let app = AppStore();

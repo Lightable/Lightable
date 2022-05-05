@@ -1,25 +1,40 @@
 <!DOCTYPE html>
-<html lang="en" theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chatty</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
-  <!-- Run Conditions-->
-  <% if(isDev){ %>
+<html lang="en"
+      theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <link href="/favicon.ico"
+        rel="icon">
+  <script src="/src/main.ts"
+        type="module"></script>
   <script>
-    console.log('Running development 💻');
-    window.prod = false;
+      window.addScript = (src) => {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+
+          s.setAttribute('src', src);
+          s.addEventListener('load', resolve);
+          s.addEventListener('error', reject);
+
+          document.body.appendChild(s);
+        });
+      }
   </script>
-  <script src="http://localhost:8098"></script>
-  <%} else { %>
+  <meta content="width=device-width, initial-scale=1.0"
+        name="viewport">
+  <title>Chatty</title>
+</head>
+<body>
+  <div id="app"></div><!-- Run Conditions-->
+  <%if(isDev){ %>
   <script>
-    window.prod = true;
-  </script>
-  <% } %>
+      console.log('Running development 💻');
+      window.prod = false;
+  </script> <%} else { %> 
+  <script>
+
+
+      window.prod = true;
+  </script> <%} %>
+</body>
 </html>

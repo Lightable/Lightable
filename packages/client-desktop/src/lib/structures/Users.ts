@@ -21,11 +21,13 @@ export enum DetailedRelationship {
     Private = "Private"
 }
 
-export enum OnlineStatus {
-    Offline = 0,
-    DND = 1,
-    ONLINE = 2
+export enum UserState {
+    OFFLINE,
+    ONLINE,
+    AWAY,
+    DND
 }
+
 export interface IRelationship {
     state: RelationshipStatus,
     detailed: DetailedRelationship
@@ -44,8 +46,8 @@ export interface IUser {
     relationship: Nullable<IRelationship>;
     about: Nullable<string>;
     developer: Nullable<boolean>;
-    online: OnlineStatus;
     admin: boolean;
+    state: UserState;
 }
 export interface ISelf extends IUser {
     authentication: string
@@ -63,7 +65,7 @@ export class User {
     avatar: Nullable<IAvatar>;
     badges: Nullable<number>;
     relationship: Nullable<IRelationship>
-    online: OnlineStatus;
+    state: UserState;
     flags: Nullable<number>;
     auth?: string;
     email: string;
@@ -76,7 +78,7 @@ export class User {
         this.avatar = data.avatar;
         this.badges = data.badges;
         this.relationship = data.relationship;
-        this.online = data.online;
+        this.state = data.state;
         this.flags = null;
         this.auth = (data as ISelf).authentication
         this.email = (data as ISelf).email;

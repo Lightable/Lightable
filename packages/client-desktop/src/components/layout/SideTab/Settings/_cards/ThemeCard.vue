@@ -267,7 +267,7 @@ export default defineComponent({
     .theme-color-name {
         margin-left: auto;
         margin-right: 20px;
-        color: var(--white);
+        color: var(--text);
     }
 }
 </style>

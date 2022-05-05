@@ -5,10 +5,11 @@
       :width="size"
       color="var(--error)"
       class="avatar-src"
+      :state="user.state"
       :circle="circle"
     />
   </div>
-  <div class="avatar" v-else>
+  <div class="avatar"  v-else>
     <div class="loading" :style="`width: ${size}px; height: ${size}px`" :loaded="loaded">
       <img
         :src="user.getAvatar() + `?size=64`"
@@ -17,6 +18,7 @@
         class="avatar-src"
         :circle="circle"
         :style="!loaded ? 'display: none;' : 'display: block;'"
+        :state="user.state"
         @load="loaded = true"
       />
     </div>
@@ -69,6 +71,15 @@ export default defineComponent({
 .avatar-src {
   &[circle='true'] {
     border-radius: 50%;
+  }
+  &[state='1'] {
+    border: var(--green) 2px solid;
+  }
+  &[state='2'] {
+    border: var(--yellow) 2px solid;
+  }
+  &[state='DND'] {
+    border: var(--red) 2px solid;
   }
 }
 .loading {

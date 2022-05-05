@@ -1,5 +1,5 @@
 <template>
-  <BaseModal v-on:clicked="setCurrentProfile(null)">
+  <BaseModal v-on:clicked="setCurrentProfile(null)" :headerbg="profile.getAvatar()+'?size=512'">
     <template v-slot:icon>
       <Friend height="30px" width="30px" color="var(--white)" />
     </template>
@@ -15,7 +15,7 @@
     <template v-slot:actions>
       <div class="actions">
         <button class="db" dbt="danger" @click="async () => { await profile.removeFriend(); setCurrentProfile(null); }">Remove</button>
-        <button class="db" dbt="success" @click="$router.push('/login')">Send Message</button>
+        <button class="db" dbt="success" @click="() => {setCurrentProfile(null); $router.push(`/app/channels/@me/${profile._id}`)}">Send Message</button>
       </div>
     </template>
   </BaseModal>
@@ -23,18 +23,21 @@
 </template>
 
 <script lang="ts">
-import {defineComponent} from 'vue';
+import {defineComponent, PropType} from 'vue';
 import BaseModal from '@/components/app/Modal/BaseModal.vue';
 import Friend from '@/components/Icons/Friend.vue';
 import parseMarkdown from '@/lib/utils/parseMarkdown';
 import { AppStore } from '@/stores/AppStore';
-import { IUser } from '@/lib/structures/Users';
+import { User } from '@/lib/structures/Users';
 import DebugModalData from '@/components/app/Modal/DebugModalData.vue';
 export default defineComponent({
   name: 'ProfileModal',
   components: {BaseModal, Friend, DebugModalData},
   props: {
-    profile: Object,
+    profile: {
+      type: Object as PropType<User>,
+      required: true
+    },
   },
   setup() {
       let appStore = AppStore();

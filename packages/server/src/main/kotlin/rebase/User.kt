@@ -22,7 +22,8 @@ data class User constructor(
     @JsonIgnore @BsonProperty("identifier") var identifier: Long = 0,
     @BsonProperty("name") var name: String = "Test Account",
     @BsonProperty("email") var email: String = "TestAccount@example.com",
-    @BsonProperty("password") var password: String = "TestAccount\$pass",
+    @BsonProperty("salt") var salt: String = Utils.getNextSalt(),
+    @BsonProperty("password") var password: String = Utils.getSHA512("testpass", salt),
     @JsonIgnore @BsonProperty("token") var token: StandardToken = StandardToken(
         Instant.now(),
         mutableSetOf("MESSAGE", "DM", "USER")
@@ -174,6 +175,7 @@ data class PublicUser(@JsonIgnore private val user: User) {
     val status = user.status
     val admin = user.admin
     val enabled = user.enabled
+    val state = user.state
     val avatar = user.avatar
     @JsonProperty("id") val identifier = id.toString()
 }

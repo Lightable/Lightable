@@ -6,17 +6,7 @@ import io.javalin.plugin.openapi.dsl.document
 import io.javalin.plugin.openapi.dsl.documentedContent
 import io.javalin.plugin.openapi.dsl.oneOf
 import me.kosert.flowbus.GlobalBus
-import rebase.Avatar
-import rebase.Cache
-import rebase.Constants
-import rebase.FileController
-import rebase.Friends
-import rebase.PrivateUser
-import rebase.PublicUser
-import rebase.Snowflake
-import rebase.Status
-import rebase.User
-import rebase.UserNotice
+import rebase.*
 import rebase.interfaces.FailImpl
 import java.util.concurrent.ExecutorService
 import kotlin.system.measureTimeMillis
@@ -48,11 +38,13 @@ class UserController(
         if (body.validate(cache, ctx) &&
             cache.users.values.find { user -> user.email == body.email } == null
         ) {
+            val salt = Utils.getNextSalt()
             val user =
                 User(
                     cache = cache,
                     email = body.email,
-                    password = body.password,
+                    password = Utils.getSHA512(body.password, salt),
+                    salt = salt,
                     name = body.username,
                     identifier = snowflake.nextId(),
                     relationships = Friends()
@@ -145,7 +137,7 @@ class UserController(
     fun login(ctx: Context) {
         val info = ctx.bodyAsClass<UserLogin>()
         for (user in cache.users.values) {
-            if (user.email == info.email && user.password == info.password) {
+            if (user.email == info.email && user.password == Utils.getSHA512(info.password, user.salt)) {
                 // Wait to get expiry working
                 //                if (user.token.expired()) {
                 //                    user.token =
@@ -443,7 +435,12 @@ class UserController(
             get() = "FRIEND_REQUEST_FAIL"
         override val message = bad
     }
-
+    class UserNotEnabledFail : FailImpl {
+        override val code: String
+            get() = "USER_ENABLED_FALSE"
+        override val message: String
+            get() = "User is not enabled, wait for an admin to enable your account"
+    }
     data class UpdateUserPatch(
         val name: String?,
         val email: String?,
@@ -502,10 +499,13 @@ fun requireAuth(cache: Cache, ctx: Context): rebase.User? {
     }
     if (auth == null) {
         ctx.status(401).json(UserController.UserAuthFail())
-    } else {
+    }  else {
         val user = cache.users.values.find { user -> user.token.token == auth }
-        return if (user == null || !user.enabled) {
+        return if (user == null) {
             ctx.status(401).json(UserController.UserAuthFail())
+            null
+        } else if (!user.enabled) {
+            ctx.status(403).json(UserController.UserNotEnabledFail())
             null
         } else {
             user

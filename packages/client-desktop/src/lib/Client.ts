@@ -80,13 +80,18 @@ export class Client extends EventEmitter {
             let prod = payload.d.meta.prod;
             this.options.store.setProduction(prod);
         });
-        this.ws.on('pending', (payload: IUser) => {
+        this.ws.on('pending://create', (payload: IUser) => {
             this.store.setPendingUser(new User(this, payload));
             this.logger.logInfo('ChattySocket', 'New Pending Friend', payload);
         });
         this.ws.on('friend://update', (payload: IUser) => {
             this.store.setUser(payload);
             this.logger.logInfo('ChattySocket', 'Friend Update', payload);
+        })
+        this.ws.on('request://accepted', (payload: IUser) => {
+            this.store.setUser(payload);
+            this.store.requests.delete(payload.id);
+            this.logger.logSuccess('ChattySocket', 'Friend Request Accepted!', payload);
         })
         this.ws.on('release', (payload: Release) => {
             this.logger.logInfo('ChattySocket', 'New Release', payload);

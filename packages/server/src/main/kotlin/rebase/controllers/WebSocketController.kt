@@ -79,6 +79,9 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                     session.type,
                     ServerReadyPayload(user.toPublic(), user.getFriends(), MetaInfoPayload(isProd))
                 )
+                user.state = UserState.ONLINE.ordinal
+                user.save()
+                GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.identifier, "user", user.toPublic()))
                 return
             } else if (connections[session.session.sessionId]?.authenticated == false) {
 
@@ -92,23 +95,23 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
                     SocketMessageType.ClientStatusOnline.ordinal -> {
                         userSession.user.state = UserState.ONLINE.ordinal
                         userSession.user.save()
-                        GlobalBus.post(FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "state", UserState.ONLINE.ordinal))
-                        GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "state", UserState.ONLINE.ordinal))
+                        GlobalBus.post(FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "user", userSession.user.toPublic()))
+                        GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "user", UserState.ONLINE.ordinal))
                         return
                     }
                     SocketMessageType.ClientStatusAway.ordinal -> {
                         userSession.user.state = UserState.AWAY.ordinal
                         userSession.user.save()
                         GlobalBus.post(
-                            FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "state", UserState.AWAY.ordinal)
+                            FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "user", userSession.user.toPublic())
                         )
-                        GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "state", UserState.AWAY.ordinal))
+                        GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "user", userSession.user.toPublic()))
                         return
                     }
                     SocketMessageType.ClientStatusDND.ordinal -> {
                         userSession.user.state = UserState.DND.ordinal
                         userSession.user.save()
-                        GlobalBus.post(FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "state", UserState.DND.ordinal))
+                        GlobalBus.post(FriendUpdatePayload(userSession.user.toPublic(), userSession.user.identifier, "user", userSession.user.toPublic()))
                         GlobalBus.post(SelfUpdatePayload(userSession.user.toPublic(), "state", UserState.DND.ordinal))
                         return
                     }
@@ -137,10 +140,20 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
 
     fun close(handler: WsCloseContext) {
         val connection = connections[handler.sessionId]
+
         println(red(underline("WS >> Closed Connection << WS")))
         if (connection == null) {
             println(" ${yellow("Session")} >> ${magenta(handler.sessionId)}")
         } else {
+            connection.user.state = UserState.OFFLINE.ordinal
+            connection.user.save()
+            val friends = connections.values.find { u -> u.user.identifier == connection.user.toPublic().id }!!.user.getFriends()
+            for (friend in friends.friends) {
+                val friendSession = connections.values.find { f -> f.user.identifier == friend.id }
+                if (friendSession != null) {
+                    send(friendSession.ws.session, friendSession.ws.type, jsonStr = FriendUpdatePayload(connection.user.toPublic(), connection.user.identifier, "user", connection.user.toPublic()).toJSON())
+                }
+            }
             println(" ${yellow("User")} >> ${magenta(connection.user.identifier.toString())}")
             println(" ${yellow("Authenticated")} >> ${if (connection.authenticated) green("true") else red("false")}")
             println(" ${yellow("Session")} >> ${magenta(handler.sessionId)}")

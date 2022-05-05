@@ -1,7 +1,7 @@
 <template>
   <Overlay @click="outsideClicked">
     <div class="modal-wrap" @click.stop="">
-      <div class="modal-top">
+      <div class="modal-top" :style="(headerbg) ? `background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${headerbg}); background-repeat: repeat; background-position: 50% 50%; background-size: contain;` : ''">
         <div class="header">
           <slot name="icon" />
           <slot name="name" />
@@ -31,12 +31,15 @@ export default defineComponent({
       this.$emit('clicked');
     },
   },
+  props: {
+    headerbg: String
+  }
 });
 </script>
 
 <style lang="scss" scoped>
 .modal-wrap {
-  width: 400px;
+  width: 500px;
   padding: 1rem;
   animation: show 210ms ease forwards;
 

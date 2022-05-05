@@ -18,10 +18,12 @@ interface ChattySocketEvents {
     'ready': (payload: ServerReadyPayload) => void;
     'dropped': (payload: Device) => void;
     'pong': () => void;
-    'pending': (payload: IUser) => void;
+    'pending://create': (payload: IUser) => void;
     'error': (payload: any) => void;
     'friend://update': (payload: IUser) => void;
+    'request://accepted': (payload: IUser) => void;
     'release': (payload: Release) => void;
+    
 }
 export declare interface ChattySocket {
     on<U extends keyof ChattySocketEvents>(
@@ -177,13 +179,17 @@ export class ChattySocket extends EventEmitter {
                 case SocketMessageType.ServerPendingFriend: {
                     let data = message.d as IUser
                     console.log('PENDING', message);
-                    this.emit('pending', data);
+                    this.emit('pending://create', data);
                     break;
                 }
                 case SocketMessageType.ServerFriendUpdate: {
                     let data = message.d.user as IUser
                     this.emit('friend://update', data);
                     break;
+                }
+                case SocketMessageType.ServerRequestAccepted: {
+                    let data = message.d as IUser
+                    this.emit('request://accepted', data)
                 }
                 case SocketMessageType.ServerUpdate: {
                     let release = message.d as Release
