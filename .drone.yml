@@ -14,3 +14,9 @@ steps:
       - cd ./packages/server
       - chmod +x gradlew
       - ./gradlew jib --image=ghcr.io/brys0/zenspace:latest -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS
+
+trigger:
+  branch:
+  - pre-alpha
+  event:
+  - push
