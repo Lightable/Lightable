@@ -222,22 +222,20 @@ fun main(args: Array<String>) {
     val server = Server(dbhost, dbport, dbuser, dbpass)
 
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
-    if (args[args.indexOf("--port") + 1].isNotBlank()) {
-        server.port = args[args.indexOf("--port") + 1].toInt()
-    } else if (!System.getenv("port").isNullOrBlank()) {
+    if (!System.getenv("port").isNullOrBlank()) {
         server.port = System.getenv("port").toInt()
     }
     println(t.colors.brightBlue.invoke("PORT: ${server.port}"))
-    if (args.contains("--verbose") || System.getenv("verbose").toBoolean()) {
+    if (System.getenv("verbose").toBoolean()) {
         println("${t.colors.brightYellow.invoke("Verbose is enabled ")}⚠️")
         server.root.level = Level.DEBUG
     } else {
         server.root.level = Level.INFO
     }
-    if (args.contains("--batch") || System.getenv("batchdb").toBoolean()) {
+    if (System.getenv("batchdb").toBoolean()) {
         println("${t.colors.brightYellow.invoke("Batching DB requests is enabled ")}⚠️")
     }
-    if (args.contains("--prod") || System.getenv("prod").toBoolean()) {
+    if (System.getenv("prod").toBoolean()) {
         println("${t.colors.brightGreen.invoke("Production mode is enabled ")}✅")
         server.isProd = true
     }
