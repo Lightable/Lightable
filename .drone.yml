@@ -18,5 +18,3 @@ steps:
 trigger:
   branch:
   - pre-alpha
-  event:
-  - push
