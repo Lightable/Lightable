@@ -17,6 +17,7 @@ import me.kosert.flowbus.subscribe
 import org.slf4j.Logger
 import rebase.*
 import rebase.compression.CompressionUtil
+import rebase.schema.ChattyRelease
 import java.nio.ByteBuffer
 
 class WebSocketController(private val logger: Logger, private val cache: Cache, private val isProd: Boolean) {

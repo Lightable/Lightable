@@ -6,7 +6,7 @@ import me.kosert.flowbus.GlobalBus
 import me.kosert.flowbus.subscribe
 import org.joda.time.Instant
 import rebase.Cache
-import rebase.ChattyRelease
+import rebase.schema.ChattyRelease
 
 class DeveloperController(val cache: Cache) {
     val events = EventsReceiver()

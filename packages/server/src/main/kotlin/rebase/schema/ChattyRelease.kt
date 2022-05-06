@@ -1,4 +1,4 @@
-package rebase
+package rebase.schema
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty

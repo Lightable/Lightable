@@ -3,6 +3,7 @@ package rebase
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOne
 import org.slf4j.LoggerFactory
+import rebase.schema.ChattyRelease
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import kotlin.collections.HashMap

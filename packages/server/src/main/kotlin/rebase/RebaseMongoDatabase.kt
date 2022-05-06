@@ -7,6 +7,7 @@ import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.codecs.pojo.PojoCodecProvider
 import org.litote.kmongo.getCollection
+import rebase.schema.ChattyRelease
 
 class RebaseMongoDatabase(val username: String = "root", val password: String = "rootpass", val host: String = "192.168.50.111", val port: Int = 27017) {
     private val creds = MongoCredential.createCredential(username, "admin", password.toCharArray())
@@ -22,7 +23,7 @@ class RebaseMongoDatabase(val username: String = "root", val password: String = 
         return database.getCollection<User>().withCodecRegistry(codecRegistry)
     }
 
-    fun getReleaseCollection(): MongoCollection<rebase.ChattyRelease> {
-        return database.getCollection<rebase.ChattyRelease>().withCodecRegistry(codecRegistry)
+    fun getReleaseCollection(): MongoCollection<ChattyRelease> {
+        return database.getCollection<ChattyRelease>().withCodecRegistry(codecRegistry)
     }
 }

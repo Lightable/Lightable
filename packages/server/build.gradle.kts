@@ -41,6 +41,10 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.5.1")
     testImplementation("io.mockk:mockk:1.12.3")
     implementation("org.sejda.imageio:webp-imageio:0.1.6")
+    implementation("com.datastax.oss:java-driver-core:4.14.1")
+    implementation("com.datastax.oss:java-driver-query-builder:4.14.1")
+    implementation("com.datastax.oss:java-driver-mapper-processor:4.14.1")
+    implementation("com.datastax.oss:java-driver-mapper-runtime:4.14.1")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
