@@ -36,7 +36,7 @@ export default defineComponent({
     let instance = new Client({
       store: client,
       rest: {
-        api: (window.prod) ? 'https://api.zenspace.cf' : 'http://localhost:8081',
+        api: (window.prod) ? 'https://api.zenspace.cf' : 'http://192.168.50.111:8081',
         headers: {
           'x-usmell': true,
         },

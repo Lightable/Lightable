@@ -43,7 +43,7 @@ export class Client extends EventEmitter {
         this.apiURL = options.rest?.api!!;
         this.store = options.store as IClientStore;
         this.Axios = axios.create({ baseURL: this.apiURL });
-        this.gateway = "ws://localhost:8081";
+        this.gateway = "ws://192.168.50.111:8081";
         this.ws = new ChattySocket(this);
         this.logger = new Logger();
         this.logger.logInfo('ChattyClient', 'Init', null);

@@ -122,6 +122,7 @@ export default defineComponent({
   flex-direction: column;
   max-width: 55px;
   width: 55px;
+  min-width: 55px;
   background-color: var(--titlebar);
   max-height: 100vh;
   height: 100vh;

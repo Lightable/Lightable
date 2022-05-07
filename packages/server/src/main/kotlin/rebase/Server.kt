@@ -205,6 +205,7 @@ fun main(args: Array<String>) {
     var dbport: Int = 27017
     var dbuser: String = "root"
     var dbpass: String = "rootpass"
+    println("Working -> ${File("./storage").absolutePath}")
     File("./releases").mkdir()
     File("./storage").mkdir()
     if (!System.getenv("dbport").isNullOrBlank()) {

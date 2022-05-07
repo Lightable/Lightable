@@ -14,11 +14,13 @@
       <KeepAlive>
         <NewReleaseModal v-if="createReleaseModalVis" />
       </KeepAlive>
-      <UpdateModal v-if="downloadingUpdateModalVis"/>
+      <UpdateModal v-if="downloadingUpdateModalVis" />
       <AvatarEditor v-if="false" />
+      <div class="channels">
+        <router-view />
+      </div>
     </div>
   </div>
-  <router-view />
 </template>
 
 <script lang="ts">
@@ -60,7 +62,7 @@ export default defineComponent({
     AvatarEditor,
     AdminContextMenu,
     NewReleaseModal,
-    UpdateModal
+    UpdateModal,
   },
   name: 'app',
   setup() {
@@ -97,5 +99,9 @@ export default defineComponent({
 .app-data {
   display: flex;
   flex-direction: row;
+}
+.channels {
+  width: 100%;
+  height: 100vh;
 }
 </style>

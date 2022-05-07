@@ -32,4 +32,8 @@
       background: var(--red);
       color: white;
     }
+    &[disabled] {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
 }

@@ -41,7 +41,16 @@ let routes = [
                 component() {
                     // @ts-ignore
                     return import('./pages/app/channels/@me/index.vue');
-                }
+                },
+                children: [
+                    {
+                        path: '/app/channels/@me/:id',
+                        component() {
+                            // @ts-ignore
+                            return import('./pages/app/channels/@me/FriendChannel.vue')
+                        }
+                    }
+                ]
             }
         ]
     }
