@@ -13,6 +13,7 @@ import Avatar from '@/components/app/User/Avatar/Avatar.vue';
 import {ClientStore} from '@/stores/ClientStore';
 import Users, {User} from '@/lib/structures/Users';
 import {Nullable} from '@/lib/utils/null';
+import { RouteLocationRaw } from 'vue-router';
 
 export default defineComponent({
   name: 'FriendChannel',
@@ -26,13 +27,10 @@ export default defineComponent({
   },
   created() {
     this.friend = this.friends.get(this.$route.params.id!! as string) as User;
-    this.$watch(
-      () => this.$route.params,
-      (toParams: unknown, previousParams: unknown) => {
-        console.log('TO', toParams, 'Previous', previousParams);
-      }
-    );
   },
+  beforeRouteUpdate(to: RouteLocationRaw) {
+      this.friend = this.friends.get(to.params.id!! as string) as User;
+  }, 
   data() {
     return {
       friend: null as Nullable<User>,

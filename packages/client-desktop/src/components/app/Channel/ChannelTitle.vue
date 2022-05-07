@@ -1,15 +1,15 @@
 <template>
-  <div class="channel-title">
-    <div class="__icon">
-      <slot name="icon" />
+    <div class="channel-title">
+      <div class="__icon">
+        <slot name="icon" />
+      </div>
+      <span class="__title">
+        <slot name="title" />
+      </span>
+      <div class="__actions">
+        <slot name="actions" />
+      </div>
     </div>
-    <span class="__title">
-      <slot name="title" />
-    </span>
-    <div class="__actions">
-        <slot name="actions"/>
-    </div>
-  </div>
 </template>
 
 <script lang="ts">
@@ -29,8 +29,9 @@ export default defineComponent({
   justify-content: flex-start;
   align-items: center;
   height: 42px;
-
+  animation: moveDown 60ms ease forwards;
   border-bottom: var(--gray) 1px solid;
+  box-shadow: 0px 5px 9px -3px var(--titlebar);
   .__icon {
     max-height: 64px;
     max-width: 64px;
@@ -40,6 +41,7 @@ export default defineComponent({
     color: var(--white);
     font-size: calc(var(--font-size) + 12px);
     margin-left: 10px;
+    transition: opacity 250ms;
   }
   .__actions {
     display: flex;
@@ -47,6 +49,15 @@ export default defineComponent({
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+  }
+}
+
+@keyframes moveDown {
+  from {
+    transform: translateY(-46px);
+  }
+  to {
+    transform: translateY(0);
   }
 }
 </style>

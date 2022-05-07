@@ -2,7 +2,7 @@
     <div class="friend-channel-header">
          <ChannelTitle>
             <template v-slot:title>
-                {{friend.name}}
+                <span :key="friend.name">{{friend.name}}</span>
             </template>
             <template v-slot:icon>
                 <Avatar :circle="true" :user="friend"/>
@@ -37,3 +37,7 @@ export default defineComponent({
     }
 })
 </script>
+
+<style lang="scss" scoped>
+
+</style>

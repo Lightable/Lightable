@@ -33,6 +33,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .side-ctx-menu {
+  box-shadow: 10px 2px 11px -5px var(--titlebar);
 
   .header {
     border-bottom: var(--gray) 1px solid;
