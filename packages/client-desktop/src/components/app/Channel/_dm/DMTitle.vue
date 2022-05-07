@@ -12,7 +12,7 @@
                     <CallWifi color="var(--white)"/>
                 </button> 
                 <button class="db" dbt="default"> 
-                    <Settings color="var(--white)"/>
+                    <Settings color="var(--white)" @click="$emit('open')"/>
                 </button> 
             </template>
         </ChannelTitle>
