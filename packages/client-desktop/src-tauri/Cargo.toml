@@ -30,6 +30,9 @@ branch = "dev"
 [dependencies.window-vibrancy]
 git = "https://github.com/tauri-apps/window-vibrancy"
 branch = "dev"
+[dependencies.tauri-plugin-window-state]
+git = "https://github.com/tauri-apps/tauri-plugin-window-state"
+branch = "dev"
 [features]
 default = [ "custom-protocol" ]
 custom-protocol = [ "tauri/custom-protocol" ]

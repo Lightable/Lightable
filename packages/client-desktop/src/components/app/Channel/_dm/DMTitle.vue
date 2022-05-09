@@ -11,8 +11,8 @@
                 <button class="db" dbt="default" disabled v-if="false"> 
                     <CallWifi color="var(--white)"/>
                 </button> 
-                <button class="db" dbt="default"> 
-                    <Settings color="var(--white)" @click="$emit('open')"/>
+                <button class="db" dbt="default" disabled> 
+                    <Settings color="var(--white)"/>
                 </button> 
             </template>
         </ChannelTitle>

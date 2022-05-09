@@ -1,24 +1,27 @@
 <template>
   <div class="friend-channel">
     <div class="check-if" v-if="friend">
-      <DMTitle :friend="friend" v-on:open="settingsOpen = true" />
-      <ChannelSettings :style="`height: ${settingsOpen ? '100%' : '0'}`" />
+      <DMTitle :friend="friend" v-on:open="settingsOpen = !settingsOpen" />
+      <ChannelMessages :messages="friend.messages!!"/>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {defineComponent, Transition} from 'vue';
+import {defineComponent, computed, WritableComputedRef} from 'vue';
 import DMTitle from '@/components/app/Channel/_dm/DMTitle.vue';
 import Avatar from '@/components/app/User/Avatar/Avatar.vue';
 import {ClientStore} from '@/stores/ClientStore';
 import Users, {User} from '@/lib/structures/Users';
 import {Nullable} from '@/lib/utils/null';
 import {RouteLocationRaw} from 'vue-router';
-import ChannelSettings from '@/components/app/Channel/ChannelSettings.vue';
+// import ChannelSettings from '@/components/app/Channel/ChannelSettings.vue';
+import ChannelMessages from '@/components/app/Channel/ChannelMessages.vue';
+import { AppStore } from '@/stores/AppStore';
+import Messages from '@/lib/structures/Messages';
 export default defineComponent({
   name: 'FriendChannel',
-  components: {ChannelSettings, DMTitle, Avatar},
+  components: { DMTitle, Avatar, ChannelMessages},
   setup() {
     let client = ClientStore();
     return {
@@ -30,11 +33,14 @@ export default defineComponent({
     this.friend = this.friends.get(this.$route.params.id!! as string) as User;
   },
   beforeRouteUpdate(to: RouteLocationRaw) {
-    this.friend = this.friends.get(to.params.id!! as string) as User;
+    let friend = this.friends.get(to.params.id!! as string) as User
+    AppStore().setTitleDetails(`${friend.name}`);
+    this.friend = friend;
   },
   data() {
     return {
       friend: null as Nullable<User>,
+      messages: null as Nullable<WritableComputedRef<Messages>>,
       settingsOpen: false as boolean,
     };
   },

@@ -115,7 +115,6 @@ export default defineComponent({
 
           appWindow.setSize(new LogicalSize(1220, 700));
           appWindow.setResizable(true);
-          appWindow.center();
           appStore.allowTitlebar(true);
           appStore.setTitleDetails('Home');
           this.$router.push('/app/channels/@me');

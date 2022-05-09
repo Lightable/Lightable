@@ -64,6 +64,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-store",
+ "tauri-plugin-window-state",
  "window-shadows",
  "window-vibrancy",
 ]
@@ -3225,6 +3226,16 @@ dependencies = [
  "serde_json",
  "tauri",
  "thiserror",
+]
+
+[[package]]
+name = "tauri-plugin-window-state"
+version = "0.1.0"
+source = "git+https://github.com/tauri-apps/tauri-plugin-window-state?branch=dev#c198d375fde734ce453a025524587433dca1849c"
+dependencies = [
+ "bincode",
+ "serde",
+ "tauri",
 ]
 
 [[package]]

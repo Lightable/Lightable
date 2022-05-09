@@ -1,7 +1,7 @@
 import { Client } from "../Client";
 import { Nullable } from "../utils/null";
 import { Attachment } from "./Attachment";
-import { IUser } from "./Users";
+import { IUser, User } from "./Users";
 import moment from 'moment'
 export class Message {
     client: Client;
@@ -28,26 +28,30 @@ export class Message {
         this.user = data.user;
         moment.defineLocale('en', {
             relativeTime: {
-              future: 'in %s',
-              past: '%s ago',
-              s:  '1s',
-              ss: '%ss',
-              m:  '1m',
-              mm: '%dm',
-              h:  '1h',
-              hh: '%dh',
-              d:  '1d',
-              dd: '%dd',
-              M:  '1M',
-              MM: '%dM',
-              y:  '1Y',
-              yy: '%dY'
+                future: 'in %s',
+                past: '%s ago',
+                s: '1s',
+                ss: '%ss',
+                m: '1m',
+                mm: '%dm',
+                h: '1h',
+                hh: '%dh',
+                d: '1d',
+                dd: '%dd',
+                M: '1M',
+                MM: '%dM',
+                y: '1Y',
+                yy: '%dY'
             }
-          })
+        })
         this.readableTime = String(moment(this.created).fromNow());
     }
     revaluateDate() {
         this.readableTime = String(moment(this.created).fromNow());
+    }
+    getUser() {
+        if (this.author_id == this.client.self?._id) return this.client.self?._id;
+        return this.client.store.users.get(this.author_id);
     }
     get channel() {
         return
@@ -94,6 +98,7 @@ export interface ICreated {
     sec: number,
     milli: number
 }
+export type UIMessageType = "Classic" | "SMS"
 export default class Messages extends Map<string, Message> {
     client: Client;
     constructor(client: Client) {
@@ -111,8 +116,49 @@ export default class Messages extends Map<string, Message> {
         this.set(data.id, message);
         this.client.emit('message', message);
     }
+    $hasChain(id: string) {
+        let currentMessage = this.$get(id)
+        let findNext = Array.from(this.keys()).indexOf(id) + 1
+        let next = Array.from(this.values())[findNext]
+        if (!next) return false
+        if (next.user.id == currentMessage.author_id) {
+            return true
+        } else {
+            return false
+        }
+    }
+    $makeRandom(user: string, amount: number = 1) {
+        for (let i = 0; amount > i; i++) {
+            const message = new Message(this.client, {
+                content: `Test message ${this.randomString(5)}`,
+                created: {
+                    sec: 11111,
+                    milli: 92,
+                },
+                id: this.randomString(20),
+                attachments: null,
+                mentions: null,
+                edited: null,
+                user: Array.from(this.values())[0].user
+            })
+
+            this.set(message._id, message);
+        }
+    }
     get last() {
         let getLastItemInMap = Array.from(this)[this.size - 1]
         return getLastItemInMap;
+    }
+    randomString(strLength: number) {
+        var result = [];
+
+        strLength = strLength || 5;
+        let charSet = '0123456789';
+
+        while (strLength--) { // (note, fixed typo)
+            result.push(charSet.charAt(Math.floor(Math.random() * charSet.length)));
+        }
+
+        return result.join('');
     }
 }

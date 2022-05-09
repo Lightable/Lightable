@@ -1,8 +1,6 @@
 <template>
-  <BringOutAni>
     <div class="side-ctx-menu">
       <div class="header">
-        <BringOutAni class="flex-header" v-if="true">
           <div class="header-icon">
             <slot name="icon" class="header-icon" />
           </div>
@@ -13,13 +11,11 @@
           <div class="header-actions">
             <slot name="actions" class="header-title" />
           </div>
-        </BringOutAni>
       </div>
       <div class="body">
         <slot name="body" />
       </div>
     </div>
-  </BringOutAni>
 </template>
 
 <script lang="ts">
@@ -55,9 +51,11 @@ export default defineComponent({
       font-size: calc(var(--font-size) + 18px);
       color: var(--white);
       margin-left: 10px;
+      animation: slide-out-right 250ms ease;
     }
     .header-icon {
       margin-top: 2px;
+      animation: slide-out-right 250ms ease;
     }
     .header-actions {
       width: 100%;
@@ -65,6 +63,7 @@ export default defineComponent({
       justify-content: flex-end;
       padding: 20px;
       align-items: center;
+      animation: slide-down 250ms ease;
     }
   }
   height: 100vh;
@@ -79,5 +78,22 @@ export default defineComponent({
 }
 ::-webkit-scrollbar {
     display: none;
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(-250px);
+  }
+  to {
+    tranform: translateX(0);
+  }
+}
+@keyframes slide-down {
+  from {
+    transform: translateY(-60px);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 </style>

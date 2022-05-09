@@ -71,7 +71,7 @@ export class User {
     email: string;
     messages: Nullable<Messages>;
     admin: boolean;
-    constructor(client: Client, data: IUser | ISelf) {
+    constructor(client: Client, data: IUser | ISelf)  {
         this.client = client;
         this._id = data.id;
         this.name = data.name;
@@ -84,6 +84,19 @@ export class User {
         this.email = (data as ISelf).email;
         this.messages = new Messages(this.client);
         this.admin = data.admin;
+        this.messages.create({
+            content: 'Test message reciever',
+            created: {
+                sec: 11111,
+                milli: 92,
+            },
+            id: '8288298298',
+            attachments: null,
+            mentions: null,
+            edited: null,
+            user: data
+        })
+       
     }
     async addFriend(id: string) {
         try {
@@ -182,7 +195,21 @@ export class User {
     }
     getAvatar() {
         //@ts-ignore
+        
         return `${this.client.apiURL}/cdn/user/${this._id}/avatars/avatar_${this.avatar.id}`;
+    }
+
+    asIUser() {
+        return {
+            id: this._id,
+            name: this.name,
+            created: 111,
+            avatar: this.avatar,
+            about: null,
+            developer: false,
+            admin: this.admin,
+            state: this.state,
+        } as IUser
     }
 }
 

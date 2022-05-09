@@ -24,45 +24,30 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent} from 'vue';
+import {computed, defineAsyncComponent, defineComponent} from 'vue';
 import Loading from '@/components/global/loading.vue';
 import {AppStore} from '@/stores/AppStore';
 import {ClientStore} from '@/stores/ClientStore';
-import SideBar from '@/components/app/SideBar.vue';
-import UnravelAni from '@/components/layout/SideTab/_extensions/UnravelAni.vue';
-import SideContextMenu from '@/components/layout/SideTab/index.vue';
-import Friend from '@/components/Icons/Friend.vue';
-import FriendContextMenu from '@/components/layout/SideTab/Friends/index.vue';
-import AdminContextMenu from '@/components/layout/SideTab/Admin/index.vue';
-import AddFriendModal from '@/components/app/Modal/AddFriendModal.vue';
-import SettingsContextMenu from '@/components/layout/SideTab/Settings/index.vue';
-import NewNameModal from '@/components/app/Modal/NewNameModal.vue';
-import Profile from '@/components/app/User/Profile.vue';
-import OfflineModal from '@/components/app/Modal/OfflineModal.vue';
-import TooManyConnections from '@/components/app/Modal/TooManyConnections.vue';
-import AvatarEditor from '@/components/app/User/Avatar/_extensions/AvatarEditor.vue';
 import {AuthenticationStore} from '@/stores/AuthenticationStore';
 import {appWindow, LogicalSize} from '@tauri-apps/api/window';
-import NewReleaseModal from '../../components/app/Modal/_admin/NewReleaseModal.vue';
-import UpdateModal from '@/components/app/Modal/UpdateModal.vue';
 export default defineComponent({
   components: {
     Loading,
-    SideBar,
-    UnravelAni,
-    SideContextMenu,
-    Friend,
-    FriendContextMenu,
-    AddFriendModal,
-    SettingsContextMenu,
-    NewNameModal,
-    Profile,
-    OfflineModal,
-    TooManyConnections,
-    AvatarEditor,
-    AdminContextMenu,
-    NewReleaseModal,
-    UpdateModal,
+    SideBar: defineAsyncComponent(() => import('@/components/app/SideBar.vue')),
+    UnravelAni: defineAsyncComponent(() => import('@/components/layout/SideTab/_extensions/UnravelAni.vue')),
+    SideContextMenu: defineAsyncComponent(() => import('@/components/layout/SideTab/index.vue')),
+    Friend: defineAsyncComponent(() => import('@/components/Icons/Friend.vue')),
+    FriendContextMenu: defineAsyncComponent(() => import('@/components/layout/SideTab/Friends/index.vue')),
+    AddFriendModal: defineAsyncComponent(() => import('@/components/app/Modal/AddFriendModal.vue')),
+    SettingsContextMenu: defineAsyncComponent(() => import('@/components/layout/SideTab/Settings/index.vue')),
+    NewNameModal: defineAsyncComponent(() => import('@/components/app/Modal/NewNameModal.vue')),
+    Profile: defineAsyncComponent(() => import('@/components/app/User/Profile.vue')),
+    OfflineModal: defineAsyncComponent(() => import('@/components/app/Modal/OfflineModal.vue')),
+    TooManyConnections: defineAsyncComponent(() => import('@/components/app/Modal/TooManyConnections.vue')),
+    AvatarEditor: defineAsyncComponent(() => import('@/components/app/User/Avatar/_extensions/AvatarEditor.vue')),
+    AdminContextMenu: defineAsyncComponent(() => import('@/components/layout/SideTab/Admin/index.vue')),
+    NewReleaseModal: defineAsyncComponent(() => import('@/components/app/Modal/_admin/NewReleaseModal.vue')),
+    UpdateModal: defineAsyncComponent(() => import('@/components/app/Modal/UpdateModal.vue')),
   },
   name: 'app',
   setup() {
@@ -75,7 +60,6 @@ export default defineComponent({
       clientStore.client?.loginWT(authStore.default.authentication);
       appWindow.setSize(new LogicalSize(1220, 700));
       appWindow.setResizable(true);
-      appWindow.center();
       appStore.allowTitlebar(true);
       appStore.setTitleDetails('Home');
     }
