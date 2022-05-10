@@ -1,5 +1,5 @@
 <template>
-  <BaseModal v-on:clicked="setCurrentProfile(null)" :headerbg="profile.getAvatar()+'?size=512'">
+  <BaseModal v-on:clicked="setCurrentProfile(null)" :headerbg="(profile.getAvatar() == null) ? '' : profile.getAvatar()+'?size=512'">
     <template v-slot:icon>
       <Friend height="30px" width="30px" color="var(--white)" />
     </template>

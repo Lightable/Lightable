@@ -7,6 +7,7 @@
       <SideBar v-if="state == 2" />
       <FriendContextMenu v-if="currentPanel == 'Friends'" />
       <AdminContextMenu v-if="currentPanel == 'Admin'" />
+      <ExperimentContextMenu v-if="currentPanel == 'Experiments'"/>
       <SettingsContextMenu v-if="currentPanel == 'Settings'" />
       <Profile v-if="currentlyActiveProfile != null" :profile="currentlyActiveProfile" />
       <OfflineModal v-if="offline" />
@@ -46,6 +47,7 @@ export default defineComponent({
     TooManyConnections: defineAsyncComponent(() => import('@/components/app/Modal/TooManyConnections.vue')),
     AvatarEditor: defineAsyncComponent(() => import('@/components/app/User/Avatar/_extensions/AvatarEditor.vue')),
     AdminContextMenu: defineAsyncComponent(() => import('@/components/layout/SideTab/Admin/index.vue')),
+    ExperimentContextMenu: defineAsyncComponent(() => import('@/components/layout/SideTab/Experiments/index.vue')),
     NewReleaseModal: defineAsyncComponent(() => import('@/components/app/Modal/_admin/NewReleaseModal.vue')),
     UpdateModal: defineAsyncComponent(() => import('@/components/app/Modal/UpdateModal.vue')),
   },

@@ -12,7 +12,8 @@
         @input="(selected) => setTheme(selected as string)"
       />
     </div>
-    <div class="theme-customizer">
+    <div class="themes" v-if="false">
+    <div class="theme-customizer" >
       <span class="title">Customize Theme</span>
       <div class="theme-range-pick">
         <div class="color" @click="$refs.bgpicker.click()" type="button"  style="background-color: var(--bg)">
@@ -202,6 +203,7 @@
           />
         </div>
         <span class="theme-color-name">Error</span>
+      </div>
       </div>
   </div>
 </template>

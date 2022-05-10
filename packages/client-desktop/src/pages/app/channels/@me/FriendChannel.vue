@@ -1,8 +1,9 @@
 <template>
   <div class="friend-channel">
     <div class="check-if" v-if="friend">
-      <DMTitle :friend="friend" v-on:open="settingsOpen = !settingsOpen" />
-      <ChannelMessages :messages="friend.messages!!"/>
+      <DMTitle :friend="friend" v-on:open="settingsOpen = !settingsOpen"/>
+      <ChannelSettings v-if="settingsOpen" :style="`height: ${!settingsOpen ? '0' : '100%'};`"/>
+      <ChannelMessages :messages="friend.messages!!" :externaluser="friend"/>
     </div>
   </div>
 </template>
@@ -15,13 +16,13 @@ import {ClientStore} from '@/stores/ClientStore';
 import Users, {User} from '@/lib/structures/Users';
 import {Nullable} from '@/lib/utils/null';
 import {RouteLocationRaw} from 'vue-router';
-// import ChannelSettings from '@/components/app/Channel/ChannelSettings.vue';
 import ChannelMessages from '@/components/app/Channel/ChannelMessages.vue';
 import { AppStore } from '@/stores/AppStore';
 import Messages from '@/lib/structures/Messages';
+import ChannelSettings from '@/components/app/Channel/ChannelSettings.vue';
 export default defineComponent({
   name: 'FriendChannel',
-  components: { DMTitle, Avatar, ChannelMessages},
+  components: { DMTitle, Avatar, ChannelMessages, ChannelSettings},
   setup() {
     let client = ClientStore();
     return {

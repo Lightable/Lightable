@@ -55,8 +55,9 @@ export default defineComponent({
   width: 100%;
   height: 0;
   background-color: var(--titlebar);
-  transition: 0.3s;
+  transition: opacity, height 0.3s;
   position: absolute;
+  z-index: 1;
 }
 .toggle-wrapper {
   display: flex;

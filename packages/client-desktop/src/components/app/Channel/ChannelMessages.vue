@@ -1,6 +1,6 @@
 <template>
   <div class="channel-messages">
-    <Notice class="notice" v-if="!release"> Messages are not yet released </Notice>
+    <Notice class="notice" v-if="!messageExperiment"> Messages are not yet released </Notice>
     <div class="classic __messages" v-if="UIType == 'Classic'"></div>
     <div class="sms __messages" v-if="UIType == 'SMS'">
       <SMSMessage
@@ -9,7 +9,7 @@
         :prevchain="messages.$hasChain(message._id)"
         :self="message.author_id == client.self?._id"
         v-bind:key="index"
-        v-if="release"
+        v-if="messageExperiment"
       />
     </div>
     <button
@@ -20,7 +20,7 @@
           createMessage(10);
         }
       "
-      v-if="release"
+      v-if="messageExperiment"
     >
       Create Messages (10)
     </button>
@@ -32,7 +32,7 @@
           createSelfMessages();
         }
       "
-      v-if="release"
+      v-if="messageExperiment"
     >
       Create Self Messages
     </button>
@@ -40,24 +40,32 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType} from 'vue';
+import {defineComponent, PropType, computed} from 'vue';
 import Messages, {UIMessageType} from '@/lib/structures/Messages';
 import {ClientStore} from '@/stores/ClientStore';
 import {Client} from '@/lib/Client';
 import SMSMessage from './_message/SMSMessage.vue';
 import Notice from './Notice.vue';
+import { AppStore } from '@/stores/AppStore';
+import { User } from '@/lib/structures/Users';
 export default defineComponent({
   name: 'ChannelMessages',
   setup() {
     let clientStore = ClientStore();
+    let appStore = AppStore();
     return {
       client: clientStore.client!! as Client,
+      messageExperiment: computed(() => appStore.experiments.get('messages'))
     };
   },
   props: {
     messages: {
       type: Object as PropType<Messages>,
       required: true,
+    },
+    externaluser: {
+      type: Object as PropType<User>,
+      required: true
     },
     UIType: {
       type: String as PropType<UIMessageType>,
@@ -70,7 +78,7 @@ export default defineComponent({
   components: {SMSMessage, Notice},
   methods: {
     createMessage(amount: number = 1) {
-      this.client.users.get('45667265216368640')?.messages?.$makeRandom(amount);
+      this.client.users.get(this.externaluser._id)?.messages?.$makeRandom(amount);
     },
     createSelfMessages() {
       this.messages.create({
@@ -86,11 +94,6 @@ export default defineComponent({
         user: this.client.self?.asIUser()!!,
       });
     },
-  },
-  data() {
-    return {
-      release: false,
-    };
   },
 });
 </script>

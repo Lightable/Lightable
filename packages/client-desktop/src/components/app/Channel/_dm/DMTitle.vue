@@ -11,7 +11,7 @@
                 <button class="db" dbt="default" disabled v-if="false"> 
                     <CallWifi color="var(--white)"/>
                 </button> 
-                <button class="db" dbt="default" disabled> 
+                <button class="db" dbt="default" :disable="!channelSettingsExperiment" @click="(channelSettingsExperiment) ? $emit('open') : () => {}"> 
                     <Settings color="var(--white)"/>
                 </button> 
             </template>
@@ -20,12 +20,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { computed, defineComponent, PropType } from "vue";
 import ChannelTitle from "../ChannelTitle.vue";
 import { User } from "@/lib/structures/Users";
 import Avatar from "@/components/app/User/Avatar/Avatar.vue";
 import CallWifi from "@/components/Icons/CallWifi.vue";
 import Settings from '@/components/Icons/Settings.vue'
+import { AppStore } from "@/stores/AppStore";
 export default defineComponent({
     name: 'DMTitle',
     components: {ChannelTitle, Avatar, CallWifi, Settings},
@@ -33,6 +34,12 @@ export default defineComponent({
         friend: {
             type: Object as PropType<User>,
             required: true
+        }
+    },
+    setup() {
+        let appStore = AppStore();
+        return {
+            channelSettingsExperiment: computed(() => appStore.experiments.get('dmSettings'))
         }
     }
 })

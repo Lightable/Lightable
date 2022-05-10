@@ -23,7 +23,8 @@ export const AppStore = defineStore('AppStore', {
         notFoundModal: false as boolean,
         offline: false as boolean,
         version: 'unknown',
-
+        experiments: new Map<string, boolean>(),
+        showExperiments: false as boolean,
         update: null as Nullable<Release>
     }),
     actions: {
@@ -66,6 +67,12 @@ export const AppStore = defineStore('AppStore', {
         setDownloadingModalVis(bool: boolean) {
             this.downloadingUpdateModalVis = bool;
         },
+        setExperiment(key: string, value: boolean) {
+            this.experiments.set(key, value);
+        },
+        enableExperiments(bool: boolean) {
+            this.showExperiments = bool;
+        },
         async save() {
             await this.store.save();
         },
@@ -73,9 +80,12 @@ export const AppStore = defineStore('AppStore', {
             await this.store.load();
             let debug = await this.store.get('debug') as boolean;
             this.version = await app.getVersion();
+            this.experiments.set('profileNotice', false);
+            this.experiments.set('messages', false);
+            this.experiments.set('dmSettings', false);
             this.setDebug(debug);
         }
     }
 })
 
-export type CurrentPanelAct = "Friends" | "Groups" | "Settings" | "Admin" | "None"
+export type CurrentPanelAct = "Friends" | "Groups" | "Settings" | "Admin" | "Experiments" | "None"

@@ -44,7 +44,23 @@
           v-tippy
         />
       </SidebarItem>
-
+      <SidebarItem
+        @hover="hover.experiments = true"
+        @leave="hover.experiments = false"
+        @click="
+          currentPanel == 'Experiments' ? setCurrentPanel('None') : setCurrentPanel('Experiments')
+        "
+        v-if="showExperiments"
+      >
+        <Experiments
+          :color="hover.experiments ? 'var(--ac)' : 'var(--white)'"
+          height="32px"
+          width="32px"
+          class="icon-tran"
+          content="Experimental Features !! UNSTABLE !!"
+          v-tippy
+        />
+      </SidebarItem>
       <SidebarItem v-if="release" @click="downloadRelease(true)">
         <BringOutAni>
           <Download
@@ -89,6 +105,7 @@ import {AppStore} from '@/stores/AppStore';
 import {ClientStore} from '@/stores/ClientStore';
 import Download from '../Icons/Download.vue';
 import BringOutAni from '../layout/SideTab/_extensions/BringOutAni.vue';
+import Experiments from '@/components/Icons/Experiments.vue';
 export default defineComponent({
   name: 'sidebar',
   setup() {
@@ -98,8 +115,9 @@ export default defineComponent({
       setCurrentPanel: appStore.setCurrentPanel,
       // @ts-ignore
       userAdmin: computed(() => ClientStore().client.self.admin),
+      showExperiments: computed(() => appStore.showExperiments),
       downloadRelease: appStore.setDownloadingModalVis,
-      release: computed(() => appStore.update)
+      release: computed(() => appStore.update),
     };
   },
   data() {
@@ -109,10 +127,11 @@ export default defineComponent({
         group: false,
         settings: false,
         admin: false,
+        experiments: false,
       },
     };
   },
-  components: {SelfItem, Friend, SidebarItem, Group, Settings, Admin, Download, BringOutAni},
+  components: {SelfItem, Friend, SidebarItem, Group, Settings, Admin, Download, BringOutAni, Experiments},
 });
 </script>
 

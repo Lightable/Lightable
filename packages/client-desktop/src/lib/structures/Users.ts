@@ -193,9 +193,9 @@ export class User {
         apply("flags");
         apply("bot");
     }
-    getAvatar() {
+    getAvatar(): string | null {
         //@ts-ignore
-        
+        if (!this.avatar) return null
         return `${this.client.apiURL}/cdn/user/${this._id}/avatars/avatar_${this.avatar.id}`;
     }
 

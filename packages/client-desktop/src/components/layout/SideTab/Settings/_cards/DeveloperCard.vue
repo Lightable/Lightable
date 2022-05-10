@@ -4,7 +4,13 @@
       <div class="subc">
           <tippy content="Shows request data and potentional errors">
           <span class="descript">Debug Mode</span> </tippy> <div class="toggle">
-            <Toggle v-model="debugMode" @change="() => { setDebug(debugMode); createSnack('success', (debugMode) ? 'Debug mode is enabled' : 'Debug mode is disabled', true, 5000)}"/>
+            <Toggle v-model="debug" @change="() => { setDebug(debugMode); createSnack('success', (debugMode) ? 'Debug mode is enabled' : 'Debug mode is disabled', true, 5000)}"/>
+          </div>
+      </div>
+       <div class="subc">
+          <tippy content="Enable experimental features !! UNSTABLE !!">
+          <span class="descript">Enable Experiments</span> </tippy> <div class="toggle">
+            <Toggle v-model="allowExperiments" @change="() => { showExperiments(allowExperiments); }"/>
           </div>
       </div>
       <div class="subc">
@@ -27,17 +33,21 @@ export default defineComponent({
         let appStore = AppStore();
         return {
             debug: computed(() => appStore.debug),
+            experiments: computed(() => appStore.showExperiments),
             setDebug: appStore.setDebug,
+            showExperiments: appStore.enableExperiments,
             createSnack: SnackStore().create,
             openDevtools: invoke
         }
     },
     mounted() {
         this.debugMode = this.debug;
+        this.allowExperiments = this.experiments;
     },
     data() {
         return {
-            debugMode: false as boolean
+            debugMode: false as boolean,
+            allowExperiments: false as boolean
         }
     }
 });
