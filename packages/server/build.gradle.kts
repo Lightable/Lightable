@@ -49,7 +49,7 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.suppressWarnings = true
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_16.toString()
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
 }
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     archiveFileName.set("zenspaceapi.jar")

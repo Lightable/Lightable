@@ -2,6 +2,7 @@ import { Client } from "../Client";
 import { Nullable } from "../utils/null";
 import { Attachment } from "./Attachment";
 import { IUser, User } from "./Users";
+import { generateParagraph } from "../utils/generateLoremIpsum";
 import moment from 'moment'
 export class Message {
     client: Client;
@@ -130,7 +131,7 @@ export default class Messages extends Map<string, Message> {
     $makeRandom(user: string, amount: number = 1) {
         for (let i = 0; amount > i; i++) {
             const message = new Message(this.client, {
-                content: `Test message ${this.randomString(5)}`,
+                content: generateParagraph(3),
                 created: {
                     sec: 11111,
                     milli: 92,

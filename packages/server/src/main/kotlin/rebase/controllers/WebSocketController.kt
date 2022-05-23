@@ -49,11 +49,7 @@ class WebSocketController(private val logger: Logger, private val cache: Cache, 
             } else if (message.t == SocketMessageType.ClientStart.ordinal) {
                 val properties = jsonWrap.convertValue(rawMessage["d"], SessionProperties::class.java)
                 properties.properties.ip = handler.session.remoteAddress.address.hostAddress
-                val user = cache.users.values.find { u -> u.token.token == properties.auth }
-                    ?: return session.session.closeSession(
-                        1010,
-                        "Authentication matching ${properties.auth} doesn't exist"
-                    )
+                val user = cache.users.values.find { u -> u.token.token == properties.auth } ?:  return session.session.closeSession(1010, "Authentication matching ${properties.auth} doesn't exist")
                 val existingConnection = connections.values.find { u -> u.user.token.token == properties.auth }
                 if (existingConnection != null) {
                     send(existingConnection.ws.session, existingConnection.ws.type, ServerDropGateway(Device(properties.properties.ip!!, properties.properties.browser, properties.properties.build, properties.properties.os)))

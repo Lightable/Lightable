@@ -26,6 +26,7 @@
     "global": "^4.4.0",
     "json-format-highlight": "^1.0.4",
     "lint": "^0.7.0",
+    "lorem-ipsum": "^2.0.4",
     "moment": "^2.29.3",
     "pako": "^2.0.4",
     "pinia": "^2.0.14",
