@@ -32,7 +32,6 @@ export default defineComponent({
   box-shadow: 10px 2px 11px -5px var(--titlebar);
 
   .header {
-    border-bottom: var(--gray) 1px solid;
     height: 50px;
     display: flex;
     flex-direction: row;

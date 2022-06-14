@@ -28,6 +28,10 @@ class DeveloperController(val cache: Cache) {
         val user = requireAuth(cache, ctx)
         val body = ctx.bodyAsClass<ReleasePayload>()
         if (user != null && user.admin) {
+            if (!body.checkForBlank()) {
+                ctx.status(400).json("The following must not be blank: 'version','title','url','signature'")
+                return
+            }
             val release = ChattyRelease(body.version.replace(".", "").toInt(), body.version, body.title, body.notes, body.signature, body.url)
             cache.saveOrReplaceRelease(release)
             ctx.status(201).json(release)
@@ -55,6 +59,14 @@ class DeveloperController(val cache: Cache) {
     }
 
     data class ConnectedClient(val inc: Boolean)
-    data class ReleasePayload(val version: String, val notes: String, val title: String, val url: String, val signature: String)
+    data class ReleasePayload(val version: String, val notes: String, val title: String, val url: String, val signature: String) {
+        fun checkForBlank(): Boolean {
+             if (version.isBlank()) return false
+             if (title.isBlank()) return false
+             if (url.isBlank()) return false
+             if (signature.isBlank()) return false
+            return true
+        }
+    }
     object SentMessage
 }

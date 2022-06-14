@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"
+<html class="blur"
+      lang="en"
       theme="dark">
 <head>
   <meta charset="UTF-8">
@@ -8,7 +9,7 @@
   <script src="/src/main.ts"
         type="module"></script>
   <script>
-      window.addScript = (src) => {
+      window.addScript = src => {
         return new Promise((resolve, reject) => {
           const s = document.createElement('script');
 
@@ -18,7 +19,7 @@
 
           document.body.appendChild(s);
         });
-      }
+      };
   </script>
   <meta content="width=device-width, initial-scale=1.0"
         name="viewport">
@@ -34,7 +35,21 @@
   <script>
 
 
+
       window.prod = true;
-  </script> <%} %>
+  </script> <%} %> 
+  <script>
+
+
+
+      console.defaultLog = console.log.bind(console);
+      console.logs = [];
+      console.log = function () {
+        // default &  console.log()
+        console.defaultLog.apply(console, arguments);
+        // new & array data
+        console.logs.push(Array.from(arguments));
+      };
+  </script>
 </body>
 </html>

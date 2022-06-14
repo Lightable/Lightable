@@ -14,12 +14,14 @@
 //       .show().expect("Fail");
 // }
 //
-use tauri::api::notification::Notification;
 use tauri::{Manager, Wry};
 use tauri_plugin_store::PluginBuilder;
 use window_shadows::set_shadow;
-use window_vibrancy::{apply_mica, apply_vibrancy, NSVisualEffectMaterial};
-
+use window_vibrancy::{
+  apply_acrylic, apply_blur, apply_mica, apply_vibrancy, clear_acrylic, clear_blur, clear_mica,
+};
+use winreg::RegKey;
+use winreg::enums::HKEY_CURRENT_USER;
 fn main() {
   tauri::Builder::default()
     .setup(|app| {
@@ -33,10 +35,13 @@ fn main() {
       Ok(())
     })
     .plugin(PluginBuilder::default().build::<Wry>())
-    // .invoke_handler(tauri::generate_handler!(chatty_notification))
-    // .invoke_handler(tauri::generate_handler!(get_battery_percentage))
-    // .invoke_handler(tauri::generate_handler!(open_dev_tools))
-    .invoke_handler(tauri::generate_handler!(close_splashscreen))
+    .invoke_handler(tauri::generate_handler![
+      set_mica,
+      close_splashscreen,
+      set_blur,
+      set_acrylic,
+      get_accent_color
+    ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application")
 }
@@ -66,4 +71,45 @@ async fn close_splashscreen(window: tauri::Window) {
   }
   // Show main window
   window.get_window("main").unwrap().show().unwrap();
+}
+
+#[tauri::command]
+async fn set_mica(window: tauri::Window, mica: bool) {
+  if mica {
+    #[cfg(target_os = "windows")]
+    apply_mica(&window).unwrap();
+  } else {
+    #[cfg(target_os = "windows")]
+    clear_mica(&window).unwrap();
+  }
+
+  return;
+}
+#[tauri::command]
+async fn set_blur(window: tauri::Window, blur: bool) {
+  if blur {
+    #[cfg(target_os = "windows")]
+apply_blur(&window, Some((18, 18, 18, 125))).expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+  } else {
+    #[cfg(target_os = "windows")]
+    clear_blur(&window).unwrap();
+  }
+}
+#[tauri::command]
+async fn set_acrylic(window: tauri::Window, acrylic: bool) {
+  if acrylic {
+    #[cfg(target_os = "windows")]
+    apply_acrylic(&window, Some((18, 18, 18, 125)))
+      .expect("Unsupported platform! 'apply_acrylic' is only supported on Windows");
+  } else {
+    clear_acrylic(&window).unwrap();
+  }
+}
+#[tauri::command]
+fn get_accent_color(window: tauri::Window) -> Result<u32, String> {
+  println!("Getting sys info...");
+  let hklm = RegKey::predef(HKEY_CURRENT_USER);
+  let cur_dwm = hklm.open_subkey("Software\\Microsoft\\Windows\\DWM").unwrap();
+  let ac: u32 = cur_dwm.get_value("AccentColor").expect("Could not find accent");
+  return Ok(ac)
 }

@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  zenspacedb:
+    image: scylladb/scylla
+    container-name: scylla-node1
+    command: --smp 1 --memory 1G --api-address 0.0.0.0
+    privileged: true
+    ports:
+      -  9042:9042
+    networks:
+     web:
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+    container_name: zenspacedb
+    volumes:
+      - type: volume
+        source: target
+        target: /hd2/ScyllaDB/data
+        volume:
+          nocopy: true
+    restart: always
+
+volumes:
+  target:
+networks:
+  web:
+     driver: bridge

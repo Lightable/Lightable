@@ -2,7 +2,9 @@
   <div class="friends">
     <SideContextMenu>
       <template v-slot:icon>
-        <Admin height="35px" width="35px" color="var(--white)" />
+        <Admin height="35px"
+          width="35px"
+          color="var(--white)" />
       </template>
       <template v-slot:header>
         <span>Admin</span>
@@ -13,13 +15,18 @@
           <div class="__header">
             <h2>Releases</h2>
           </div>
-          <button class="db" dbt="default" @click="setReleaseModal(true)">
-            Create Release
-          </button>
+          <NButton quaternary @click="setReleaseModal(true)">
+            <NIcon>
+              <LogoCreateApp />
+            </NIcon>
+             <span style="margin-left: 8px;">Create Release</span>
+          </NButton>
           <div class="releases">
-            <Release v-for="(release, index) in releases" v-bind:key="index" :release="release"/>
+            <Release v-for="(release, index) in releases"
+              v-bind:key="index"
+              :release="release" />
           </div>
-          
+
         </div>
       </template>
     </SideContextMenu>
@@ -28,17 +35,19 @@
 
 
 <script lang="ts">
-import {defineComponent, computed} from 'vue';
+import { defineComponent, computed } from 'vue';
 import SideContextMenu from '../index.vue';
-import {AppStore} from '@/stores/AppStore';
-import {ClientStore} from '@/stores/ClientStore';
+import { AppStore } from '@/stores/AppStore';
+import { ClientStore } from '@/stores/ClientStore';
 import Admin from '@/components/Icons/Admin.vue';
 import Release from './_cards/Release/Release.vue';
 import { Nullable } from '@/lib/utils/null';
-import { Release  as R } from '@/lib/structures/Release';
+import { Release as R } from '@/lib/structures/Release';
+import { NButton, NIcon } from 'naive-ui';
+import LogoCreateApp from '@vicons/ionicons5/LogoAppleAr';
 export default defineComponent({
   name: 'AdminContextMenu',
-  components: {SideContextMenu, Admin, Release},
+  components: { SideContextMenu, Admin, Release, NButton, NIcon, LogoCreateApp },
   setup() {
     let appStore = AppStore();
     return {
@@ -48,7 +57,7 @@ export default defineComponent({
   mounted() {
     let clientStore = ClientStore();
     clientStore.client?.getReleases().then((releases) => {
-        this.releases = releases;
+      this.releases = releases;
     })
     //    let cvt = Array.from(this.users!!.values())
     //    for (let i = 0; cvt.length > i; i++) {
@@ -62,9 +71,9 @@ export default defineComponent({
     //    })
   },
   data() {
-      return {
-          releases: null as Nullable<R[]>
-      }
+    return {
+      releases: null as Nullable<R[]>
+    }
   }
 });
 </script>
@@ -79,6 +88,7 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
 }
+
 .pending,
 .requests {
   .title {
@@ -91,10 +101,12 @@ export default defineComponent({
     padding: 3px;
   }
 }
+
 .empty {
   color: gray;
   padding: 8px;
 }
+
 .releases {
   .__header {
     color: var(--blue);

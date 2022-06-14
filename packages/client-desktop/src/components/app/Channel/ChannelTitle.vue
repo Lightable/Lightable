@@ -22,7 +22,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .channel-title {
-  background-color: var(--notification);
+  background-color: var(--titlebar);
   padding: 4px;
   display: flex;
   flex-direction: row;
@@ -30,7 +30,6 @@ export default defineComponent({
   align-items: center;
   height: 42px;
   animation: moveDown 60ms ease forwards;
-  border-bottom: var(--gray) 1px solid;
   box-shadow: 0px 5px 9px -3px var(--titlebar);
   .__icon {
     max-height: 64px;

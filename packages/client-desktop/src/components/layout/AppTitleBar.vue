@@ -71,6 +71,7 @@ export default defineComponent({
   z-index: 2;
   height: 25px;
   background-color: var(--titlebar);
+  z-index: 200;
   .titlebar {
     height: 25px;
     user-select: none;

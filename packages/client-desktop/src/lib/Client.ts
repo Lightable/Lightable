@@ -177,7 +177,7 @@ export class Client extends EventEmitter {
     }
     async saveRelease(release: Release) {
         // @ts-ignore 
-        return await this.req('POST', '/admin/release', { 'Authorization': this.self?.auth!! }, release);
+        return await this.req('POST', '/admin/release', { 'Authorization': this.self?.auth!! }, release) as Release | Error;
     }
     async $connect() {
         await this

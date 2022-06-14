@@ -23,13 +23,12 @@ export default defineComponent({
 
 <style lang="scss">
 :root {
-    --titlebar-hover: #202020;
+    --titlebar-hover: #ffffff09;
 }
 .sidebar-item {
     padding: 5px;
     width: 100%;
     height: 42px;
-    background-color: var(--titlebar);
     display: flex;
     justify-content: center;
     align-items: center;

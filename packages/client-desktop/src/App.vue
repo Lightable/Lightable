@@ -1,24 +1,28 @@
 <template>
-  <AppTitleBar v-if="titlebar" />
-  <Snackbar />
-  <NotFoundModal v-if="notFoundModal" />
-  <div class="embedded">
-    <router-view />
-  </div>
+  <NConfigProvider :theme="darkTheme">
+
+
+    <AppTitleBar v-if="titlebar" />
+    <Snackbar />
+    <NotFoundModal v-if="notFoundModal" />
+    <div class="embedded">
+      <router-view />
+    </div>
+  </NConfigProvider>
 </template>
 
 <script lang="ts">
-import {defineComponent, computed} from 'vue';
+import { defineComponent, computed } from 'vue';
 import AppTitleBar from './components/layout/AppTitleBar.vue';
 import Snackbar from './components/global/Snackbar/index.vue';
-import {SettingsStore} from './stores/SettingsStore';
-import {AuthenticationStore} from './stores/AuthenticationStore';
-import {AppStore} from './stores/AppStore';
-import {ClientStore} from './stores/ClientStore';
-import {Client} from './lib/Client';
+import { SettingsStore } from './stores/SettingsStore';
+import { AuthenticationStore } from './stores/AuthenticationStore';
+import { AppStore } from './stores/AppStore';
+import { ClientStore } from './stores/ClientStore';
+import { Client } from './lib/Client';
 import NotFoundModal from './components/app/Modal/NotFoundModal.vue';
-import {User} from './lib/structures/Users';
-import { getVersion } from '@tauri-apps/api/app';
+import { User } from './lib/structures/Users';
+import { NConfigProvider, darkTheme, lightTheme } from 'naive-ui';
 export default defineComponent({
   name: 'App',
   beforeCreate() {
@@ -66,6 +70,8 @@ export default defineComponent({
     return {
       titlebar: computed(() => app.titlebar),
       notFoundModal: computed(() => app.notFoundModal),
+      darkTheme,
+      lightTheme
     };
   },
   async mounted() {
@@ -80,22 +86,25 @@ export default defineComponent({
     //   }
     // })
   },
-  components: {AppTitleBar, Snackbar, NotFoundModal},
+  components: { AppTitleBar, Snackbar, NotFoundModal, NConfigProvider, },
 });
 </script>
 
 <style lang="scss">
 @import './assets/sass/base';
+
 #app,
 html,
 body,
 .embedded {
   height: 100vh;
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.4s;
 }
+
 .fade-enter,
 .fade-leave-to {
   opacity: 0;

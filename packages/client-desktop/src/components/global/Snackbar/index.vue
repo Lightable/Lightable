@@ -21,7 +21,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .snackbar {
   position: absolute;
-  z-index: 1;
+  z-index: 100;
   left: 0;
   right: 0;
   display: flex;

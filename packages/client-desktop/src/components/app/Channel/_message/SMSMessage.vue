@@ -1,8 +1,21 @@
 <template>
-  <div class="sms-message" :prevchain="prevchain" :self="self">
-    <div class="__wrapper" :self="self">
-      <Avatar :user="message.getUser()!!" circle v-if="!prevchain" />
-      <div class="__text__wrapper" :prevchain="prevchain" :self="self">
+  <div class="sms-message"
+    :prevchain="prevchain"
+    :self="self">
+    <div class="__wrapper"
+      :self="self">
+      <div class="avatar-wrap">
+        <tippy :content="message.getUser()!!.name">
+          <Avatar :user="message.getUser()!!"
+            class="raw-avatar"
+            circle
+            v-if="!prevchain" />
+        </tippy>
+      </div>
+
+      <div class="__text__wrapper"
+        :prevchain="prevchain"
+        :self="self">
         <span class="__text">{{ message.content }}</span>
       </div>
     </div>
@@ -10,12 +23,12 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType} from 'vue';
-import {Message} from '@/lib/structures/Messages';
+import { defineComponent, PropType } from 'vue';
+import { Message } from '@/lib/structures/Messages';
 import Avatar from '../../User/Avatar/Avatar.vue';
 export default defineComponent({
   name: 'SMSMessage',
-  components: {Avatar},
+  components: { Avatar },
   props: {
     message: {
       type: Object as PropType<Message>,
@@ -24,9 +37,6 @@ export default defineComponent({
     prevchain: Boolean,
     self: Boolean,
   },
-  mounted() {
-    console.log('message', this.message);
-  },
 });
 </script>
 
@@ -34,9 +44,11 @@ export default defineComponent({
 .sms-message {
   margin: 8px;
   display: flex;
+
   &[self='true'] {
     justify-content: flex-end;
   }
+
   .__wrapper {
     display: inline-flex;
     flex-direction: wrap;
@@ -44,6 +56,7 @@ export default defineComponent({
     &[self='true'] {
       flex-direction: row-reverse;
     }
+
     .__text__wrapper {
       padding-top: 6px;
       border-radius: 8px;
@@ -54,10 +67,13 @@ export default defineComponent({
       padding-right: 10px;
       margin-left: 5px;
       background-color: var(--sb);
+      box-shadow: 8px 17px 15px 0px rgba(0, 0, 0, 0.3);
+
       &[self='true'] {
         margin-left: 0;
         margin-right: 5px;
       }
+
       .__text {
         color: var(--text);
       }

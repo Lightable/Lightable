@@ -21,6 +21,8 @@ export default defineComponent({
   width: 100vw;
   background: rgba(0, 0, 0, 0.486);
   z-index: 10;
+  top: 0;
+  left: 0;
   .data {
     height: 100%;
     width: 100%;

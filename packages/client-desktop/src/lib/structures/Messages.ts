@@ -2,7 +2,7 @@ import { Client } from "../Client";
 import { Nullable } from "../utils/null";
 import { Attachment } from "./Attachment";
 import { IUser, User } from "./Users";
-import { generateParagraph } from "../utils/generateLoremIpsum";
+import { generateParagraph, generateSentences } from "../utils/generateLoremIpsum";
 import moment from 'moment'
 export class Message {
     client: Client;
@@ -99,12 +99,23 @@ export interface ICreated {
     sec: number,
     milli: number
 }
+export interface IAttachment {
+    name: string;
+    extension: string;
+    size: number | null;
+
+    fullPath: string | null;
+}
 export type UIMessageType = "Classic" | "SMS"
 export default class Messages extends Map<string, Message> {
     client: Client;
+    currentScrollLocation: number;
+    shouldScroll: boolean;
     constructor(client: Client) {
         super();
         this.client = client;
+        this.currentScrollLocation = 0;
+        this.shouldScroll = true;
     }
     $get(id: string, data?: IMessage) {
         const msg = this.get(id)!
@@ -119,6 +130,7 @@ export default class Messages extends Map<string, Message> {
     }
     $hasChain(id: string) {
         let currentMessage = this.$get(id)
+        let initalStart = performance.now()
         let findNext = Array.from(this.keys()).indexOf(id) + 1
         let next = Array.from(this.values())[findNext]
         if (!next) return false
@@ -131,7 +143,7 @@ export default class Messages extends Map<string, Message> {
     $makeRandom(user: string, amount: number = 1) {
         for (let i = 0; amount > i; i++) {
             const message = new Message(this.client, {
-                content: generateParagraph(3),
+                content: generateSentences(3),
                 created: {
                     sec: 11111,
                     milli: 92,
