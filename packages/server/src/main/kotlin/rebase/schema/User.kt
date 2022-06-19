@@ -1,4 +1,4 @@
-package rebase
+package rebase.schema
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -9,6 +9,8 @@ import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import org.bson.codecs.pojo.annotations.BsonProperty
 import org.eclipse.jetty.websocket.common.WebSocketSession
+import rebase.Cache
+import rebase.Utils
 import rebase.auth.StandardToken
 import rebase.controllers.*
 import rebase.interfaces.BucketImpl

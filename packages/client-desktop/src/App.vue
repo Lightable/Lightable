@@ -23,6 +23,8 @@ import { Client } from './lib/Client';
 import NotFoundModal from './components/app/Modal/NotFoundModal.vue';
 import { User } from './lib/structures/Users';
 import { NConfigProvider, darkTheme, lightTheme } from 'naive-ui';
+
+
 export default defineComponent({
   name: 'App',
   beforeCreate() {

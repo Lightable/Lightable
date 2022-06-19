@@ -2,7 +2,7 @@
   [theme="new"] {
     --bg:           #1d1918;
     --fg:           #30292F;
-    --text:         #496669;
+    --text:         rgb(224 225 230 / 1);
     --sb:           #292a30;
     --highlight:    #1F2233;
     --notification: #413F54;
@@ -18,4 +18,50 @@
     --white: #eeffff;
     --error: #ff5370;
     --link:  #80cbc4;
+
+     
+      /* Netural Define */
+      --neutralBase: #1d1918;
+      --neturalInvertBase: #fff;
+      --neturalTextBase: #fff;
+      --neturalModal: #1e2428;
+      
+      /* Alpha Channels */
+      --alpha1: 0.23;
+      --alpha2: 0.66;
+      --alpha3: 0.88;
+      --alphaDisabled: 0.38;
+      --alphaDisabledInput: 0.06;
+      --alphaPending: 0.09;
+      --alphaPressed: 0.05;
+
+      /* Primary */
+      --primaryDefault: #85e89d;
+      --primaryHover: rgba(var(--primaryDefault)), var(--alphaPressed);
+      --primaryActive: #84fca2;
+      --primarySuppl: #59cc76;
+      
+      /* Info */
+      --infoDefault: #ffab70;
+      --infoHover: rgba(var(--infoDefault), var(--alphaPressed));
+      --infoActive: #fcb481;
+      --infoSuppl: #c27f4e;
+
+      /* Error */
+      --errorDefault: #f97583;
+      --errorHover: rgba(var(--errorDefault), var(--alphaPressed));
+      --errorActive: #f78a95;
+      --errorSuppl: #b9434e;
+
+      /* Warning */
+      --warningDefault: #f2c97d;
+      --warningHover: rgba(var(--warningDefault), var(--alphaPressed));
+      --warningActive: #e6c260;
+      --warningSuppl: rgb(240, 138, 0);
+
+      /* Router */
+      --routerDefaultBg: rgba(hexToRGB(var(--neturalBase)), var(var(--alpha2)));
+  }
+  @function hexToRGB($hex) {
+    @return red($hex), green($hex), blue($hex);
   }

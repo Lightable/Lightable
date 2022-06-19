@@ -29,7 +29,7 @@
   <div class="self"
     @click="active = !active">
     <div class="inner-self">
-      <Avatar size="35"
+      <Avatar size="26"
         :user="me"
         :displaywarn="false"
         @click="active = !active"

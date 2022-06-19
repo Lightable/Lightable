@@ -2,39 +2,32 @@
   all(not(debug_assertions), target_os = "windows"),
   windows_subsystem = "windows"
 )]
-
-// use notify_rust::Notification;
-
-// fn main() {
-//   Notification::new()
-//       .app_id(&"org.feuer.chatty".into())
-//       .summary("Firefox News")
-//       .body("This will almost look like a real firefox notification.")
-//       .icon("firefox")
-//       .show().expect("Fail");
-// }
-//
 use tauri::{Manager, Wry};
+use tauri_plugin_log::{LogTarget, LoggerBuilder};
 use tauri_plugin_store::PluginBuilder;
 use window_shadows::set_shadow;
-use window_vibrancy::{
-  apply_acrylic, apply_blur, apply_mica, apply_vibrancy, clear_acrylic, clear_blur, clear_mica,
-};
-use winreg::RegKey;
+use window_vibrancy::{apply_acrylic, apply_blur, apply_mica, clear_acrylic, clear_blur, clear_mica,};
 use winreg::enums::HKEY_CURRENT_USER;
+use winreg::RegKey;
+
 fn main() {
+  // Logging targets
+  let targets = [LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview];
+  // Start building our tauri app
   tauri::Builder::default()
     .setup(|app| {
+      // Loading mechanics
       let window = app.get_window("main").unwrap();
       let splashscreen = app.get_window("splashscreen").unwrap();
       #[cfg(any(target_os = "windows", target_os = "macos"))]
-      set_shadow(&window, true).unwrap();
+      set_shadow(&window, true).unwrap(); // Set shadows
       #[cfg(any(target_os = "windows", target_os = "macos"))]
       set_shadow(&splashscreen, true).unwrap();
-      splashscreen.center().unwrap();
+      splashscreen.center().unwrap(); // Center splashscreen window
       Ok(())
     })
-    .plugin(PluginBuilder::default().build::<Wry>())
+    .plugin(PluginBuilder::default().build::<Wry>()) // Store plugin 
+    .plugin(LoggerBuilder::new().targets(targets).build()) // Log Plugin
     .invoke_handler(tauri::generate_handler![
       set_mica,
       close_splashscreen,
@@ -43,7 +36,7 @@ fn main() {
       get_accent_color
     ])
     .run(tauri::generate_context!())
-    .expect("error while running tauri application")
+    .expect("error while running tauri application");
 }
 
 // #[tauri::command]
@@ -73,6 +66,9 @@ async fn close_splashscreen(window: tauri::Window) {
   window.get_window("main").unwrap().show().unwrap();
 }
 
+/**
+ * Set mica (Win 11 > *)
+ */
 #[tauri::command]
 async fn set_mica(window: tauri::Window, mica: bool) {
   if mica {
@@ -85,31 +81,44 @@ async fn set_mica(window: tauri::Window, mica: bool) {
 
   return;
 }
+/**
+ * Set blur (Win 11 < *)
+ */
 #[tauri::command]
 async fn set_blur(window: tauri::Window, blur: bool) {
   if blur {
     #[cfg(target_os = "windows")]
-apply_blur(&window, Some((18, 18, 18, 125))).expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+    apply_blur(&window, Some((18, 18, 18, 125)))
+      .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
   } else {
     #[cfg(target_os = "windows")]
     clear_blur(&window).unwrap();
   }
 }
+/**
+ * Set acrylic (Win 10+)
+ */
 #[tauri::command]
-async fn set_acrylic(window: tauri::Window, acrylic: bool) {
+async fn set_acrylic(window: tauri::Window, acrylic: bool, r: u8, g: u8, b: u8, opacity: u8) {
   if acrylic {
     #[cfg(target_os = "windows")]
-    apply_acrylic(&window, Some((18, 18, 18, 125)))
+    println!("Applying acrylic effect...");
+    apply_acrylic(&window, Some((r, g, b, opacity)))
       .expect("Unsupported platform! 'apply_acrylic' is only supported on Windows");
+      return
   } else {
+    println!("Clearing acrylic effect...");
     clear_acrylic(&window).unwrap();
+    return
   }
 }
+/**
+ * Get accent color for system (Win 10+)
+ */
 #[tauri::command]
-fn get_accent_color(window: tauri::Window) -> Result<u32, String> {
-  println!("Getting sys info...");
+fn get_accent_color() -> Result<u32, String> {
   let hklm = RegKey::predef(HKEY_CURRENT_USER);
-  let cur_dwm = hklm.open_subkey("Software\\Microsoft\\Windows\\DWM").unwrap();
-  let ac: u32 = cur_dwm.get_value("AccentColor").expect("Could not find accent");
-  return Ok(ac)
+  let cur_dwm = hklm.open_subkey("Software\\Microsoft\\Windows\\DWM").unwrap();  // DWM contains all compositor configs
+  let ac: u32 = cur_dwm.get_value("ColorizationColor").expect("Could not find accent");  // Source of the accent color for windows wrapped in a u32 encoded hex code
+  return Ok(ac);
 }

@@ -7,7 +7,7 @@ package rebase.codec
 // import org.bson.codecs.DecoderContext
 // import org.bson.codecs.EncoderContext
 // import org.bson.codecs.configuration.CodecRegistry
-// import rebase.User
+// import rebase.schema.User
 //
 //
 // class UserCodec(private val registry: CodecRegistry) :

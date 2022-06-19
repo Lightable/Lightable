@@ -28,12 +28,12 @@
     user-select: none;
   }
   text-rendering: optimizeLegibility;
-  --titlebar: #161616;
+  --titlebar: var(--neutralBase);
   --font-size: 8px;
   --modal: #1F1F1F;
   --modal-def-action: #171717;
-  --toggle-bg-on: var(--green);
-  --toggle-bg-off: var(--sb);
+  --toggle-bg-on: var(--primaryDefault);
+  --toggle-bg-off: var(--neutralBase);
   --toggle-border-on: transparent;
   --toggle-border-off: transparent;
   .circle {
@@ -271,6 +271,7 @@ body {
 :focus {
   outline: none !important;
 }
+
 // .blur {
 //   /* All the background image supports */
 //   background-image: -webkit-linear-gradient(bottom left, rgba(43, 40, 50, 0.8) 0%, rgba(83, 86, 99, 0.8) 45%, rgba(69, 77, 91, 0.6) 60%);

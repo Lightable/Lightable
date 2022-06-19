@@ -74,6 +74,7 @@ export const AppStore = defineStore('AppStore', {
             this.downloadingUpdateModalVis = bool;
         },
         setExperiment(key: string, value: boolean) {
+            console.log(`Setting experiment "${key}" to`, value);
             switch (key) {
                 case 'micaChat': {
                     if (value) {
@@ -93,9 +94,12 @@ export const AppStore = defineStore('AppStore', {
                 }
                 case 'acrylicChat': {
                     if (value) {
-                        invoke('set_acrylic', { acrylic: true })
+                        setTimeout(() => {
+                            invoke('set_acrylic', { acrylic: true, r: 0, g: 0, b: 0, opacity: 0 });
+                        }, 200)
+
                     } else {
-                        invoke('set_acrylic', { acrylic: false })
+                        invoke('set_acrylic', { acrylic: false, r: 0, g: 0, b: 0, opacity: 0 })
                     }
                     break;
                 }
@@ -121,28 +125,54 @@ export const AppStore = defineStore('AppStore', {
             let debug = await this.store.get('debug') as boolean;
             let theme = await invoke('get_accent_color');
             this.version = await app.getVersion();
-
-            this.accent = `#${theme}`;
-            console.log(`Got Sys Theme %c(${this.accent})`,);
+            this.accent = `#${theme.toString(16).substring(2)}`;
+            var r = document.querySelector(':root') as any;
+            r.style.setProperty('--primaryAccent', this.accent);
+            console.log(`Got Sys Theme %c(${this.accent})`, `color: ${this.accent};`);
             this.setDebug(debug);
+            let releaseIntervalActive = true
+            setInterval(() => {
+                if (releaseIntervalActive) {
+                    this.setRelease({
+                        version: '0.0.1',
+                        title: 'Fake Release',
+                        notes: 'Fake release notes',
+                        signature: 'NotRealReleaseSig',
+                        url: 'https://google.com'
+                    });
+                    releaseIntervalActive = false;
+                    return
+                } else {
+                    this.update = null;
+                    releaseIntervalActive = true;
+                    return
+                }
+            }, 5000)
         },
         async $loadExperiments() {
             this.enableExperiments(await this.store.get('showExperiments') as boolean);
-            let experimentEntries = Object.entries(await this.store.get('experiments') as Object);
-            if (experimentEntries.length < 1) {
-                this.experiments.set('profileNotice', false);
-                this.experiments.set('messages', false);
-                this.experiments.set('dmSettings', false);
-                this.experiments.set('micaChat', false);
-                this.experiments.set('acrylicChat', false);
-                this.experiments.set('blurChat', false);
+            let experimentEntries: [string, any];
+            let savedRawExperimentEntries = await this.store.get('experiments');
+            if (savedRawExperimentEntries == null || savedRawExperimentEntries == undefined) {
+                experimentEntries = {} as [string, any];
+            } else {
+                experimentEntries = Object.entries(savedRawExperimentEntries as Object) as [string, any];
+            }
+            console.log(experimentEntries.length);
+            if (experimentEntries.length < 1 || experimentEntries.length == undefined) {
+                this.setExperiment('profileNotice', false);
+                this.setExperiment('messages', false);
+                this.setExperiment('dmSettings', false);
+                this.setExperiment('micaChat', false);
+                this.setExperiment('acrylicChat', false);
+                this.setExperiment('blurChat', false);
                 return
             }
             for (let ee = 0; experimentEntries.length > ee; ee++) {
                 let experimentKeyPair = experimentEntries[ee];
                 let key = experimentKeyPair[0];
                 let value = experimentKeyPair[1];
-                this.experiments.set(key, value);
+                this.setExperiment(key, value);
                 this.$logger.log(`Zenspace -> App Load -> Load Experiments`, `Loaded Experiment "${key}"`, value);
             }
         }

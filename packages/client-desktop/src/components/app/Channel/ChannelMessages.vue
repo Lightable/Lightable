@@ -143,7 +143,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .channel-messages {
   height: calc(100vh - 70px);
-  background-color: var(--bg);
+  background-color: var(--routerDefaultBg);
   .__messages {
     overflow-y: scroll;
     height: calc(100% - 155px);

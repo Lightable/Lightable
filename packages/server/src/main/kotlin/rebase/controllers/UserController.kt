@@ -8,6 +8,7 @@ import io.javalin.plugin.openapi.dsl.oneOf
 import me.kosert.flowbus.GlobalBus
 import rebase.*
 import rebase.interfaces.FailImpl
+import rebase.schema.*
 import java.util.concurrent.ExecutorService
 import kotlin.system.measureTimeMillis
 
@@ -492,7 +493,7 @@ class UserController(
     }
 }
 
-fun requireAuth(cache: Cache, ctx: Context): rebase.User? {
+fun requireAuth(cache: Cache, ctx: Context): User? {
     val auth = ctx.header("Authorization")
     cache.users.values.forEach {
         println("User ${it.name} (${it.identifier}) - ${it.token.token} Compare $auth")

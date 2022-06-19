@@ -28,10 +28,9 @@
       </div>
     </template>
     <template v-slot:actions>
-      <button class="db" dbt="success" @click="updateUserName(name)" v-if="!request.loading">
+      <NButton type="primary" secondary @click="updateUserName(name)" :loading="request.loading">
         Submit
-      </button>
-      <LoadingIcon height="32px" width="32px" v-if="request.loading" />
+      </NButton>
       </template>
   </BaseModal>
 </template>
@@ -41,15 +40,15 @@ import {ClientStore} from '@/stores/ClientStore';
 import {defineComponent} from 'vue';
 import BaseModal from './BaseModal.vue';
 import AddFriend from '@/components/Icons/AddFriend.vue';
-import LoadingIcon from '@/components/Icons/Status/LoadingIcon.vue';
 import ErrorIcon from '@/components/Icons/Status/ErrorIcon.vue';
 import {SnackStore} from '@/stores/SnackStore';
 import { AppStore } from '@/stores/AppStore';
 import Name from '@/components/Icons/Name.vue';
 import { computed } from '@vue/reactivity';
+import { NButton } from 'naive-ui';
 export default defineComponent({
   name: 'NewNameModal',
-  components: { BaseModal, AddFriend, LoadingIcon, ErrorIcon, Name },
+  components: { BaseModal, AddFriend, ErrorIcon, Name, NButton },
   setup() {
     let appStore = AppStore();
     return {
