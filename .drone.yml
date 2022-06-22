@@ -14,21 +14,21 @@ steps:
       cache_key: "volume"
       archive_format: "gzip"
       mount:
-        - ".gradle"
+        - "drone"
     volumes:
       - name: cache
         path: /tmp/cache
-  - name: ZenSpace Build ✨
+  - name: 🧪 ZenSpace Test
     image: gradle:jdk17
     environment:
       PASS:
         from_secret: github-token
-      GRADLE_USER_HOME: /drone/src/.gradle
+      GRADLE_USER_HOME: /drone/src/drone
     commands:
       - ls /drone
       - cd ./packages/server
       - chmod +x gradlew
-      - ./gradlew jib --image=ghcr.io/brys0/zenspace:latest -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS
+      - ./gradlew test
       - ls /drone/src
   - name: 🏗️ Rebuild Cache
     image: meltwater/drone-cache
@@ -39,7 +39,7 @@ steps:
       cache_key: "volume"
       archive_format: "gzip"
       mount:
-        - "/.gradle"
+        - "/drone"
     volumes:
       - name: cache
         path: /tmp/cache
