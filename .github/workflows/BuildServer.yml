@@ -1,7 +1,7 @@
 name: Build Jib Gradle
 on: [push]
 jobs:
-  🧪-Test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,7 +17,7 @@ jobs:
           cd ./packages/server
           chmod +x gradlew
           ./gradlew test
-  🏗️-build:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
