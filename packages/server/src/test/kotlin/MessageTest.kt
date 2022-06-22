@@ -117,7 +117,8 @@ class MessageTest {
     }
     init {
         println("🔌 Attempting connection to Scylla Instance...")
-        connector.connect("192.168.50.111", 9042, "datacenter1")
+        val droneCIHost = System.getenv("SCYLLA_HOST") ?: "192.168.50.111"
+        connector.connect(droneCIHost, 9042, "datacenter1")
         println("✅ Connection established!")
         session = connector.getSession()
     }
