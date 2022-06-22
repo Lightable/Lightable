@@ -1,4 +1,4 @@
-name: Build Jib Gradle
+name: 💾 ZenSpace Server
 on: [push]
 jobs:
   test:
