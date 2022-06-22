@@ -19,17 +19,13 @@ fun main() {
     val messageId = snowflake.nextId()
     val messageCreateTiming = measureTimeMillis {
         dmDB.createMessage(Message(messageId, "This is a message", false, MessageType.Text.ordinal))
-        Thread.sleep(200)
         dmDB.createMessage(Message(snowflake.nextId(), "This is a message 1", false, MessageType.Text.ordinal))
-        Thread.sleep(200)
         dmDB.createMessage(Message(snowflake.nextId(), "This is a message 2", false, MessageType.Text.ordinal))
-        Thread.sleep(200)
         dmDB.createMessage(Message(snowflake.nextId(), "This is a message 3", false, MessageType.Text.ordinal))
     }
     println("Created message in ${messageCreateTiming}ms")
 //    val existedMessage = dmDB.getAll()
 //    println("Found Message? $existedMessage")
-    Thread.sleep(200)
     val getExactMessage = dmDB.getMessagesAfterLastID(messageId, 50)
 //    val deleteMessage = dmDB.delete(messageId, {
 //        println("Message with id $messageId deleted in ${it}ms")
@@ -40,6 +36,7 @@ fun main() {
 //
 //    })
 //    println("Waiting 10s and then deleting all rows")
+    println(dmDB.getTotalMessageCount())
     readln()
     dmDB.deleteAll(executeCallback = {
         println("All DM Messages deleted in ${it}ms")

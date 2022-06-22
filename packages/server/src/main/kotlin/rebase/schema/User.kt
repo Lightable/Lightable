@@ -15,10 +15,11 @@ import rebase.auth.StandardToken
 import rebase.controllers.*
 import rebase.interfaces.BucketImpl
 import rebase.interfaces.Image.ImageImpl
+import rebase.interfaces.cache.IUserCache
 import java.time.Instant
 
 data class User constructor(
-    @JsonIgnore @BsonIgnore override var cache: Cache? = null,
+    @JsonIgnore @BsonIgnore override var cache: IUserCache? = null,
     @JsonIgnore @BsonIgnore override val jackson: ObjectMapper = jacksonObjectMapper(),
     @BsonIgnore @JsonIgnore var connections: ArrayList<WebSocketSession> = ArrayList(),
     @JsonIgnore @BsonProperty("identifier") var identifier: Long = 0,

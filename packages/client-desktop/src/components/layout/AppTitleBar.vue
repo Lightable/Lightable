@@ -1,50 +1,40 @@
 <template>
-  <div group="window-decorations" class="window-decorations" data-tauri-drag-region>
-    <span id="titlebar-title" data-tauri-drag-region>
-      <Logo color="var(--white)" height="18px" width="18px" data-tauri-drag-region/>
-      <div class="name-details" data-tauri-drag-region><span data-tauri-drag-region>ZenSpace</span><span class="title-details" v-if="titleDetails" data-tauri-drag-region>• {{titleDetails}}</span></div>
-    </span>
-    <div class="titlebar">
-      <div class="titlebar-button" id="titlebar-minimize" @click="minimize">
-        <span alt="Minimize"
-          ><svg aria-hidden="false" width="12" height="12" viewBox="0 0 12 12">
-            <rect fill="currentColor" width="10" height="1" x="1" y="6"></rect></svg></span>
-      </div>
-      <div class="titlebar-button" id="titlebar-maximize" @click="maximize">
-        <span alt="Maximize"
-          ><svg aria-hidden="false" width="12" height="12" viewBox="0 0 12 12">
-            <rect
-              width="9"
-              height="9"
-              x="1.5"
-              y="1.5"
-              fill="none"
-              stroke="currentColor"
-            ></rect></svg></span>
-      </div>
-      <div class="titlebar-button" id="titlebar-close" @click="close">
-        <span alt="close"
-          ><svg aria-hidden="false" width="12" height="12" viewBox="0 0 12 12">
-            <polygon
-              fill="currentColor"
-              fill-rule="evenodd"
-              points="11 1.576 6.583 6 11 10.424 10.424 11 6 6.583 1.576 11 1 10.424 5.417 6 1 1.576 1.576 1 6 5.417 10.424 1"
-            ></polygon></svg></span>
+  <div group="window-decorations"
+    class="window-decorations"
+    data-tauri-drag-region>
+    <div class="titlebar-left"  data-tauri-drag-region/>
+    <div class="titlebar-right"  data-tauri-drag-region>
+      <div class="titlebar" data-tauri-drag-region>
+        <div class="titlebar-button"
+          id="titlebar-minimize"
+          @click="minimize">
+          
+        </div>
+        <div class="titlebar-button"
+          id="titlebar-maximize"
+          @click="maximize">
+          
+        </div>
+        <div class="titlebar-button"
+          id="titlebar-close"
+          @click="close">
+          
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {computed, defineComponent} from 'vue';
-import {appWindow} from '@tauri-apps/api/window';
+import { computed, defineComponent } from 'vue';
+import { appWindow } from '@tauri-apps/api/window';
 import Logo from '@/components/Icons/Logo.vue';
-import {AppStore} from '@/stores/AppStore';
+import { AppStore } from '@/stores/AppStore';
 export default defineComponent({
   name: 'AppTitleBar',
   setup() {
     let appStore = AppStore();
-    return {titleDetails: computed(() => appStore.titleDetails)};
+    return { titleDetails: computed(() => appStore.titleDetails) };
   },
   mounted() {
     appWindow.setTitle(`ZenSpace • ${this.titleDetails}`);
@@ -60,10 +50,21 @@ export default defineComponent({
       appWindow.close();
     },
   },
-  components: {Logo},
+  components: { Logo },
 });
 </script>
 <style lang="scss" scoped>
+.titlebar-left {
+  width: 13.25rem;
+  min-width: 13.25rem;
+  max-width: 13.25rem;
+}
+
+.titlebar-right {
+  width: 100%;
+  background-color: var(--neturalDefaultBase);
+}
+
 .window-decorations {
   display: flex;
   flex-direction: row;
@@ -72,6 +73,9 @@ export default defineComponent({
   height: 25px;
   background-color: var(--titlebar);
   z-index: 200;
+  width: 100%;
+  // background-color: var(--neturalDefaultBase);
+
   .titlebar {
     height: 25px;
     user-select: none;
@@ -79,27 +83,41 @@ export default defineComponent({
     justify-content: flex-end;
     margin-left: auto;
     align-items: center;
-    
+    gap: 4px;
   }
+
   .titlebar-button {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: 22px;
-    height: 16px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
     color: var(--white);
     background-color: var(--bg);
     transition: all 120ms ease-in-out;
     text-align: center;
     background-color: var(--titlebar);
     padding: 4px;
+    &#titlebar-maximize {
+      background-color: var(--primaryDefault);
+    }
+    &#titlebar-minimize {
+      background-color: var(--warningDefault);
+    }
+    &#titlebar-close {
+      background-color: var(--errorDefault);
+      margin-right: 8px;
+    }
     svg {
       margin-top: 3px;
     }
+
     &:hover {
       filter: brightness(120%);
     }
   }
+
   #titlebar-title {
     display: flex;
     color: var(--white);
@@ -113,10 +131,12 @@ export default defineComponent({
     font-family: Inter;
     font-smooth: always;
     margin-left: 4px;
+    width: 12rem;
 
     .name-details {
       margin-bottom: 2.5px;
       font-size: 13px;
+
       span {
         margin-left: 3px;
       }

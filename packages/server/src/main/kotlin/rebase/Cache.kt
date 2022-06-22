@@ -3,22 +3,22 @@ package rebase
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOne
 import org.slf4j.LoggerFactory
+import rebase.interfaces.cache.IUserCache
 import rebase.schema.ChattyRelease
 import rebase.schema.User
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import kotlin.collections.HashMap
 
-class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, private val snowflake: Snowflake, val server: Server, val fileController: FileController) {
+class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, override val snowflake: Snowflake, val server: Server, val fileController: FileController): IUserCache {
     val logger = LoggerFactory.getLogger("Rebase -> CACHE")
     val userColl = db.getUserCollection()
     val releaseColl = db.getReleaseCollection()
-    val users = HashMap<Long, User>()
+    override val users = HashMap<Long, User>()
     val releases = HashMap<String, ChattyRelease>()
     var latestRelease: ChattyRelease? = null
-    val userAvatarCache = HashMap<Long, ByteArrayOutputStream>()
-    val sameNameUser: (name: String) -> Boolean = { name -> users.values.find { u -> u.name == name } != null }
-    fun saveOrReplaceUser(user: User, saveToDB: Boolean = true) {
+    override val avatarCache = HashMap<Long, ByteArrayOutputStream>()
+    override fun saveOrReplaceUser(user: User, saveToDB: Boolean) {
         users[user.identifier] = user
         if (saveToDB) {
             executor.submit {
@@ -31,7 +31,14 @@ class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, 
         }
     }
 
-    fun removeAllTestUsers() {
+    override fun sameName(name: String): Boolean {
+        return users.values.find { u -> u.name == name } != null
+    }
+
+    override fun sameEmail(email: String): Boolean {
+        return users.values.find { u -> u.email == email } != null
+    }
+    override fun removeAllTestUsers() {
         db.getUserCollection().find().forEach { u -> if (u.test) println("DELETE Test user found ${u.email}") }
         users.values.forEach { u ->
             if (u.test) {

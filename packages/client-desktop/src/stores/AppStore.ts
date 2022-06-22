@@ -121,6 +121,12 @@ export const AppStore = defineStore('AppStore', {
         },
         async load() {
             await this.store.load();
+            this.setExperiment('profileNotice', false);
+            this.setExperiment('messages', false);
+            this.setExperiment('dmSettings', false);
+            this.setExperiment('micaChat', false);
+            this.setExperiment('acrylicChat', false);
+            this.setExperiment('blurChat', false);
             await this.$loadExperiments();
             let debug = await this.store.get('debug') as boolean;
             let theme = await invoke('get_accent_color');
@@ -130,24 +136,14 @@ export const AppStore = defineStore('AppStore', {
             r.style.setProperty('--primaryAccent', this.accent);
             console.log(`Got Sys Theme %c(${this.accent})`, `color: ${this.accent};`);
             this.setDebug(debug);
-            let releaseIntervalActive = true
-            setInterval(() => {
-                if (releaseIntervalActive) {
-                    this.setRelease({
-                        version: '0.0.1',
-                        title: 'Fake Release',
-                        notes: 'Fake release notes',
-                        signature: 'NotRealReleaseSig',
-                        url: 'https://google.com'
-                    });
-                    releaseIntervalActive = false;
-                    return
-                } else {
-                    this.update = null;
-                    releaseIntervalActive = true;
-                    return
-                }
-            }, 5000)
+            // Debug Purposes
+            this.setRelease({
+                version: '0.0.1',
+                title: 'Fake Release',
+                notes: 'Fake release notes',
+                signature: 'NotRealReleaseSig',
+                url: 'https://google.com'
+            });
         },
         async $loadExperiments() {
             this.enableExperiments(await this.store.get('showExperiments') as boolean);
@@ -159,15 +155,6 @@ export const AppStore = defineStore('AppStore', {
                 experimentEntries = Object.entries(savedRawExperimentEntries as Object) as [string, any];
             }
             console.log(experimentEntries.length);
-            if (experimentEntries.length < 1 || experimentEntries.length == undefined) {
-                this.setExperiment('profileNotice', false);
-                this.setExperiment('messages', false);
-                this.setExperiment('dmSettings', false);
-                this.setExperiment('micaChat', false);
-                this.setExperiment('acrylicChat', false);
-                this.setExperiment('blurChat', false);
-                return
-            }
             for (let ee = 0; experimentEntries.length > ee; ee++) {
                 let experimentKeyPair = experimentEntries[ee];
                 let key = experimentKeyPair[0];

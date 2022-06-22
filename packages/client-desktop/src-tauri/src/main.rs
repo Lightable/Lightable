@@ -33,7 +33,8 @@ fn main() {
       close_splashscreen,
       set_blur,
       set_acrylic,
-      get_accent_color
+      get_accent_color,
+      open_dev_tools
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
@@ -52,10 +53,10 @@ fn main() {
 //     .icon(icon)
 //     .show();
 // }
-// #[tauri::command]
-// async fn open_dev_tools(window: tauri::Window) {
-//   window.get_window("main").unwrap().open_devtools();
-// }
+#[tauri::command]
+async fn open_dev_tools(window: tauri::Window) {
+  window.get_window("main").unwrap().open_devtools();
+}
 #[tauri::command]
 async fn close_splashscreen(window: tauri::Window) {
   // Close splashscreen

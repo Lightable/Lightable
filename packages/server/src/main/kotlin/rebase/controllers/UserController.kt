@@ -8,6 +8,7 @@ import io.javalin.plugin.openapi.dsl.oneOf
 import me.kosert.flowbus.GlobalBus
 import rebase.*
 import rebase.interfaces.FailImpl
+import rebase.interfaces.cache.IUserCache
 import rebase.schema.*
 import java.util.concurrent.ExecutorService
 import kotlin.system.measureTimeMillis
@@ -36,31 +37,34 @@ class UserController(
     )
     fun createUser(ctx: Context) {
         val body = ctx.bodyAsClass<NewUser>()
-        if (body.validate(cache, ctx) &&
-            cache.users.values.find { user -> user.email == body.email } == null
-        ) {
-            val salt = Utils.getNextSalt()
-            val user =
-                User(
-                    cache = cache,
-                    email = body.email,
-                    password = Utils.getSHA512(body.password, salt),
-                    salt = salt,
-                    name = body.username,
-                    identifier = snowflake.nextId(),
-                    relationships = Friends()
-                )
-            user.save()
-            ctx.status(201)
-                .json(
-                    object {
-                        val token = user.token.token
-                    }
-                )
-            return
-        } else {
-            ctx.status(403).json(UserDataFail("Email is already in use"))
-            return
+        println("Users -> ${cache.users.values}\nPersonal Email -> ${body.email}")
+        println("Cache users -> Body.email -> ${cache.users.values.find { user -> user.email == body.email } == null}")
+        println("Body validate -> ${body.validate(cache, ctx)}")
+        if (body.validate(cache, ctx)) {
+            if (cache.users.values.find { user -> user.email == body.email } == null) {
+                val salt = Utils.getNextSalt()
+                val user =
+                    User(
+                        cache = cache,
+                        email = body.email,
+                        password = Utils.getSHA512(body.password, salt),
+                        salt = salt,
+                        name = body.username,
+                        identifier = snowflake.nextId(),
+                        relationships = Friends()
+                    )
+                user.save()
+                ctx.status(201)
+                    .json(
+                        object {
+                            val token = user.token.token
+                        }
+                    )
+                return
+            } else {
+                ctx.status(403).json(UserDataFail("Email is already in use"))
+                return
+            }
         }
     }
 
@@ -176,9 +180,11 @@ class UserController(
         val user = requireAuth(cache, ctx)
         val updatedUser = ctx.bodyAsClass<UpdateUserPatch>()
         if (user != null) {
-            if (updatedUser.name != null && NewUser.validateUsername(updatedUser.name, cache, ctx)) user.name = updatedUser.name
+            if (updatedUser.name != null && NewUser.validateUsername(updatedUser.name, cache, ctx)) user.name =
+                updatedUser.name
             if (updatedUser.status != null) user.status = updatedUser.status
-            if (updatedUser.email != null && NewUser.validateEmail(updatedUser.email, ctx)) user.email = updatedUser.email
+            if (updatedUser.email != null && NewUser.validateEmail(updatedUser.email, ctx)) user.email =
+                updatedUser.email
             if (updatedUser.notice != null) user.notice = updatedUser.notice
             user.save()
             ctx.status(200).json(user.toPublic())
@@ -401,7 +407,10 @@ class UserController(
             val relationshipID = ctx.pathParam("id")
             if (user != null) {
                 // Inverse checking for pending / already friends
-                if (!user.checkValidFriendRequest(relationshipID.toLong()) && !user.relationships.pending.contains(relationshipID.toLong())) {
+                if (!user.checkValidFriendRequest(relationshipID.toLong()) && !user.relationships.pending.contains(
+                        relationshipID.toLong()
+                    )
+                ) {
                     user.removeFriend(relationshipID.toLong())
                     ctx.status(204)
                 } else {
@@ -436,12 +445,14 @@ class UserController(
             get() = "FRIEND_REQUEST_FAIL"
         override val message = bad
     }
+
     class UserNotEnabledFail : FailImpl {
         override val code: String
             get() = "USER_ENABLED_FALSE"
         override val message: String
             get() = "User is not enabled, wait for an admin to enable your account"
     }
+
     data class UpdateUserPatch(
         val name: String?,
         val email: String?,
@@ -456,35 +467,38 @@ class UserController(
 
         fun validate(cache: Cache, ctx: Context): Boolean {
             val emailVal = validateEmail(email, ctx)
+            println("Email validation: ${emailVal}")
             val passwordVal = validatePassword(password, ctx)
+            println("Password validation: ${passwordVal}")
             val usernameVal = validateUsername(username, cache, ctx)
+            println("Username validation: ${usernameVal}")
             return emailVal.and(passwordVal).and(usernameVal)
         }
 
         companion object {
 
-            fun validatePassword(password: String, ctx: Context): Boolean {
+            fun validatePassword(password: String, ctx: Context?): Boolean {
                 if (password.isBlank() || password.length < 6) {
-                    ctx.status(400).json(UserDataFail("Password is empty or less than 6 characters"))
+                    ctx?.status(400)?.json(UserDataFail("Password is empty or less than 6 characters"))
                     return false
                 }
                 return true
             }
 
-            fun validateEmail(email: String, ctx: Context): Boolean {
+            fun validateEmail(email: String, ctx: Context?): Boolean {
                 if (!email.matches(Constants.REGEX.EMAIL)) {
-                    ctx.status(400).json(UserDataFail("Email is not correct format"))
+                    ctx?.status(400)?.json(UserDataFail("Email is not correct format"))
                     return false
                 }
                 return true
             }
 
-            fun validateUsername(username: String, cache: Cache, ctx: Context): Boolean {
+            fun validateUsername(username: String, cache: IUserCache, ctx: Context?): Boolean {
                 if (username.isBlank()) {
-                    ctx.status(400).json(UserDataFail("Username is blank"))
+                    ctx?.status(400)?.json(UserDataFail("Username is blank"))
                     return false
-                } else if (cache.sameNameUser(username)) {
-                    ctx.status(400).json(UserDataFail("Username is already used"))
+                } else if (cache.sameName(username)) {
+                    ctx?.status(400)?.json(UserDataFail("Username is already used"))
                     return false
                 }
                 return true
@@ -500,7 +514,7 @@ fun requireAuth(cache: Cache, ctx: Context): User? {
     }
     if (auth == null) {
         ctx.status(401).json(UserController.UserAuthFail())
-    }  else {
+    } else {
         val user = cache.users.values.find { user -> user.token.token == auth }
         return if (user == null) {
             ctx.status(401).json(UserController.UserAuthFail())

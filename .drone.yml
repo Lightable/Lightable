@@ -5,6 +5,19 @@ platform:
   os: linux
   arch: amd64
 steps:
+  - name: 🔃 Restore Gradle Cache
+    image: meltwater/drone-cache
+    pull: true
+    settings:
+      backend: "filesystem"
+      restore: true
+      cache_key: "volume"
+      archive_format: "gzip"
+      mount: 
+       - '${HOME}/.gradle'
+    volumes:
+    - name: cache
+      path: /tmp/cache 
   - name: ZenSpace Build ✨
     image: gradle:jdk17
     environment:
@@ -14,7 +27,23 @@ steps:
       - cd ./packages/server
       - chmod +x gradlew
       - ./gradlew jib --image=ghcr.io/brys0/zenspace:latest -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS
-
+  - name: 🏗️ Rebuild Cache
+    image: meltwater/drone-cache
+    pull: true
+    settings:
+      backend: "filesystem"
+      rebuild: true
+      cache_key: "volume"
+      archive_format: "gzip"
+      mount:
+        - '${HOME}/.gradle'
+    volumes:
+    - name: cache
+      path: /tmp/cache
+volumes:
+  - name: cache
+    host: 
+      path: /var/lib/cache
 trigger:
   branch:
   - pre-alpha

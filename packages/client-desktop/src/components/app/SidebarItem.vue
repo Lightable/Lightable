@@ -37,7 +37,7 @@ export default defineComponent({
   height: 16px;
   flex-direction: row;
   align-items: center;
-  width: 100%;
+  width: 92%;
   transition: all 150ms ease;
   padding-left: 0.5rem;
   padding-right: 0.5rem;

@@ -1,6 +1,6 @@
 <template>
   <Overlay @click="outsideClicked">
-    <div class="modal-wrap" @click.stop="">
+    <div class="modal-wrap" @click.stop="" @mousedown="shouldEmit = false">
       <div class="modal-top" :style="(headerbg) ? `background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${headerbg}); background-repeat: repeat; background-position: 50% 50%; background-size: contain;` : ''">
         <div class="header">
           <slot name="icon" />
@@ -28,11 +28,20 @@ export default defineComponent({
   components: {Overlay},
   methods: {
     outsideClicked() {
+      if (!this.shouldEmit) {
+        this.shouldEmit = true;
+        return
+      }
       this.$emit('clicked');
     },
   },
   props: {
     headerbg: String
+  },
+  data() {
+    return {
+      shouldEmit: true
+    }
   }
 });
 </script>

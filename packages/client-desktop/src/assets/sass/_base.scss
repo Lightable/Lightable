@@ -55,10 +55,11 @@ body {
   overflow: hidden;
   margin: 0;
   color: var(--color);
-  background: var(--bg);
+  background: var(--neutralBase);
   animation: all 150ms ease-in-out;
   overscroll-behavior-x: none;
   font-family: Inter, Arial;
+  // border-radius: 50%;
 }
 .app-mountable {
     width: 100vw;

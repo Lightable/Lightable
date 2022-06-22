@@ -3,20 +3,34 @@ package rebase.messages
 import com.datastax.oss.driver.api.core.CqlIdentifier
 import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.ResultSet
+import com.datastax.oss.driver.api.core.cql.Row
 import com.datastax.oss.driver.api.core.cql.SimpleStatement
 import com.datastax.oss.driver.api.core.type.DataTypes
+import com.datastax.oss.driver.api.core.type.reflect.GenericType
 import com.datastax.oss.driver.api.mapper.annotations.Dao
 import com.datastax.oss.driver.api.mapper.annotations.Entity
 import com.datastax.oss.driver.api.mapper.annotations.PartitionKey
 import com.datastax.oss.driver.api.mapper.annotations.Select
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder
+import com.datastax.oss.driver.internal.core.type.codec.BigIntCodec
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.joda.time.DateTime
 import java.math.BigInteger
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import kotlin.system.measureTimeMillis
 
+fun Any?.toString(): String {
+    return this?.toString() ?: "NULL"
+}
+fun MutableList<Message>.organize(): MutableList<Message> {
+    val measure = measureTimeMillis {
+        this.sortBy { it.id }
+    }
+    println("Debug -> Sort took ${measure}ms")
+    return this
+}
 /**
  * ChannelDao the DAO for any Channel Messages
  * @param session The current CQL Session
@@ -26,7 +40,6 @@ import java.time.format.DateTimeFormatter
 interface ChannelDao {
     val session: CqlSession
     val table: String
-
     /**
      * Get message by id
      * @param messageID Message ID
@@ -39,14 +52,14 @@ interface ChannelDao {
      * @param userID User ID
      */
     @Select
-    fun getByUser(userID: Long): Message?
+    fun getMessagesByUser(userID: Long): MutableList<Message>
 
     /**
      * Get content
      * @param content The 'EXACT' message content i.e "This is a message" NOT "message"
      */
     @Select
-    fun getByContent(content: String): MutableList<Message>
+    fun getMessagesByContent(content: String): MutableList<Message>
 
     /**
      * Get all messages
@@ -54,6 +67,10 @@ interface ChannelDao {
     @Select
     fun getAll(): MutableList<Message>
 
+    /**
+     * Get total message count
+     */
+    fun getTotalMessageCount(): Int
     /**
      * Get messages after last id
      * @param id Message ID
@@ -88,72 +105,59 @@ interface ChannelDao {
      * @param errorCallback If an error occurred, callback to handle it.
      */
     fun delete(msgid: Long, executeCallback: (timing: Long) -> Unit, errorCallback: (e: Exception) -> Unit)
+
+    /**
+     * Get all games
+     */
+    fun getGames(): MutableList<IGame>
+
+    /**
+     * Get active games
+     */
+    fun getActiveGames(): MutableList<IGame>
 }
 
 @Dao
 data class DMDao(override val table: String, override val session: CqlSession) : ChannelDao {
     override fun getByID(messageID: Long): Message? {
-        TODO("Not yet implemented")
+        val select = session.execute("SELECT * FROM ${KEYSPACE}.${table} WHERE id = ${messageID};").single()
+        return getMessageFromResult(select)
     }
 
-    override fun getByUser(userID: Long): Message? {
-        val select = session.execute("SELECT content, created, type, edited FROM ${KEYSPACE}.${table}.${table} WHERE author = '${userID}'")
-        val messages = mutableListOf<Message>()
-        TODO("Not yet implemented")
+    override fun getMessagesByUser(userID: Long): MutableList<Message> {
+        val select = session.execute("SELECT * FROM ${KEYSPACE}.${table} WHERE author = $userID ALLOW FILTERING;").all()
+        return getMessagesFromResult(select)
     }
 
-    override fun getByContent(content: String): MutableList<Message> {
-        val select = session.execute("SELECT id, content, system, type, channel, author, created, edited FROM ${KEYSPACE}.${table}.${table} WHERE content LIKE '${content}' ALLOW FILTERING").all()
-        val messages = mutableListOf<Message>()
-        select.forEach { row ->
-            messages.add(
-                Message(
-                    id = row.getString("id")!!.toLong(),
-                    content = row.getString("content"),
-                    system = row.getBoolean("system"),
-                    channel = row.getString("channel")?.toLong(),
-                    author = row.getString("author")?.toLong(),
-                    created = row.getInstant("created")!!,
-                    edited = row.getInstant("edited")
-                )
-            )
-        }
-        return messages
+    override fun getMessagesByContent(content: String): MutableList<Message> {
+        val select = session.execute("SELECT * FROM ${KEYSPACE}.${table} WHERE content LIKE '${content}' ALLOW FILTERING;").all()
+        return getMessagesFromResult(select)
     }
 
     override fun getAll(): MutableList<Message> {
-        val select = session.execute("SELECT id, content, system, type, channel, author, created, edited FROM ${KEYSPACE}.${table}")
-        val messages = mutableListOf<Message>()
-        select.forEach { row ->
-            messages.add(
-                Message(
-                    id = row.getString("id")!!.toLong(),
-                    content = row.getString("content"),
-                    system = row.getBoolean("system"),
-                    channel = row.getString("channel")?.toLong(),
-                    author = row.getString("author")?.toLong(),
-                    created = row.getInstant("created")!!,
-                    edited = row.getInstant("edited")
-                )
-            )
-        }
-        return messages
+        val select = session.execute("SELECT * FROM ${KEYSPACE}.${table};").all()
+        return getMessagesFromResult(select)
+    }
+
+    override fun getTotalMessageCount(): Int {
+        val select = session.execute("SELECT count(*) FROM ${KEYSPACE}.${table};").single()
+        return select.formattedContents.replace("[", "").replace("]", "").replace("count:", "").toInt()
     }
 
     override fun getMessagesAfterLastID(id: Long, limit: Int): MutableList<Message> {
-        val firstSelect = session.execute("SELECT * FROM ${KEYSPACE}.${table} WHERE id < ${BigInteger.valueOf(id)}").all()
-        println(jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(firstSelect))
-        return mutableListOf()
+        val firstSelect = session.execute("SELECT * FROM ${KEYSPACE}.${table} WHERE id > ${BigInteger.valueOf(id)} LIMIT $limit ALLOW FILTERING;").all()
+        return getMessagesFromResult(firstSelect)
     }
 
     override fun getMessagesBeforeLastID(id: Long, limit: Int): MutableList<Message> {
-        TODO("Not yet implemented")
+        val firstSelect = session.execute("SELECT * FROM ${KEYSPACE}.${table} WHERE id < ${BigInteger.valueOf(id)} LIMIT $limit ALLOW FILTERING;").all()
+        return getMessagesFromResult(firstSelect)
     }
 
     override fun deleteAll(executeCallback: (timing: Long) -> Unit, errorCallback: (e: Exception) -> Unit) {
         val startTiming = System.currentTimeMillis()
         try {
-            session.execute("TRUNCATE zenspace_messages.${table}")
+            session.execute("TRUNCATE zenspace_messages.${table};")
         } catch (e: Exception) {
             errorCallback(e)
         } finally {
@@ -164,7 +168,7 @@ data class DMDao(override val table: String, override val session: CqlSession) :
     override fun delete(msgid: Long, executeCallback: (timing: Long) -> Unit, errorCallback: (e: Exception) -> Unit) {
         val startTiming = System.currentTimeMillis()
         try {
-            session.execute("DELETE FROM ${KEYSPACE}.${table}.${table} WHERE id='${msgid}' IF EXISTS;")
+            session.execute("DELETE FROM ${KEYSPACE}.${table} WHERE id=${msgid} IF EXISTS;")
         } catch (e: Exception) {
             errorCallback(e)
         } finally {
@@ -172,6 +176,67 @@ data class DMDao(override val table: String, override val session: CqlSession) :
         }
     }
 
+    override fun getGames(): MutableList<IGame> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getActiveGames(): MutableList<IGame> {
+        TODO("Not yet implemented")
+    }
+
+    private fun getMessageFromResult(row: Row): Message {
+        return Message(
+            id = row.getLong("id"),
+            content = row.getString("content"),
+            system = row.getBoolean("system"),
+            channel = row.getLong("channel"),
+            author = row.getLong("author"),
+            created = row.getInstant("created")!!,
+            edited = row.getInstant("edited"),
+            gameActive = row.getBoolean("gameActive"),
+            gameData = row.getString("gameData")
+        )
+    }
+    private fun getMessagesFromResult(set: ResultSet): MutableList<Message> {
+        val messages = mutableListOf<Message>()
+        set.forEach { row ->
+            messages.add(
+                Message(
+                    id = row.getLong("id"),
+                    content = row.getString("content"),
+                    system = row.getBoolean("system"),
+                    channel = row.getLong("channel"),
+                    author = row.getLong("author"),
+                    created = row.getInstant("created")!!,
+                    edited = row.getInstant("edited"),
+                    gameActive = row.getBoolean("gameActive"),
+                    gameType = row.getInt("gameType").takeIf { i -> i != 0 },
+                    gameData = row.getString("gameData")
+                )
+            )
+        }
+        return messages.organize()
+    }
+    private fun getMessagesFromResult(resultList: MutableList<Row>): MutableList<Message> {
+        val messages = mutableListOf<Message>()
+        resultList.forEach { row ->
+            messages.add(
+                Message(
+                    id = row.getLong("id"),
+                    content = row.getString("content"),
+                    system = row.getBoolean("system"),
+                    channel = row.getLong("channel"),
+                    author = row.getLong("author"),
+                    created = row.getInstant("created")!!,
+                    edited = row.getInstant("edited"),
+                    gameActive = row.getBoolean("gameActive"),
+                    gameType = row.getInt("gameType").takeIf { i -> i != 0 },
+                    gameData = row.getString("gameData")
+                )
+            )
+        }
+        return messages.organize()
+    }
     fun init() {
         createKeyspace()
         useKeyspace()
@@ -186,13 +251,14 @@ data class DMDao(override val table: String, override val session: CqlSession) :
             .withColumn("author", DataTypes.BIGINT)
             .withColumn("created", DataTypes.TIMESTAMP)
             .withColumn("edited", DataTypes.TIMESTAMP)
+            .withColumn("gameType", DataTypes.INT)
+            .withColumn("gameActive", DataTypes.BOOLEAN)
             .withColumn("gameData", DataTypes.TEXT)
         executeStatement(createTable.build())
     }
 
     override fun createMessage(message: Message) {
-        val rendered = "INSERT INTO ${KEYSPACE}.${table} (id, content, system, type, channel, author, created, edited, gameData) VALUES (${BigInteger.valueOf(message.id)}, '${message.content}', ${message.system}, ${message.type}, ${message.channel}, ${message.author}, '${message.created.toEpochMilli()}', NULL, '${message.gameData}');"
-        println("Rendered Query $rendered")
+        val rendered = "INSERT INTO ${KEYSPACE}.${table} (id, content, system, type, channel, author, created, edited, gameActive, gameType, gameData) VALUES (${BigInteger.valueOf(message.id)}, '${message.content}', ${message.system}, ${message.type}, ${message.channel}, ${message.author}, '${message.created.toEpochMilli()}', ${message.edited}, ${message.gameActive}, ${message.gameType}, '${message.gameData}');"
         session.execute(rendered)
     }
 
@@ -227,11 +293,14 @@ data class Message(
     var author: Long? = null,
     val created: Instant = Instant.now(),
     var edited: Instant? = null,
+    // Experiment.. Games?
+    var gameActive: Boolean = false,
+    var gameType: Int? = null,
     val gameData: String? = null
 ) {
 
     init {
-        println("New message created at ${created}")
+        println("New message created at $created")
     }
 }
 
@@ -312,4 +381,13 @@ enum class MessageType {
     Attachment,
     GameStart,
     GameEnd
+}
+
+enum class GameType {
+    TicTacToe,
+    Connect4,
+    Battleships,
+    Memory,
+    Pool,
+    Shooter
 }

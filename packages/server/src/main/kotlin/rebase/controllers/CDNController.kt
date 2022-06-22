@@ -34,14 +34,14 @@ class CDNController(val cache: Cache, val fileController: FileController) {
         ctx.contentType("image/webp")
         var avatar: ByteArrayOutputStream? = null
 
-        if (cache.userAvatarCache[user.identifier] == null || cache.userAvatarCache[user.identifier] != null && size != 512) {
+        if (cache.avatarCache[user.identifier] == null || cache.avatarCache[user.identifier] != null && size != 512) {
             val resizedImage = fileController.dynamicResize("./storage$file", size)
             avatar = resizedImage
             if (size == 512) {
-                cache.userAvatarCache[user.identifier] = resizedImage
+                cache.avatarCache[user.identifier] = resizedImage
             }
         } else {
-            avatar = cache.userAvatarCache[user.identifier]
+            avatar = cache.avatarCache[user.identifier]
         }
         when (size) {
             512 -> {
