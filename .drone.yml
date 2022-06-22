@@ -24,7 +24,9 @@ steps:
     environment:
       PASS:
         from_secret: github-token
+      GRADLE_USER_HOME: /drone
     commands:
+      - ls /
       - cd ./packages/server
       - chmod +x gradlew
       - ./gradlew jib --image=ghcr.io/brys0/zenspace:latest -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS
