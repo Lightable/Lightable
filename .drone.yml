@@ -14,7 +14,7 @@ steps:
       cache_key: "volume"
       archive_format: "gzip"
       mount:
-        - "drone"
+        - ".gradle"
     volumes:
       - name: cache
         path: /tmp/cache
@@ -23,7 +23,7 @@ steps:
     environment:
       PASS:
         from_secret: github-token
-      GRADLE_USER_HOME: /drone
+      GRADLE_USER_HOME: /drone/src/.gradle
     commands:
       - ls /drone
       - cd ./packages/server
@@ -39,7 +39,7 @@ steps:
       cache_key: "volume"
       archive_format: "gzip"
       mount:
-        - "/drone"
+        - "/.gradle"
     volumes:
       - name: cache
         path: /tmp/cache
