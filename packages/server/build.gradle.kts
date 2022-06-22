@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
     val kotlinVersion = "1.6.10"
     implementation(kotlin("stdlib"))
     implementation("com.github.Kosert.FlowBus:FlowBus:1.1")
@@ -55,6 +55,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 }
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     archiveFileName.set("zenspaceapi.jar")
+}
+tasks.test {
+    useJUnitPlatform()
 }
 jib {
     from {
