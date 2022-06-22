@@ -16,3 +16,4 @@ jobs:
           cd ./packages/server
           chmod +x gradlew
           ./gradlew --no-daemon jib --image=ghcr.io/brys0/zenspace:latest -Djib.to.auth.username=Brys0 -Djib.to.auth.password=${{secrets.SECRET_TOKEN}}
+          ./gradlew test
