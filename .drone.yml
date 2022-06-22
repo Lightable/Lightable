@@ -14,8 +14,7 @@ steps:
       cache_key: "volume"
       archive_format: "gzip"
       mount:
-        - "/drone/.gradle"
-        - "drone/.m2"
+        - "/drone"
     volumes:
       - name: cache
         path: /tmp/cache
@@ -40,8 +39,7 @@ steps:
       cache_key: "volume"
       archive_format: "gzip"
       mount:
-        - "/drone/.gradle"
-        - "/drone/.m2"
+        - "/drone/"
     volumes:
       - name: cache
         path: /tmp/cache
