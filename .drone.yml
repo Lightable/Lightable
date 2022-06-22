@@ -25,7 +25,7 @@ steps:
       PASS:
         from_secret: github-token
       GRADLE_USER_HOME: /drone/src/drone
-      SCYLLA_HOST: "172.19.0.5"
+      SCYLLA_HOST: drone_network
     commands:
       - ls /drone
       - cd ./packages/server
