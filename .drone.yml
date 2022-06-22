@@ -29,7 +29,7 @@ steps:
       - cd ./packages/server
       - chmod +x gradlew
       - ./gradlew jib --image=ghcr.io/brys0/zenspace:latest -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS
-      - ls /drone
+      - ls /drone/src
   - name: 🏗️ Rebuild Cache
     image: meltwater/drone-cache
     pull: true
