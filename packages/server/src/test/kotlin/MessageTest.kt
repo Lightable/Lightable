@@ -117,7 +117,7 @@ class MessageTest {
     }
     init {
         println("🔌 Attempting connection to Scylla Instance...")
-        connector.connect("192.168.50.111", 9042, "datacenter1")
+        connector.connect("localhost", 9042, "datacenter1")
         println("✅ Connection established!")
         session = connector.getSession()
     }
