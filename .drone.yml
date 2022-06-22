@@ -18,10 +18,6 @@ steps:
     volumes:
     - name: cache
       path: /tmp/cache
-  - name: Look At Build Files
-    commands:
-      - ls
-      - cd ../ ; ls
   - name: ZenSpace Build ✨
     image: gradle:jdk17
     environment:
