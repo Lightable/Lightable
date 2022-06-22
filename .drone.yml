@@ -39,7 +39,7 @@ steps:
       cache_key: "volume"
       archive_format: "gzip"
       mount:
-        - "drone"
+        - "/drone"
     volumes:
       - name: cache
         path: /tmp/cache
