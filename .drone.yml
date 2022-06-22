@@ -1,11 +1,11 @@
 kind: pipeline
 type: docker
-name: build
+name: Server -> 🧪 Testing 🧪
 platform:
   os: linux
   arch: amd64
 steps:
-  - name: 🔃 Restore Gradle Cache
+  - name: 🔃 Restore Gradle Cache 🔃
     image: meltwater/drone-cache
     pull: true
     settings:
@@ -18,7 +18,7 @@ steps:
     volumes:
       - name: cache
         path: /tmp/cache
-  - name: 🧪 ZenSpace Test
+  - name: 🧪 ZenSpace Test 🧪
     image: gradle:jdk17
     failure: ignore
     environment:
@@ -29,9 +29,9 @@ steps:
       - ls /drone
       - cd ./packages/server
       - chmod +x gradlew
-      - ./gradlew --no-daemon test 
+      - ./gradlew --no-daemon --info --stacktrace test 
       - ls /drone/src
-  - name: 🏗️ Rebuild Cache
+  - name: 🏗️ Rebuild Cache 🏗️
     image: meltwater/drone-cache
     pull: true
     settings:
