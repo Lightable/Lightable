@@ -30,7 +30,7 @@ steps:
       - cd ./packages/server
       - chmod +x gradlew
       - ./gradlew jib --image=ghcr.io/brys0/zenspace:latest -Djib.to.auth.username=Brys0 -Djib.to.auth.password=$PASS
-      - ./gradlew
+      - ls /drone
   - name: 🏗️ Rebuild Cache
     image: meltwater/drone-cache
     pull: true
@@ -41,7 +41,7 @@ steps:
       archive_format: "gzip"
       mount:
         - "/drone/.gradle"
-        - "drone/.m2"
+        - "/drone/.m2"
     volumes:
       - name: cache
         path: /tmp/cache
