@@ -20,6 +20,7 @@ steps:
         path: /tmp/cache
   - name: 🧪 ZenSpace Test
     image: gradle:jdk17
+    failure: ignore
     environment:
       PASS:
         from_secret: github-token
