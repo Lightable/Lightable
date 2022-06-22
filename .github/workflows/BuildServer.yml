@@ -1,7 +1,7 @@
 name: Build Jib Gradle
 on: [push]
 jobs:
-  build:
+  🧪-Test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -9,7 +9,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 17
-          distribution: 'adopt'
+          distribution: "adopt"
           cache: gradle
       - name: 🧪 Test ZenSpace
         continue-on-error: true
@@ -17,10 +17,19 @@ jobs:
           cd ./packages/server
           chmod +x gradlew
           ./gradlew test
+  🏗️-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: ☕ Setting up Java (17)
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: "adopt"
+          cache: gradle
       - name: 🏗️ Build ZenSpace
         if: always()
         run: |
           cd ./packages/server
           chmod +x gradlew
           ./gradlew --no-daemon jib --image=ghcr.io/brys0/zenspace:latest -Djib.to.auth.username=Brys0 -Djib.to.auth.password=${{secrets.SECRET_TOKEN}}
-         
