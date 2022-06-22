@@ -12,7 +12,7 @@ steps:
       backend: "filesystem"
       restore: true
       cache_key: "volume"
-      archive_format: "gzip"
+      archive_format: "tar"
       mount:
         - "drone"
     volumes:
@@ -38,7 +38,7 @@ steps:
       backend: "filesystem"
       rebuild: true
       cache_key: "volume"
-      archive_format: "gzip"
+      archive_format: "tar"
       mount:
         - "/drone"
     volumes:
