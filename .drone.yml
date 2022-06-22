@@ -29,7 +29,7 @@ steps:
       - ls /drone
       - cd ./packages/server
       - chmod +x gradlew
-      - ./gradlew test
+      - ./gradlew --no-daemon test 
       - ls /drone/src
   - name: 🏗️ Rebuild Cache
     image: meltwater/drone-cache
