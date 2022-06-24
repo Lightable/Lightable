@@ -65,7 +65,6 @@ jib {
     container {
         mainClass = "rebase.ServerKt"
         creationTime = Clock.systemUTC().instant().toString()
-        user = "brys"
     }
 }
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
