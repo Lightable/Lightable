@@ -17,7 +17,6 @@ import me.kosert.flowbus.subscribe
 import org.slf4j.Logger
 import rebase.cache.UserCache
 import rebase.compression.CompressionUtil
-import rebase.messages.Message
 import rebase.schema.*
 import java.nio.ByteBuffer
 
@@ -272,26 +271,13 @@ class WebSocketController(private val logger: Logger, private val userCache: Use
             }
             GlobalBus.dropAll()
         }
-
-        events.subscribe<ServerMessageCreate> { payload ->
-            val friendSockets = connections.values.filter { u -> u.user.identifier == payload.to }
-            for (socket in friendSockets) {
-                send(socket.ws.session, socket.ws.type, payload)
-            }
-            GlobalBus.dropAll()
-        }
     }
 }
 
 data class ReceivedMessage(
     val t: Int,
 )
-data class ServerMessageCreate(
-    @JsonIgnore var to: Long,
-    var d: Message
-) {
-    val t = SocketMessageType.ServerMessageCreate.ordinal
-}
+
 data class ReadyPayload(@JsonIgnore val heartbeat: Int) {
     val t = SocketMessageType.ServerStart.ordinal
     val d = object {

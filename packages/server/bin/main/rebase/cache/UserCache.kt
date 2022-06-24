@@ -1,8 +1,12 @@
-package rebase
+package rebase.cache
 
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOne
 import org.slf4j.LoggerFactory
+import rebase.FileController
+import rebase.RebaseMongoDatabase
+import rebase.Server
+import rebase.Snowflake
 import rebase.interfaces.cache.IUserCache
 import rebase.schema.ChattyRelease
 import rebase.schema.User
@@ -10,8 +14,8 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import kotlin.collections.HashMap
 
-class Cache(private val executor: ExecutorService, val db: RebaseMongoDatabase, override val snowflake: Snowflake, val server: Server, val fileController: FileController): IUserCache {
-    val logger = LoggerFactory.getLogger("Rebase -> CACHE")
+class UserCache(private val executor: ExecutorService, val db: RebaseMongoDatabase, override val snowflake: Snowflake, val server: Server, val fileController: FileController): IUserCache {
+    val logger = LoggerFactory.getLogger("Rebase -> UserCache")
     val userColl = db.getUserCollection()
     val releaseColl = db.getReleaseCollection()
     override val users = HashMap<Long, User>()

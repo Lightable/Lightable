@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import com.datastax.oss.driver.api.core.CqlSession
 import com.github.ajalt.mordant.terminal.Terminal
-import com.sun.management.OperatingSystemMXBean
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.core.util.RouteOverviewPlugin
@@ -15,9 +14,6 @@ import io.javalin.plugin.openapi.dsl.documented
 import io.javalin.plugin.openapi.ui.ReDocOptions
 import io.javalin.plugin.openapi.ui.SwaggerOptions
 import io.swagger.v3.oas.models.info.Info
-import me.kosert.flowbus.EventsReceiver
-import me.kosert.flowbus.GlobalBus
-import me.kosert.flowbus.subscribe
 import org.slf4j.LoggerFactory
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
@@ -28,14 +24,11 @@ import rebase.messages.ScyllaConnector
 import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintStream
-import java.lang.management.ManagementFactory
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Timer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
 
 val t = Terminal()
 
@@ -45,7 +38,7 @@ class Server(var dbhost: String = "localhost",
              var dbpass: String = "rootpass",
              var session: CqlSession) {
     val logger: org.slf4j.Logger = LoggerFactory.getLogger("Server")!!
-    var totalRequests = 0
+    val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
     var port = 8080
 
     var isProd = false
@@ -68,26 +61,16 @@ class Server(var dbhost: String = "localhost",
             static.location = Location.EXTERNAL
             static.hostedPath = "/release"
         }
-        it.accessManager { handler, ctx, _ ->
-            if (serverOverloaded) {
-                ctx.status(503).html("<!DOCTYPE html><head><title>ZenSpace is overloaded</title></head><body> <h1>Server is Overloaded, Please Wait.<br>CPU Usage: ${serverCPUUsage}%</h1></body> <style>:root { font-family: Arial; color: red; font-weight: bold; }</style><script>setInterval(() => {location.reload()}, 5000)</script></html>")
-            } else {
-                handler.handle(ctx)
-            }
-        }
         it.requestLogger { ctx, executionTimeMs ->
             val date = Instant.now()
             val dateStr = "${dateFormatter.format(date)} " + "- ${timeFormatter.format(date)}"
-            totalRequests += 1
-            if (!isProd) {
-                println(
-                    "[Rebase]: $dateStr |   ${executionTimeMs}ms   | ${ctx.req.remoteHost}  | ${
-                        determineMethodColor(
-                            ctx.method()
-                        )
-                    }  \"${ctx.path()}\""
+            println(
+                "[Rebase]: $dateStr |   ${executionTimeMs}ms   | ${ctx.req.remoteHost}  | ${
+                determineMethodColor(
+                    ctx.method()
                 )
-            }
+                }  \"${ctx.path()}\""
+            )
         }
     }
     val userCache = UserCache(async, db, snowflake, this, fileController)
@@ -97,9 +80,6 @@ class Server(var dbhost: String = "localhost",
     private val developerController = DeveloperController(userCache)
     val user = rebase.controllers.UserController(userCache, dmCache, session, snowflake, async, isProd, fileController)
     private val cdnController = CDNController(userCache, fileController)
-    private var serverOverloaded = false
-    private var serverCPUUsage = 0L
-    private val events = EventsReceiver()
     init {
         Thread.currentThread().name = "Server (Main)"
         Thread.setDefaultUncaughtExceptionHandler { thread, err ->
@@ -173,17 +153,11 @@ class Server(var dbhost: String = "localhost",
                         }
                         delete("{id}", documented(relationship.removeRelationshipDoc, relationship::removeRelationship))
                     }
-                    val dmChannel = user.DMChannel()
-                    path("/{id}/messages") {
-                        get(dmChannel::getMessages)
-                        post("send", dmChannel::sendMessage)
+                    path("/messages") {
+                        post("/{cid}/send", user.DMChannel()::sendMessage)
                     }
                 }
             }
-        }
-        events.subscribe<GetCPUUsage.CPUUsageUpdate> {
-            this.serverOverloaded = it.usage > 75
-            this.serverCPUUsage = it.usage
         }
     }
 
@@ -240,17 +214,9 @@ fun main(args: Array<String>) {
     var dbport: Int = 27017
     var dbuser: String = "root"
     var dbpass: String = "rootpass"
-    var prod = false
-    val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
     println("Working -> ${File("./storage").absolutePath}")
     File("./releases").mkdir()
     File("./storage").mkdir()
-    if (System.getenv("verbose").toBoolean()) {
-        println("${t.colors.brightYellow.invoke("Verbose is enabled ")}⚠️")
-        root.level = Level.DEBUG
-    } else {
-        root.level = Level.INFO
-    }
     if (!System.getenv("dbport").isNullOrBlank()) {
         dbport = System.getenv("dbport").toInt()
     }
@@ -263,25 +229,29 @@ fun main(args: Array<String>) {
      if (!System.getenv("dbpass").isNullOrBlank()) {
         dbpass = System.getenv("dbpass")
     }
-    if (System.getenv("prod").toBoolean()) {
-        println("${t.colors.brightGreen.invoke("Production mode is enabled ")}✅")
-        prod = true
-    }
     val scyllaHost = System.getenv("SCYLLA_HOST") ?: "192.168.50.111"
     val connector = ScyllaConnector()
     connector.connect(scyllaHost, 9042, "datacenter1")
     val server = Server(dbhost, dbport, dbuser, dbpass, connector.getSession())
-    server.isProd = prod
+
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (!System.getenv("port").isNullOrBlank()) {
         server.port = System.getenv("port").toInt()
     }
     println(t.colors.brightBlue.invoke("PORT: ${server.port}"))
-
+    if (System.getenv("verbose").toBoolean()) {
+        println("${t.colors.brightYellow.invoke("Verbose is enabled ")}⚠️")
+        server.root.level = Level.DEBUG
+    } else {
+        server.root.level = Level.INFO
+    }
     if (System.getenv("batchdb").toBoolean()) {
         println("${t.colors.brightYellow.invoke("Batching DB requests is enabled ")}⚠️")
     }
-
+    if (System.getenv("prod").toBoolean()) {
+        println("${t.colors.brightGreen.invoke("Production mode is enabled ")}✅")
+        server.isProd = true
+    }
 
     if (server.isProd) {
         val file = File("err.clog")
@@ -291,14 +261,4 @@ fun main(args: Array<String>) {
     }
     println("${t.colors.brightRed.invoke("---->>")} Logs ${t.colors.brightBlue.invoke("<<----\n")}")
     server.javalin.start(server.port)
-    Timer().scheduleAtFixedRate(GetCPUUsage(), 0, 2000)
-}
-
-
-class GetCPUUsage() : java.util.TimerTask() {
-    override fun run() {
-        val osBean: OperatingSystemMXBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
-        GlobalBus.post(CPUUsageUpdate((osBean.processCpuLoad * 100).toLong()))
-    }
-    data class CPUUsageUpdate(val usage: Long)
 }

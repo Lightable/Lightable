@@ -72,7 +72,6 @@ interface ChannelDao {
      * Get total message count
      */
     fun getTotalMessageCount(): Int
-    fun getMessages(limit: Int): MutableList<Message>
     /**
      * Get messages after last id
      * @param id Message ID
@@ -144,11 +143,6 @@ data class DMDao(override val table: String, override val session: CqlSession) :
     override fun getTotalMessageCount(): Int {
         val select = session.execute("SELECT count(*) FROM ${KEYSPACE}.${table};").single()
         return select.formattedContents.replace("[", "").replace("]", "").replace("count:", "").toInt()
-    }
-
-    override fun getMessages(limit: Int): MutableList<Message> {
-        val firstSelect = session.execute("SELECT * FROM ${KEYSPACE}.${table} LIMIT ${limit};").all()
-        return getMessagesFromResult(firstSelect)
     }
 
     override fun getMessagesAfterLastID(id: Long, limit: Int): MutableList<Message> {
@@ -324,32 +318,6 @@ interface IGame {
     fun stop()
     fun update(data: Any)
 }
-class Hangman(
-    override val name: String,
-    override val players: MutableList<Long>,
-    override val created: Instant,
-    private val word: String = "Hangman"
-) : IGame {
-    override var gameData: Any = GameData(word, players, mutableMapOf())
-    override fun start() {
-        TODO("Not yet implemented")
-    }
-
-    override fun pause() {
-        TODO("Not yet implemented")
-    }
-
-    override fun stop() {
-        TODO("Not yet implemented")
-    }
-
-    override fun update(data: Any) {
-        this.gameData = data as GameData
-    }
-    data class GameData(val word: String, val players: MutableList<Long>, val playerState: MutableMap<Long, String>) {
-        var waitingFor = players[0]
-    }
-}
 
 class Connect4(
     override val name: String,
@@ -359,7 +327,7 @@ class Connect4(
     val rows = mutableListOf<Row>()
 
     // Rows
-    override var gameData: Any = GameData(players, rows)
+    override var gameData: Any = mutableListOf<Connect4>()
     override fun start() {
         TODO("Not yet implemented")
     }
@@ -409,9 +377,6 @@ class Connect4(
         for (i in 1..6) {
             this.rows.add(Row())
         }
-    }
-    data class GameData(var players: MutableList<Long>, var data: MutableList<Row>) {
-        var waitingFor = players[0]
     }
 }
 

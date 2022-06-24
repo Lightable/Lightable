@@ -390,12 +390,7 @@ class UserController(
             if (user != null) {
                 if (user.acceptRequest(pendingUser.toLong())) {
                     val dmChannelID = snowflake.nextId()
-                    val dmChannel = DMChannel(
-                        dmCache,
-                        identifier = dmChannelID,
-                        users = mutableListOf(user.identifier, pendingUser.toLong()),
-                        dao = DMDao("dm_${dmChannelID}", cqlSession)
-                    )
+                    val dmChannel = DMChannel(dmCache, identifier = dmChannelID, users = mutableListOf(user.identifier, pendingUser.toLong()), dao = DMDao("dm_${dmChannelID}", cqlSession))
                     dmChannel.dao!!.init()
                     ctx.status(201).json(userCache.users[pendingUser.toLong()]?.toPublic()!!)
                     dmCache.saveOrReplaceChannel(dmChannel)
@@ -435,387 +430,57 @@ class UserController(
             }
         }
     }
-
     inner class DMChannel {
-        @OpenApi(
-            path = "/user/@me/{id}/messages",
-            method = HttpMethod.GET,
-            responses = [
-                OpenApiResponse(
-                    "200",
-                    content = [OpenApiContent(Message::class, isArray = true, type = "application/json")]
-                ),
-                OpenApiResponse(
-                    "403",
-                    content = [OpenApiContent(
-                        DMChannelResponse.InvalidChannelPermissions::class,
-                        type = "application/json"
-                    )]
-                ),
-                OpenApiResponse(
-                    "400",
-                    content = [OpenApiContent(DMChannelResponse.TooManyMessages::class, type = "application/json")]
-                ),
-                OpenApiResponse(
-                    "404",
-                    content = [OpenApiContent(DMChannelResponse.ChannelDoesntExist::class, type = "application/json")]
-                ),
-                OpenApiResponse(
-                    "501",
-                    content = [OpenApiContent(DMChannelResponse.FeatureDoesntExist::class, type = "application/json")]
-                )
-            ],
-            queryParams = [
-                OpenApiParam(
-                    name = "type",
-                    type = DMChannelTypes::class,
-                    description = "Type of channel you want to get messages from. FRIEND/GROUP",
-                    required = true,
-                    allowEmptyValue = false,
-                    isRepeatable = false
-                ),
-                OpenApiParam(
-                    name = "before",
-                    type = Long::class,
-                    description = "Optional, what messages do you want before the given message id",
-                    required = false,
-                    allowEmptyValue = false,
-                    isRepeatable = false
-                ),
-                OpenApiParam(
-                    name = "after",
-                    type = Long::class,
-                    description = "Optional, what messages do you want after the given message id",
-                    required = false,
-                    allowEmptyValue = false,
-                    isRepeatable = false
-                )
-            ],
-            summary = "Get messages from a DM channel",
-            description = "Get up to 100 messages from a DM channel",
-            tags = ["User", "Message", "Channel"],
-            operationId = "DMChannelMessagesGet"
-        )
-
-        fun getMessages(ctx: Context) {
-            val user = requireAuth(userCache, ctx)
-            val id = ctx.pathParam("id").toLong()
-            val after = ctx.queryParam("after")?.toLong()
-            val before = ctx.queryParam("before")?.toLong()
-            val limit = ctx.queryParam("limit")?.toInt() ?: 50
-
-            if (user != null) {
-                if (limit > 100) {
-                    ctx.status(400).json(DMChannelResponse.TooManyMessages())
-                    return
-                }
-                when (ctx.queryParam("type")) {
-                    "FRIEND" -> {
-                        val friend = userCache.users[id]
-                        if (friend == null) {
-                            ctx.status(404).json(DMChannelResponse.ChannelDoesntExist())
-                            return
-                        }
-                        // First filter by users in the channel
-                        val dmChannels = dmCache.channels.values.filter { c ->
-                            c.users.containsAll(
-                                listOf(
-                                    user.identifier,
-                                    friend.identifier
-                                )
-                            )
-                        }
-                        // Then by type of channel, in this case FRIEND
-                        val friendChannel = dmChannels.find { c -> c.type == DMChannelTypes.FRIEND.ordinal }
-                        // I don't know how this could be null but shit happens (。・・)ノ
-                        if (friendChannel == null) {
-                            ctx.status(404).json(DMChannelResponse.ChannelDoesntExist())
-                            return
-                        } else if (friendChannel.dao == null) {
-                            ctx.status(500).json(DMChannelResponse.BrokenChannelContext())
-                            return
-                        } else {
-                            if (after != null) {
-                                val messages = friendChannel.dao!!.getMessagesAfterLastID(after, limit)
-                                ctx.status(200).json(messages)
-                                return
-                            } else if (before != null) {
-                                val messages = friendChannel.dao!!.getMessagesBeforeLastID(before, limit)
-                                ctx.status(200).json(messages)
-                                return
-                            } else {
-                                val messages = friendChannel.dao!!.getMessages(limit)
-                                ctx.status(200).json(messages)
-                                return
-                            }
-                        }
-                    }
-                    "GROUP" -> {
-                        // TODO: Finish Group Channels
-                        ctx.status(501).json(DMChannelResponse.FeatureDoesntExist())
-                        return
-                    }
-                    else -> {
-                        ctx.status(400).json(DMChannelResponse.ChannelTypeDoesntExist())
-                        return
-                    }
-                }
-            }
-        }
-
-        @OpenApi(
-            path = "/user/@me/{id}/messages/send",
-            method = HttpMethod.POST,
-            requestBody = OpenApiRequestBody(content = arrayOf(OpenApiContent(from = MessageCreate::class))),
-            responses = [
-                OpenApiResponse("201", content = [OpenApiContent(Message::class, type = "application/json")]),
-                OpenApiResponse(
-                    "400",
-                    content = [OpenApiContent(DMChannelResponse.ChannelDoesntExist::class, type = "application/json")]
-                ),
-                OpenApiResponse(
-                    "403",
-                    content = [OpenApiContent(
-                        DMChannelResponse.InvalidChannelPermissions::class,
-                        type = "application/json"
-                    )]
-                ),
-                OpenApiResponse(
-                    "404",
-                    content = [OpenApiContent(DMChannelResponse.ChannelDoesntExist::class, type = "application/json")]
-                ),
-                OpenApiResponse(
-                    "500",
-                    content = [OpenApiContent(DMChannelResponse.BrokenChannelContext::class, type = "application/json")]
-                ),
-                OpenApiResponse(
-                    "501",
-                    content = [OpenApiContent(DMChannelResponse.FeatureDoesntExist::class, type = "application/json")]
-                )
-            ],
-            pathParams = [
-                OpenApiParam(
-                    name = "id",
-                    type = String::class,
-                    description = "ID of the group channel or friend",
-                    required = true,
-                    allowEmptyValue = false,
-                    isRepeatable = false
-                )
-            ],
-            queryParams = [
-                OpenApiParam(
-                    name = "type",
-                    type = DMChannelTypes::class,
-                    description = "Type of channel you want to send a message to. FRIEND/GROUP",
-                    required = true,
-                    allowEmptyValue = false,
-                    isRepeatable = false
-                )
-            ],
-            headers = [
-                OpenApiParam(
-                    name = "Authorization",
-                    type = String::class,
-                    description = "The User token authorization header",
-                    required = true,
-                    allowEmptyValue = false,
-                    isRepeatable = false
-                )
-            ],
-            summary = "Send message to a DM channel",
-            description = "Send a message to a valid dm channel",
-            tags = ["User", "Message", "Channel"],
-            operationId = "DMChannelMessageCreate"
-        )
         fun sendMessage(ctx: Context) {
             val user = requireAuth(userCache, ctx)
-            val id = ctx.pathParam("id").toLong()
+            val channel = dmCache.channels[ctx.pathParam("cid").toLong()]
             val createMessage = ctx.bodyAsClass<MessageCreate>()
-            if (user != null) {
-                when (ctx.queryParam("type")) {
-                    "FRIEND" -> {
-                        val friend = userCache.users[id]
-                        if (friend == null) {
-                            ctx.status(404).json(DMChannelResponse.ChannelDoesntExist())
+            println(ctx.pathParam("cid").toLong())
+            println(dmCache.channels)
+            if (channel == null) {
+                ctx.status(404).json(ChannelDoesntExist())
+                return
+            } else if (channel.dao == null) {
+                ctx.status(500).json(BrokenChannelContext())
+                return
+            } else {
+                if (user != null) {
+                    channel.users.forEach {
+                        val externalUser = userCache.users[it]
+                        if (externalUser?.relationships?.friends?.contains(user.identifier) == false && externalUser.identifier != user.identifier) {
+                            ctx.status(403).json(InvalidChannelPermissions())
                             return
                         }
-                        // First filter by users in the channel
-                        val dmChannels = dmCache.channels.values.filter { c ->
-                            c.users.containsAll(
-                                listOf(
-                                    user.identifier,
-                                    friend.identifier
-                                )
-                            )
-                        }
-                        // Then by type of channel, in this case FRIEND
-                        val friendChannel = dmChannels.find { c -> c.type == DMChannelTypes.FRIEND.ordinal }
-                        // I don't know how this could be null but shit happens (。・・)ノ
-                        if (friendChannel == null) {
-                            ctx.status(404).json(DMChannelResponse.ChannelDoesntExist())
-                            return
-                        } else if (friendChannel.dao == null) {
-                            ctx.status(500).json(DMChannelResponse.BrokenChannelContext())
-                            return
-                        } else {
-                            if (user.validFriendship(friend.identifier)) {
-                                val message = Message(
-                                    id = snowflake.nextId(),
-                                    content = createMessage.content,
-                                    author = user.identifier
-                                )
-                                val messageCreateTiming = measureTimeMillis {
-                                    friendChannel.dao!!.createMessage(message)
-                                }
-                                ctx.status(201).json(message).header(
-                                    "Server-Timing",
-                                    "creation;desc=\"Message creation time on DB\";dur=${messageCreateTiming}"
-                                )
-                                GlobalBus.post(ServerMessageCreate(friend.identifier, message))
-                                return
-                            } else {
-                                ctx.status(403).json(DMChannelResponse.InvalidChannelPermissions())
-                                return
-                            }
-                        }
-
                     }
-                    "GROUP" -> {
-                        // TODO: Finish Group Channels
-                        ctx.status(501).json(DMChannelResponse.FeatureDoesntExist())
-                        return
+                    val message = Message(id = snowflake.nextId(), content = createMessage.content, author = user.identifier)
+                    val messageCreateTiming = measureTimeMillis {
+                        channel.dao!!.createMessage(message)
                     }
-                    else -> {
-                        ctx.status(400).json(DMChannelResponse.ChannelTypeDoesntExist())
-                    }
-                }
-            }
-        }
-
-        fun deleteMessage(ctx: Context) {
-            val user = requireAuth(userCache, ctx)
-            val id = ctx.pathParam("id").toLong()
-            val messageID = ctx.queryParam("messageID")?.toLong()
-            if (user != null) {
-                if (messageID == null) {
-                    ctx.status(400)
+                    ctx.status(201).json(message).header("Server-Timing", "creation;desc=\"Message creation time on DB\";dur=${messageCreateTiming}")
                     return
                 }
-                when (ctx.queryParam("type")) {
-                    "FRIEND" -> {
-                        val friend = userCache.users[id]
-                        if (friend == null) {
-                            ctx.status(404).json(DMChannelResponse.ChannelDoesntExist())
-                            return
-                        }
-                        // First filter by users in the channel
-                        val dmChannels = dmCache.channels.values.filter { c ->
-                            c.users.containsAll(
-                                listOf(
-                                    user.identifier,
-                                    friend.identifier
-                                )
-                            )
-                        }
-                        // Then by type of channel, in this case FRIEND
-                        val friendChannel = dmChannels.find { c -> c.type == DMChannelTypes.FRIEND.ordinal }
-                        // I don't know how this could be null but shit happens (。・・)ノ
-                        if (friendChannel == null) {
-                            ctx.status(404).json(DMChannelResponse.ChannelDoesntExist())
-                            return
-                        } else if (friendChannel.dao == null) {
-                            ctx.status(500).json(DMChannelResponse.BrokenChannelContext())
-                            return
-                        } else {
-                            val message = friendChannel.dao!!.getByID(messageID)
-                            if (message == null) {
-                                ctx.status(404)
-                                return
-                            } else {
-                                if (message.author != user.identifier) {
-                                    ctx.status(403).json(DMChannelResponse.MissingPermissions())
-                                    return
-                                } else {
-                                    friendChannel.dao!!.delete(messageID, {
-                                        ctx.status(204).header(
-                                            "Server-Timing",
-                                            "creation;desc=\"Message deletion time on DB\";dur=${it}"
-                                        )
-                                        return@delete
-                                    }, {
-                                        ctx.status(500).json(DMChannelResponse.BrokenChannelContext())
-                                        return@delete
-                                    })
-                                }
-                            }
-                        }
-                    }
-                    "GROUP" -> {
-                        // TODO: Finish Group Channels
-                        ctx.status(501).json(DMChannelResponse.FeatureDoesntExist())
-                        return
-                    }
-                    else -> {
-                        ctx.status(400).json(DMChannelResponse.ChannelTypeDoesntExist())
-                    }
-                }
             }
+
         }
     }
-
-    object DMChannelResponse {
-        class MissingPermissions : FailImpl {
-            override val code: String
-                get() = "MISSING_PERMISSIONS"
-            override val message: String
-                get() = "You're missing permissions to perform this action on the channel"
-        }
-
-        class TooManyMessages : FailImpl {
-            override val code: String
-                get() = "TOO_MANY_MESSAGES"
-            override val message: String
-                get() = "For your current account you can only request up to 100 messages (?limit=0-100)"
-        }
-
-        class ChannelTypeDoesntExist : FailImpl {
-            override val code: String
-                get() = "CHANNEL_TYPE_DOESNT_EXIST"
-            override val message: String
-                get() = "This channel type does not exist. The valid channel types are: [FRIEND, GROUP]"
-        }
-
-        class FeatureDoesntExist : FailImpl {
-            override val code: String
-                get() = "FEATURE_DOESNT_EXIST"
-            override val message: String
-                get() = "This feature has yet to implemented or allowed for the general public, check back later"
-        }
-
-        class BrokenChannelContext : FailImpl {
-            override val code: String
-                get() = "INVALID_CHANNEL"
-            override val message: String
-                get() = "Something went wrong when trying to access this channel"
-        }
-
-        class InvalidChannelPermissions : FailImpl {
-            override val code: String
-                get() = "INVALID_CHANNEL_PERMISSIONS"
-            override val message: String
-                get() = "You are not friends with this user or they have blocked you"
-        }
-
-        class ChannelDoesntExist : FailImpl {
-            override val code: String
-                get() = "CHANNEL_NOT_FOUND"
-            override val message: String
-                get() = "The channel was recently deleted or is an invalid id"
-        }
+    class BrokenChannelContext : FailImpl {
+        override val code: String
+            get() = "INVALID_CHANNEL"
+        override val message: String
+            get() = "Something went wrong when trying to access this channel"
     }
-
-
+    class InvalidChannelPermissions : FailImpl {
+        override val code: String
+            get() = "INVALID_CHANNEL_PERMISSIONS"
+        override val message: String
+            get() = "You are not friends with this user or they have blocked you"
+    }
+    class ChannelDoesntExist : FailImpl {
+        override val code: String
+            get() = "CHANNEL_NOT_FOUND"
+        override val message: String
+            get() = "The channel was recently deleted or is an invalid id"
+    }
     class UserAuthFail : FailImpl {
         override val code: String
             get() = "AUTH_USER_FAIL"

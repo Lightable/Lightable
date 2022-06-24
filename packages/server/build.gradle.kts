@@ -1,6 +1,5 @@
-import io.opencensus.common.Clock
+import java.time.Clock
 
-val exposedVersion: String by project
 plugins {
     kotlin("jvm") version "1.6.10"
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -61,10 +60,12 @@ tasks.test {
 }
 jib {
     from {
-        image = "gcr.io/distroless/java17-debian11"
+        image = "ghcr.io/graalvm/graalvm-ce:ol8-java17"
     }
     container {
         mainClass = "rebase.ServerKt"
+        creationTime = Clock.systemUTC().instant().toString()
+        user = "brys"
     }
 }
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks

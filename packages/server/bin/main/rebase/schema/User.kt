@@ -93,7 +93,7 @@ data class User constructor(
     @BsonIgnore
     fun validFriendship(friendID: Long): Boolean {
         val friend = cache?.users?.get(friendID) ?: return false
-        if (friend.relationships.friends.contains(this.identifier) && this.relationships.friends.contains(friend.identifier)) return true
+        if (friend.relationships.friends.contains(this.identifier) && this.relationships.friends.contains(this.identifier)) return true
         return false
     }
     @BsonIgnore
