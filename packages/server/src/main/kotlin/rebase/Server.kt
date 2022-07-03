@@ -24,7 +24,9 @@ import rebase.cache.UserCache
 import rebase.controllers.CDNController
 import rebase.controllers.DeveloperController
 import rebase.controllers.WebSocketController
+import rebase.generator.EmbedImageGenerator
 import rebase.messages.ScyllaConnector
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintStream
@@ -35,15 +37,18 @@ import java.time.format.DateTimeFormatter
 import java.util.Timer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import javax.imageio.ImageIO
 
 
 val t = Terminal()
 
-class Server(var dbhost: String = "localhost",
-             var dbport: Int = 27017,
-             var dbuser: String = "root",
-             var dbpass: String = "rootpass",
-             var session: CqlSession) {
+class Server(
+    var dbhost: String = "localhost",
+    var dbport: Int = 27017,
+    var dbuser: String = "root",
+    var dbpass: String = "rootpass",
+    var session: CqlSession
+) {
     val logger: org.slf4j.Logger = LoggerFactory.getLogger("Server")!!
     var totalRequests = 0
     var port = 8080
@@ -57,6 +62,7 @@ class Server(var dbhost: String = "localhost",
     private val async: ExecutorService = Executors.newCachedThreadPool()
     private val fileController = FileController()
     private val db: RebaseMongoDatabase = RebaseMongoDatabase(dbuser, dbpass, dbhost, dbport)
+    private val imageGen = EmbedImageGenerator()
     val javalin: Javalin = Javalin.create {
         it.showJavalinBanner = false
         it.enableCorsForAllOrigins()
@@ -70,7 +76,8 @@ class Server(var dbhost: String = "localhost",
         }
         it.accessManager { handler, ctx, _ ->
             if (serverOverloaded) {
-                ctx.status(503).html("<!DOCTYPE html><head><title>ZenSpace is overloaded</title></head><body> <h1>Server is Overloaded, Please Wait.<br>CPU Usage: ${serverCPUUsage}%</h1></body> <style>:root { font-family: Arial; color: red; font-weight: bold; }</style><script>setInterval(() => {location.reload()}, 5000)</script></html>")
+                ctx.status(503)
+                    .html("<!DOCTYPE html><head><title>ZenSpace is overloaded</title></head><body> <h1>Server is Overloaded, Please Wait.<br>CPU Usage: ${serverCPUUsage}%</h1></body> <style>:root { font-family: Arial; color: red; font-weight: bold; }</style><script>setInterval(() => {location.reload()}, 5000)</script></html>")
             } else {
                 handler.handle(ctx)
             }
@@ -100,6 +107,7 @@ class Server(var dbhost: String = "localhost",
     private var serverOverloaded = false
     private var serverCPUUsage = 0L
     private val events = EventsReceiver()
+
     init {
         Thread.currentThread().name = "Server (Main)"
         Thread.setDefaultUncaughtExceptionHandler { thread, err ->
@@ -120,6 +128,25 @@ class Server(var dbhost: String = "localhost",
             }
         }
         javalin.routes {
+            get("/experimental/image/generate") {
+                val type = it.queryParam("type")
+                val text = it.queryParam("text") ?: "No Text"
+                when (type) {
+                    "EMBED" -> {
+                        val image = imageGen.generateEmbed(text)
+                        val baos = ByteArrayOutputStream()
+                        ImageIO.write(image.image, "webp", baos)
+                        val imgInBytes = baos.toByteArray()
+                        it.contentType("image/webp")
+                        it.res.setContentLength(imgInBytes.size)
+                        it.res.addHeader("X-Image-Gen-Timing", image.timing.toString())
+                        it.status(201).result(imgInBytes)
+                    }
+                    else -> {
+                        it.status(401)
+                    }
+                }
+            }
             ws("/ws") {
                 it.onConnect(websocketController::connection)
                 it.onMessage(websocketController::message)
@@ -260,7 +287,7 @@ fun main(args: Array<String>) {
     if (!System.getenv("dbhost").isNullOrBlank()) {
         dbhost = System.getenv("dbhost")
     }
-     if (!System.getenv("dbpass").isNullOrBlank()) {
+    if (!System.getenv("dbpass").isNullOrBlank()) {
         dbpass = System.getenv("dbpass")
     }
     if (System.getenv("prod").toBoolean()) {
@@ -300,5 +327,6 @@ class GetCPUUsage() : java.util.TimerTask() {
         val osBean: OperatingSystemMXBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
         GlobalBus.post(CPUUsageUpdate((osBean.processCpuLoad * 100).toLong()))
     }
+
     data class CPUUsageUpdate(val usage: Long)
 }

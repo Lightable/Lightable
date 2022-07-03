@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link href="/favicon.ico"
+        rel="icon">
+  <meta content="width=device-width, initial-scale=1.0"
+        name="viewport">
+  <title>ZenSpace</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    let documentRoot = document.getElementsByTagName('html')[0];
+    if (localStorage.getItem('isDark') == 'true') {
+      documentRoot.removeAttribute('light');
+      documentRoot.setAttribute('dark', 'true');
+      document.isDark = true;
+    } else {
+      documentRoot.removeAttribute('dark');
+      documentRoot.setAttribute('light', 'true');
+      document.isDark = false;
+    }
+  </script> 
+  <script src="/src/main.ts"
+        type="module"></script>
+  <style lang="scss">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @import './src/fonts/strawford/strawford.css';
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Titillium+Web:wght@400;600;700&display=swap');
+
+    .app {
+      height: 100vh;
+      width: 100%;
+    }
+
+    :root {
+      --color-text: hsl(12, 5%, 4%);
+      --color-bg: #111111;
+      --color-border: hsl(17, 24%, 90%);
+      --astro-gradient: linear-gradient(0deg, #39fada, #6c63e6);
+      --font-size-base: clamp(1rem, 0.34vw + 0.91rem, 1.19rem);
+      --font-size-lg: clamp(1.2rem, 0.7vw + 1.2rem, 1.5rem);
+      --font-size-xl: clamp(2.44rem, 2.38vw + 1.85rem, 3.75rem);
+      --header-light: hsl(17, 26%, 95%);
+      --header-dark: #1A1A1A;
+      --slide-dark: #1A1A1A;
+      --slide-light: hsl(0, 1%, 13%);
+      --bg-light: hsl(17, 24%, 90%);
+      --bg-dark: var(--color-bg);
+      --n-bezier: cubic-bezier(.4, 0, .2, 1);
+    }
+
+    html {
+      font-family: system-ui, sans-serif;
+      font-size: var(--font-size-base);
+      color: var(--color-text);
+      background-color: var(--color-bg);
+      transition: color .3s var(--n-bezier), background-color .3s var(--n-bezier), opacity .3s var(--n-bezier), border-color .3s var(--n-bezier);
+    }
+    .selectable {
+      cursor: pointer;
+    }
+    body {
+      margin: 0;
+    }
+
+    main {
+      margin: auto;
+      padding: 1em;
+      max-width: 60ch;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        background-position-y: 0%;
+      }
+
+      50% {
+        background-position-y: 80%;
+      }
+    }
+   
+  </style>
+</body>
+</html>

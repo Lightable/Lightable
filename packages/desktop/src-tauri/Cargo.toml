@@ -1,0 +1,57 @@
+[package]
+name = "app"
+version = "0.0.2"
+description = "A Tauri App"
+authors = ["you"]
+license = ""
+repository = ""
+default-run = "app"
+edition = "2021"
+rust-version = "1.57"
+build = "src/build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.0.0", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "1.0.0", features = ["devtools", "dialog-open", "http-all", "http-api", "protocol-all", "system-tray", "updater", "window-all"] }
+
+notify-rust = "4"
+battery = "0.7.8"
+winreg = "0.10"
+hex = "0.4.3"
+colored = "2"
+log = "0.4"
+[dependencies.tauri-plugin-websocket] 
+git = "https://github.com/brys0/tauri-plugin-zenspace-gateway"
+commit = "f78b55b"
+[dependencies.tauri-plugin-store]
+git = "https://github.com/tauri-apps/tauri-plugin-store"
+branch = "dev"
+[dependencies.window-shadows]
+git = "https://github.com/tauri-apps/window-shadows"
+branch = "dev"
+[dependencies.window-vibrancy]
+git = "https://github.com/brys0/window-vibrancy-test"
+branch = "dev"
+[dependencies.tauri-plugin-window-state]
+git = "https://github.com/tauri-apps/tauri-plugin-window-state"
+branch = "dev"
+[dependencies.tauri-plugin-log]
+git = "https://github.com/tauri-apps/tauri-plugin-log"
+branch = "dev"
+[dependencies.tokio-tungstenite]
+version = "0.17"
+features = ["native-tls"]
+[dependencies.rand]
+version = "0.8"
+[dependencies.tokio] 
+version = "1.17"
+features = ["net","sync"]
+[features]
+default = [ "custom-protocol" ]
+custom-protocol = [ "tauri/custom-protocol" ]

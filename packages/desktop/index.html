@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html class="blur"
+      lang="en"
+      theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <link href="/favicon.ico"
+        rel="icon">
+  <script src="/src/main.ts"
+        type="module"></script>
+  <script>
+    window.addScript = src => {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+
+        s.setAttribute('src', src);
+        s.addEventListener('load', resolve);
+        s.addEventListener('error', reject);
+
+        document.body.appendChild(s);
+      });
+    };
+  </script>
+  <meta content="width=device-width, initial-scale=1.0"
+        name="viewport">
+  <title>Chatty</title>
+</head>
+<body>
+  <div id="app"></div><!-- Run Conditions-->
+  <%if(isDev){ %>
+  <script>
+      console.log('Running development 💻');
+      window.__PROD__ = false;
+
+  </script> <%} else
+      {
+      %> 
+  <script>
+
+        console.defaultLog = console.log.bind(console);
+        console.logs = [];
+        console.log = function () {
+          // default &  console.log()
+          console.defaultLog.apply(console, arguments);
+          // new & array data
+          console.logs.push(Array.from(arguments));
+        };
+        window.__PROD__ = true;
+  </script> <%} %>
+</body>
+</html>

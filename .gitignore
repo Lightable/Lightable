@@ -1,34 +1,39 @@
 .idea
-/packages/client-desktop/node_modules
-/packages/client-desktop/.DS_Store
+/packages/desktop/node_modules
+/packages/desktop/.DS_Store
 
-/packages/client-desktop/dist
-/packages/client-desktop/.tauri
+/packages/desktop/dist
+/packages/desktop/.tauri
 
 # local env files
-/packages/client-desktop/.env.local
-/packages/client-desktop/.env.*.local
+/packages/desktop/.env.local
+/packages/desktop/.env.*.local
 
 # Log files
-/packages/client-desktop/npm-debug.log*
-/packages/client-desktop/yarn-debug.log*
-/packages/client-desktop/yarn-error.log*
-/packages/client-desktop/pnpm-debug.log*
+/packages/desktop/npm-debug.log*
+/packages/desktop/yarn-debug.log*
+/packages/desktop/yarn-error.log*
+/packages/desktop/pnpm-debug.log*
 
 # Editor directories and files
-/packages/client-desktop/.idea
-/packages/client-desktop/.vscode
-/packages/client-desktop/*.suo
-/packages/client-desktop/*.ntvs*
-/packages/client-desktop/*.njsproj
-/packages/client-desktop/*.sln
-/packages/client-desktop/*.sw?
-/packages/client-desktop/src-tauri/WixTools
-/packages/client-desktop/src-tauri/target
-/packages/client-desktop/build/tauri-codegen-assets
+/packages/desktop/.idea
+/packages/desktop/.vscode
+/packages/desktop/*.suo
+/packages/desktop/*.ntvs*
+/packages/desktop/*.njsproj
+/packages/desktop/*.sln
+/packages/desktop/*.sw?
+/packages/desktop/src-tauri/WixTools
+/packages/desktop/src-tauri/target
+/packages/desktop/build/tauri-codegen-assets
 /packages/server/.gradle
 **/packages/server/build/*
 !**/packages/server/libs
+
+# WEB 
+/packages/web/.vercel
+/packages/web/.vscode
+/packages/web/node_modules
 
 # Ignore Gradle GUI config
 /packages/server/gradle-app.setting

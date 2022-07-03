@@ -1,22 +1,22 @@
 name: 💾 ZenSpace Server
 on: [push]
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: ☕ Setting up Java (17)
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: "adopt"
-          cache: gradle
-      - name: 🧪 Test ZenSpace
-        continue-on-error: true
-        run: |
-          cd ./packages/server
-          chmod +x gradlew
-          ./gradlew test
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   #   - uses: actions/checkout@v3
+  #   #   - name: ☕ Setting up Java (17)
+  #   #     uses: actions/setup-java@v3
+  #   #     with:
+  #   #       java-version: 17
+  #   #       distribution: "adopt"
+  #   #       cache: gradle
+  #     # - name: 🧪 Test ZenSpace
+  #     #   continue-on-error: true
+  #     #   run: |
+  #     #     cd ./packages/server
+  #     #     chmod +x gradlew
+  #     #     ./gradlew test
   build:
     runs-on: ubuntu-latest
     steps:
