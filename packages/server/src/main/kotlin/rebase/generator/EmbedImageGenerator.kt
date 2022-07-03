@@ -1,10 +1,13 @@
 package rebase.generator
 
+import com.github.ajalt.colormath.parse
+import java.awt.Color
 import java.awt.Font
 import java.awt.RenderingHints
 import java.awt.font.TextLayout
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte
+import java.time.Instant
 import javax.imageio.ImageIO
 import kotlin.system.measureTimeMillis
 
@@ -14,8 +17,7 @@ class EmbedImageGenerator {
     // 512, 512
     private val logo = ImageIO.read(this.javaClass.getResource("/assets/logo.png"))
     private val titilliumFont = Font.createFont(Font.TRUETYPE_FONT, this.javaClass.getResource("/assets/TitilliumWeb-Bold.ttf").openStream())
-    private val charSize = 55
-    fun generateEmbed(text: String): BufferRes {
+    fun generateEmbed(text: String, color: String = "#ffffff", showCreated: Boolean = false): BufferRes {
         val base = copyImage(staticBase)
         val imageGenTime = measureTimeMillis {
             val g = base.createGraphics()
@@ -26,7 +28,12 @@ class EmbedImageGenerator {
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
             g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
             g.drawImage(logo, (base.width / 2  - 215 / 2), 150, 215, 215, null)
+            g.color = Color.decode(color)
             g.drawString(text, (base.width / 2 - textWidth.toInt() / 2) , 400)
+            g.font = titilliumFont.deriveFont(Font.PLAIN, 22F)
+            if (showCreated) {
+                g.drawString("Created At: ${Instant.now()}", 30, 540)
+            }
             g.dispose()
         }
         return BufferRes(base, imageGenTime)

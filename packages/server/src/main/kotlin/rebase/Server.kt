@@ -26,6 +26,7 @@ import rebase.controllers.DeveloperController
 import rebase.controllers.WebSocketController
 import rebase.generator.EmbedImageGenerator
 import rebase.messages.ScyllaConnector
+import java.awt.Color
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -131,9 +132,18 @@ class Server(
             get("/experimental/image/generate") {
                 val type = it.queryParam("type")
                 val text = it.queryParam("text") ?: "No Text"
+                val color = it.queryParam("color") ?: "ffffff"
+                val stamp = it.queryParam("stamp").toBoolean()
+                try {
+                    Color.decode("#$color")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    it.status(401)
+                    return@get
+                }
                 when (type) {
                     "EMBED" -> {
-                        val image = imageGen.generateEmbed(text)
+                        val image = imageGen.generateEmbed(text, "#$color", stamp)
                         val baos = ByteArrayOutputStream()
                         ImageIO.write(image.image, "webp", baos)
                         val imgInBytes = baos.toByteArray()
