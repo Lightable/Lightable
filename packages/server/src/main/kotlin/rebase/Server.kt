@@ -34,8 +34,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintStream
 import java.lang.management.ManagementFactory
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -43,8 +41,6 @@ import java.util.Timer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.imageio.ImageIO
-import java.io.*;
-import java.util.*;
 
 val t = Terminal()
 
