@@ -1,3 +1,4 @@
+import { useAppStore } from "../stores/AppStore";
 import { useClientStore } from "../stores/ClientStore";
 import { Account, Friend } from "../User";
 
@@ -6,16 +7,23 @@ export default class LiteClient {
     user: Account | null;
     api: string;
     store: any;
+    app: any;
     constructor(options: LiteClientOptions) {
         this.token = options.token;
         this.user = options.user;
-        this.api = 'https://api.zenspace.cf';
+        this.api = 'http://localhost:8080';
         this.store = useClientStore();
+        this.app = useAppStore();
     }
     async $getSelf() {
         let req = await this.$request<Account>('GET', '/user/@me', undefined);
         if (req.ok) {
             this.user = req.data;
+            this.app.account = req.data;
+        } else if (req.status == 403) {
+            if (this.user) this.user.enabled = false
+            this.app.account.enabled = false;
+            return
         }
     }
     async $request<T>(method: string, path: string, body: string | undefined): Promise<ResponseData<T>> {
@@ -54,6 +62,7 @@ export default class LiteClient {
         }
     }
     async getFriends() {
+        if (!this.user?.enabled) return
         let req = await this.$request<RelationshipObject>('GET', '/user/@me/relationships', undefined);
         if (req.status != 204) {
             let friends = req.data!!.friends!!;

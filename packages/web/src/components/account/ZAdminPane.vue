@@ -18,7 +18,7 @@ const props = defineProps({
                     <div class="card-body">
                          <div class="disabled-inner">
                               <NSkeleton class="friend" :height="72" :width="72" round v-if="loading" v-for="(_, index) in [0, 0, 0]" v-bind:key="index" />
-                              <!-- <ZOverlay class="treat-as-button disabled">
+                              <ZOverlay class="treat-as-button disabled">
                                    <NAvatar round :size="72" src="https://api.zenspace.cf/cdn/user/63319240013946880/avatars/avatar_66703325155971072" style="opacity: 0.5;"/>
                                    <template #hover>
                                              <NIcon color="var(--success-color)" :size="18">
@@ -35,7 +35,7 @@ const props = defineProps({
                                              </NIcon>
                                              <span style="color: var(--success-color)">Enable</span>
                                    </template>
-                              </ZOverlay> -->
+                              </ZOverlay>
                               
                          </div>
                     </div>

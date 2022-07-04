@@ -10,18 +10,16 @@ let account = computed(() => appStore.account ? appStore.account : undefined);
 let loading = ref(true);
 clientStore.lite.$getSelf().then(() => {
     loading.value = false;
-})
+});
 </script>
 
 <template>
     <div class="settings-page">
         <NElement type="div" class="account">
-            <ZLeftAccountPane :user="account" :loading="loading"/>
+            <ZLeftAccountPane :user="account" :loading="loading" />
             <div class="profile-right-pane space">
                 <router-view v-slot="{ Component }">
-                    <Transition name="nested" :duration="200">
-                        <component :is="Component"/>
-                    </Transition>
+                    <component :is="Component" />
                 </router-view>
             </div>
         </NElement>
@@ -68,6 +66,4 @@ clientStore.lite.$getSelf().then(() => {
 .bottom {
     margin-top: auto;
 }
-
-
 </style>

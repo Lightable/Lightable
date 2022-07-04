@@ -180,7 +180,13 @@ class Server(
                 }
             }
             path("/admin") {
-                patch("/disable/{id}", developerController::disableUser)
+                path("/users") {
+                    get("enabled", developerController::getEnabledUsers)
+                    get("disabled", developerController::getDisabledUsers)
+                    patch("enable/{id}", developerController::enableUser)
+                    patch("disable/{id}", developerController::disableUser)
+                    delete("delete/{id}", developerController::deleteUser)
+                }
                 post("/release", developerController::createRelease)
             }
             path("/user") {

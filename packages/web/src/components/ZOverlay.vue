@@ -18,7 +18,7 @@
     .container {
         display: none;
     }
-    &:hover {
+    &:hover, &:focus, &:active {
         position: relative;
 
         .container {

@@ -10,6 +10,7 @@ clientStore.lite.getFriends().then(() => {
     loading.value = false;
 });
 let account = computed(() => appStore.account ? appStore.account : undefined);
+
 </script>
 
 <template>

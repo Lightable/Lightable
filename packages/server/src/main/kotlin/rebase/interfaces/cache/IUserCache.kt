@@ -11,6 +11,7 @@ interface IUserCache {
     val users: HashMap<Long, User>
     val avatarCache: HashMap<Long, ByteArrayOutputStream>
     fun saveOrReplaceUser(user: User, saveToDB: Boolean = true)
+    fun deleteUser(user: Long)
     fun removeAllTestUsers()
     fun sameName(name: String): Boolean
     fun sameEmail(email: String): Boolean

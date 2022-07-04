@@ -35,6 +35,14 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
         }
     }
 
+    override fun deleteUser(user: Long) {
+        users.remove(user)
+        executor.submit {
+            userColl.deleteOne(User::identifier eq user)
+        }
+    }
+
+
     override fun sameName(name: String): Boolean {
         return users.values.find { u -> u.name == name } != null
     }
