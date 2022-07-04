@@ -129,9 +129,9 @@ const searchDisabledUsers = (type: UserSearchType) => {
                          </NButton>
                     </NButtonGroup>
                     <NInputGroup class="any-search">
-                         <NInput placeholder="Search Name" @input="(e) => updateDisabledUserSearch('NAME', e)" v-if="currentSearchType == 'NAME'" style="width: 100%;" />
-                         <NInputNumber placeholder="User ID" @input="(e) => updateDisabledUserSearch('ID', e)" clearable v-if="currentSearchType == 'ID'" style="width: 100%;" />
-                         <NDatePicker placeholder="User created date" @update:value="(e) => updateDisabledUserSearch('CREATED', new Date(e).toISOString())" v-if="currentSearchType == 'CREATED'" style="width: 100%;" />
+                         <NInput placeholder="Search Name" @input="(e: any) => updateDisabledUserSearch('NAME', e as unknown as string)" v-if="currentSearchType == 'NAME'" style="width: 100%;" />
+                         <NInputNumber placeholder="User ID" @input="(e: any) => updateDisabledUserSearch('ID', e as unknown as string)" clearable v-if="currentSearchType == 'ID'" style="width: 100%;" />
+                         <NDatePicker placeholder="User created date" @update:value="(e: any) => updateDisabledUserSearch('CREATED', new Date(e as unknown as number).toISOString())" v-if="currentSearchType == 'CREATED'" style="width: 100%;" />
                          <NButton quaternary @click="searchDisabledUsers(currentSearchType)">
                               Search
                          </NButton>
@@ -177,9 +177,9 @@ const searchDisabledUsers = (type: UserSearchType) => {
                          </NButton>
                     </NButtonGroup>
                     <NInputGroup class="any-search">
-                         <NInput placeholder="Search Name" @input="(e) => updateEnabledUserSearch('NAME', e)" v-if="currentSearchType == 'NAME'" style="width: 100%;" />
-                         <NInputNumber placeholder="User ID" @input="(e) => updateEnabledUserSearch('ID', e)" clearable v-if="currentSearchType == 'ID'" style="width: 100%;" />
-                         <NDatePicker placeholder="User created date" @update:value="(e) => updateEnabledUserSearch('CREATED', new Date(e).toISOString())" v-if="currentSearchType == 'CREATED'" style="width: 100%;" />
+                         <NInput placeholder="Search Name" @input="(e: any) => updateEnabledUserSearch('NAME', e as unknown as string)" v-if="currentSearchType == 'NAME'" style="width: 100%;" />
+                         <NInputNumber placeholder="User ID" @input="(e: any) => updateEnabledUserSearch('ID', e as unknown as string)" clearable v-if="currentSearchType == 'ID'" style="width: 100%;" />
+                         <NDatePicker placeholder="User created date" @update:value="(e: any) => updateEnabledUserSearch('CREATED', new Date(e as unknown as number).toISOString())" v-if="currentSearchType == 'CREATED'" style="width: 100%;" />
                          <NButton quaternary @click="searchEnabledUsers(currentSearchType)">
                               Search
                          </NButton>

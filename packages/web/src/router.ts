@@ -65,7 +65,7 @@ router.beforeEach(async (to) => {
 
     if (authRequired && !auth.account) {
         return '/login';
-    } else if (adminRequired && !auth.account.admin) {
+    } else if (adminRequired && !auth?.account?.admin) {
         return '/settings/public';
     }
 })
