@@ -37,7 +37,8 @@ data class User constructor(
     @BsonProperty("admin") var admin: Boolean = false,
     @BsonProperty("enabled") var enabled: Boolean = true,
     @field:BsonProperty(useDiscriminator = true) @BsonProperty("avatar") var avatar: Avatar? = null,
-    @BsonIgnore @JsonIgnore var test: Boolean = false
+    @BsonIgnore @JsonIgnore var test: Boolean = false,
+    @BsonProperty("created") @JsonProperty val created: Instant = Instant.now()
 ) : BucketImpl {
     @BsonIgnore
     @JsonIgnore

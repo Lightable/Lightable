@@ -11,7 +11,7 @@ export default class LiteClient {
     constructor(options: LiteClientOptions) {
         this.token = options.token;
         this.user = options.user;
-        this.api = 'https://api.zenspace.cf';
+        this.api = 'http://localhost:8080';
         this.store = useClientStore();
         this.app = useAppStore();
     }
@@ -74,9 +74,10 @@ export default class LiteClient {
         }
     }
 
-    async getEnabledUsers() {
+    async getEnabledUsers(type: UserSearchType | null, query: string | null) {
         if (!this.user?.admin) return
-        let req = await this.$request<UserPayload>('GET', '/admin/users/enabled', undefined);
+        let constructQuery = (type != null) ? `?type=${type}&search=${query}` : '';
+        let req = await this.$request<UserPayload>('GET', `/admin/users/enabled${constructQuery}`, undefined);
         if (req.status != 204) {
             let users = req.data!!.users;
             for (let ui = 0; users.length > ui; ui++) {
@@ -85,15 +86,41 @@ export default class LiteClient {
             }
         }
     }
-    async getDisabledUsers() {
+    async getDisabledUsers(type: UserSearchType | null, query: string | null) {
         if (!this.user?.admin) return
-        let req = await this.$request<UserPayload>('GET', '/admin/users/disabled', undefined);
+        let constructQuery = (type != null) ? `?type=${type}&search=${query}` : '';
+        let req = await this.$request<UserPayload>('GET', `/admin/users/disabled${constructQuery}`, undefined);
         if (req.status != 204) {
             let users = req.data!!.users;
             for (let ui = 0; users.length > ui; ui++) {
                 let user = users[ui];
                 this.store.disabledUsers.set(`${user.id}`, user);
             }
+        }
+    }
+
+    async enableUser(id: string) {
+        if (!this.user?.admin) return
+        let req = await this.$request<UserPayload>('PATCH', `/admin/users/enable/${id}`, undefined);
+        if (req.status == 204) {
+            let user = this.store.disabledUsers.get(id);
+            this.store.disabledUsers.delete(id);
+            this.store.enabledUsers.set(id, user);
+            return
+        } else {
+            console.log(`Something went wrong ${req}`);
+        }
+    }
+    async disableUser(id: string) {
+        if (!this.user?.admin) return
+        let req = await this.$request<UserPayload>('PATCH', `/admin/users/disable/${id}`, undefined);
+        if (req.status == 204) {
+            let user = this.store.enabledUsers.get(id);
+            this.store.enabledUsers.delete(id);
+            this.store.disabledUsers.set(id, user);
+            return
+        } else {
+            console.log(`Something went wrong ${req}`);
         }
     }
     $getSelfAvatar(): string | null {
@@ -107,7 +134,7 @@ export default class LiteClient {
     }
 }
 
-
+export type UserSearchType = "NAME" | "ID" | "CREATED"
 export interface LiteClientOptions {
     token: string;
     user: Account | null;

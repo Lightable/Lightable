@@ -5,10 +5,12 @@ import io.javalin.plugin.openapi.annotations.*
 import me.kosert.flowbus.EventsReceiver
 import me.kosert.flowbus.GlobalBus
 import me.kosert.flowbus.subscribe
-import org.joda.time.Instant
+import org.apache.commons.lang3.time.DateUtils
 import rebase.cache.UserCache
 import rebase.schema.ChattyRelease
 import rebase.schema.PublicUser
+import java.time.Instant
+import java.util.*
 
 class DeveloperController(val userCache: UserCache) {
     val events = EventsReceiver()
@@ -172,7 +174,23 @@ class DeveloperController(val userCache: UserCache) {
                 required = true,
                 allowEmptyValue = false,
                 isRepeatable = false
-            )
+            ),
+            OpenApiParam(
+                name = "type",
+                type = UserSearchTypes::class,
+                description = "What type of search do you want to perform [NAME,ID,CREATED]",
+                required = false,
+                allowEmptyValue = false,
+                isRepeatable = false
+            ),
+            OpenApiParam(
+                name = "search",
+                type = String::class,
+                description = "The search value",
+                required = false,
+                allowEmptyValue = true,
+                isRepeatable = false
+            ),
         ],
         summary = "Get enabled users",
         description = "Get a paginated list of enabled users",
@@ -182,16 +200,56 @@ class DeveloperController(val userCache: UserCache) {
     fun getEnabledUsers(ctx: Context) {
         val user = requireAuth(userCache, ctx)
         val wantedPage = ctx.queryParam("page")?.toInt() ?: 0
+        val search = ctx.queryParam("search")
+        val type = ctx.queryParam("type")
         if (user != null && user.admin) {
+            val enabledUsersAll = userCache.users.values.filter { u -> u.enabled }
             val enabledUsersRaw = userCache.users.values.filter { u -> u.enabled }.chunked(50)
             if (enabledUsersRaw.size <= wantedPage) {
                 ctx.status(400).json(UserController.UserDataFail("Page exceeded length of ${enabledUsersRaw.size - 1}"))
                 return
             }
-            val selectedPage = enabledUsersRaw[wantedPage]
             val enabledUsers = mutableListOf<PublicUser>()
-            selectedPage.forEach {
-                enabledUsers.add(it.toPublic())
+            val selectedPage = enabledUsersRaw[wantedPage]
+            if (search != null) {
+                when (type) {
+                    "NAME" -> {
+                        enabledUsersAll.forEach {
+                            val toLower = it.name.lowercase()
+                            if (toLower.contains(search)) {
+                                enabledUsers.add(it.toPublic())
+                            }
+                        }
+                    }
+                    "ID" -> {
+                        enabledUsersAll.forEach {
+                            if (it.identifier.toString().contains(search)) {
+                                enabledUsers.add(it.toPublic())
+                            }
+                        }
+                    }
+                    "CREATED" -> {
+                        val date = Instant.parse(search)
+                        enabledUsersAll.forEach {
+                            val userCreatedTrun = DateUtils.truncate(Date.from(it.created), Calendar.DAY_OF_MONTH)
+                            val searchCreateTrun = DateUtils.truncate(Date.from(date), Calendar.DAY_OF_MONTH)
+                            if (userCreatedTrun.toInstant().toEpochMilli() == searchCreateTrun.toInstant()
+                                    .toEpochMilli()
+                            ) {
+                                enabledUsers.add(it.toPublic())
+                            }
+                        }
+                    }
+                    else -> {
+                        enabledUsersAll.forEach {
+                            enabledUsers.add(it.toPublic())
+                        }
+                    }
+                }
+            } else {
+                selectedPage.forEach {
+                    enabledUsers.add(it.toPublic())
+                }
             }
             val payload = UserPagedPayload(enabledUsers, enabledUsersRaw.size)
             ctx.status(200).json(payload)
@@ -201,6 +259,7 @@ class DeveloperController(val userCache: UserCache) {
             return
         }
     }
+
     @OpenApi(
         path = "/admin/users/disabled",
         method = HttpMethod.GET,
@@ -222,7 +281,23 @@ class DeveloperController(val userCache: UserCache) {
                 required = false,
                 allowEmptyValue = false,
                 isRepeatable = false
-            )
+            ),
+            OpenApiParam(
+                name = "type",
+                type = UserSearchTypes::class,
+                description = "What type of search do you want to perform [NAME,ID,CREATED]",
+                required = false,
+                allowEmptyValue = false,
+                isRepeatable = false
+            ),
+            OpenApiParam(
+                name = "search",
+                type = String::class,
+                description = "The search value",
+                required = false,
+                allowEmptyValue = true,
+                isRepeatable = false
+            ),
         ],
         headers = [
             OpenApiParam(
@@ -242,10 +317,14 @@ class DeveloperController(val userCache: UserCache) {
     fun getDisabledUsers(ctx: Context) {
         val user = requireAuth(userCache, ctx)
         val wantedPage = ctx.queryParam("page")?.toInt() ?: 0
+        val search = ctx.queryParam("search")
+        val type = ctx.queryParam("type")
         if (user != null && user.admin) {
+            val disabledUsersAll = userCache.users.values.filter { u -> !u.enabled }
             val disabledUsersRaw = userCache.users.values.filter { u -> !u.enabled }.chunked(50)
             if (disabledUsersRaw.size <= wantedPage && disabledUsersRaw.isNotEmpty()) {
-                ctx.status(400).json(UserController.UserDataFail("Page exceeded length of ${disabledUsersRaw.size - 1}"))
+                ctx.status(400)
+                    .json(UserController.UserDataFail("Page exceeded length of ${disabledUsersRaw.size - 1}"))
                 return
             } else if (disabledUsersRaw.isEmpty()) {
                 ctx.status(204)
@@ -253,10 +332,47 @@ class DeveloperController(val userCache: UserCache) {
             }
             val selectedPage = disabledUsersRaw[wantedPage]
             val disabledUsers = mutableListOf<PublicUser>()
-            selectedPage.forEach {
-                disabledUsers.add(it.toPublic())
+            if (search != null) {
+                when (type) {
+                    "NAME" -> {
+                        disabledUsersAll.forEach {
+                            val toLower = it.name.lowercase()
+                            if (toLower.contains(search)) {
+                                disabledUsers.add(it.toPublic())
+                            }
+                        }
+                    }
+                    "ID" -> {
+                        disabledUsersAll.forEach {
+                            if (it.identifier.toString().contains(search)) {
+                                disabledUsers.add(it.toPublic())
+                            }
+                        }
+                    }
+                    "CREATED" -> {
+                        val date = Instant.parse(search)
+                        disabledUsersAll.forEach {
+                            val userCreatedTrun = DateUtils.truncate(Date.from(it.created), Calendar.DAY_OF_MONTH)
+                            val searchCreateTrun = DateUtils.truncate(Date.from(date), Calendar.DAY_OF_MONTH)
+                            if (userCreatedTrun.toInstant().toEpochMilli() == searchCreateTrun.toInstant()
+                                    .toEpochMilli()
+                            ) {
+                                disabledUsers.add(it.toPublic())
+                            }
+                        }
+                    }
+                    else -> {
+                        disabledUsersAll.forEach {
+                            disabledUsers.add(it.toPublic())
+                        }
+                    }
+                }
+            } else {
+                selectedPage.forEach {
+                    disabledUsers.add(it.toPublic())
+                }
             }
-            val payload = UserPagedPayload(disabledUsers, disabledUsers.size-1)
+            val payload = UserPagedPayload(disabledUsers, disabledUsers.size - 1)
             ctx.status(200).json(payload)
             return
         } else {
@@ -264,6 +380,7 @@ class DeveloperController(val userCache: UserCache) {
             return
         }
     }
+
     @OpenApi(
         path = "/admin/delete/{id}",
         method = HttpMethod.DELETE,
@@ -329,6 +446,12 @@ class DeveloperController(val userCache: UserCache) {
         var connectedClients = 0
         var sentMessages = 0
         val serverStart = Instant.now()
+    }
+
+    enum class UserSearchTypes {
+        NAME,
+        ID,
+        CREATED
     }
 
     data class UserPagedPayload(val users: MutableList<PublicUser>, val size: Int)

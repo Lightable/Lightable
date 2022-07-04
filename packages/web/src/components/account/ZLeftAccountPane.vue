@@ -9,8 +9,7 @@ const props = defineProps({
     loading: Boolean
 });
 let lite = computed(() => useClientStore().lite)
-let viewPort = computed(() => window.innerWidth)
-console.log(useRouter().currentRoute)
+
 </script>
 
 <template>
