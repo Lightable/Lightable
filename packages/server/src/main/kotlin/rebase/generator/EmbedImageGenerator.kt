@@ -16,7 +16,7 @@ class EmbedImageGenerator {
     private val staticBase = ImageIO.read(this.javaClass.getResource("/assets/base.png"))
     // 512, 512
     private val logo = ImageIO.read(this.javaClass.getResource("/assets/logo.png"))
-    private val titilliumFont = Font.createFont(Font.TRUETYPE_FONT, this.javaClass.getResource("/assets/TitilliumWeb-Bold.ttf").openStream())
+    private val titilliumFont = Font.createFont(Font.TRUETYPE_FONT, this.javaClass.getResource("/assets/OpenSansEmoji.ttf").openStream())
     fun generateEmbed(text: String, color: String = "#ffffff", showCreated: Boolean = false): BufferRes {
         val base = copyImage(staticBase)
         val imageGenTime = measureTimeMillis {

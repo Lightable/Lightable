@@ -18,6 +18,8 @@ import io.swagger.v3.oas.models.info.Info
 import me.kosert.flowbus.EventsReceiver
 import me.kosert.flowbus.GlobalBus
 import me.kosert.flowbus.subscribe
+import okio.ByteString.Companion.encodeUtf8
+import okio.internal.commonAsUtf8ToByteArray
 import org.slf4j.LoggerFactory
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
@@ -32,6 +34,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintStream
 import java.lang.management.ManagementFactory
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -39,7 +43,8 @@ import java.util.Timer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.imageio.ImageIO
-
+import java.io.*;
+import java.util.*;
 
 val t = Terminal()
 
@@ -131,9 +136,15 @@ class Server(
         javalin.routes {
             get("/experimental/image/generate") {
                 val type = it.queryParam("type")
-                val text = it.queryParam("text") ?: "No Text"
+                var text = it.queryParam("text") ?: "No Text"
                 val color = it.queryParam("color") ?: "ffffff"
                 val stamp = it.queryParam("stamp").toBoolean()
+                val matched = Regex("(\\[\\[(?:0x)?\\d+\\w+\\b\\]\\])").findAll(text)
+                matched.forEach { matchResult ->
+                    val resultUnparsed = matchResult.value.replace("[[", "")
+                    val result = resultUnparsed.replace("]]", "")
+                    text = text.replace(matchResult.value, String(Character.toChars(Integer.decode(result))))
+                }
                 try {
                     Color.decode("#$color")
                 } catch (e: Exception) {
