@@ -11,7 +11,7 @@ const props = defineProps({
 });
 let clientStore = useClientStore();
 const lite = computed(() => clientStore.lite)
-const friends = computed(() => Array.from(clientStore.friends.values() as Friend[]))
+const friends = computed(() => Array.from(clientStore.friends.values()))
 </script>
 
 <template>

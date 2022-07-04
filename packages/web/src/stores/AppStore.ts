@@ -1,13 +1,11 @@
 import { defineStore } from "pinia"
 import { Account} from "../User";
-import { useClientStore } from "./ClientStore";
 
-// @ts-ignore
+
 export const useAppStore = defineStore('appStore', {
     state: () => ({
             isDark: true,
             account: null as Account | null,
-            client: useClientStore()
     }),
     persist: {
         key: 'app',

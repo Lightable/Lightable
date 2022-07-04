@@ -11,7 +11,7 @@ export default class LiteClient {
     constructor(options: LiteClientOptions) {
         this.token = options.token;
         this.user = options.user;
-        this.api = 'http://localhost:8080';
+        this.api = 'https://api.zenspace.cf';
         this.store = useClientStore();
         this.app = useAppStore();
     }
@@ -73,6 +73,29 @@ export default class LiteClient {
             }
         }
     }
+
+    async getEnabledUsers() {
+        if (!this.user?.admin) return
+        let req = await this.$request<UserPayload>('GET', '/admin/users/enabled', undefined);
+        if (req.status != 204) {
+            let users = req.data!!.users;
+            for (let ui = 0; users.length > ui; ui++) {
+                let user = users[ui];
+                this.store.enabledUsers.set(`${user.id}`, user);
+            }
+        }
+    }
+    async getDisabledUsers() {
+        if (!this.user?.admin) return
+        let req = await this.$request<UserPayload>('GET', '/admin/users/disabled', undefined);
+        if (req.status != 204) {
+            let users = req.data!!.users;
+            for (let ui = 0; users.length > ui; ui++) {
+                let user = users[ui];
+                this.store.disabledUsers.set(`${user.id}`, user);
+            }
+        }
+    }
     $getSelfAvatar(): string | null {
         //@ts-ignore
         if (!this.user?.avatar) return null
@@ -90,6 +113,10 @@ export interface LiteClientOptions {
     user: Account | null;
 }
 
+export interface UserPayload {
+    users: Friend[],
+    size: number
+}
 export interface RelationshipObject {
     friends: Friend[],
     pending: Friend[],

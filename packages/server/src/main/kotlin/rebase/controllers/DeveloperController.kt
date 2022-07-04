@@ -97,7 +97,7 @@ class DeveloperController(val userCache: UserCache) {
         val userPath = ctx.pathParam("id")
         val userExt = userCache.users[userPath.toLong()]
         if (user != null && user.admin && userExt != null) {
-            userExt.enabled = false
+            userExt.enabled = true
             userExt.save()
             ctx.status(204)
         } else {

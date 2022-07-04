@@ -294,6 +294,7 @@ fun main(args: Array<String>) {
     var prod = false
     val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
     println("Working -> ${File("./storage").absolutePath}")
+
     File("./releases").mkdir()
     File("./storage").mkdir()
     if (System.getenv("verbose").toBoolean()) {
