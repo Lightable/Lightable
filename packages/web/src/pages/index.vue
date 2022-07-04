@@ -48,6 +48,18 @@ export default defineComponent({
         {
           property: 'og:type',
           content: 'website'
+        },
+        {
+          name: 'theme-color',
+          content: '#58F2A2'
+        },
+        {
+          property: 'og:image',
+          content: 'https://api.zenspace.cf/experimental/image/generate?type=EMBED&text=ZenSpace%20[[0xf061]]%20Home&color=58F2A2'
+        },
+        {
+          name: 'twitter:card',
+          content: 'summary_large_image'
         }
       ]
     })

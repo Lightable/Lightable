@@ -157,6 +157,7 @@ class Server(
                         it.contentType("image/webp")
                         it.res.setContentLength(imgInBytes.size)
                         it.res.addHeader("X-Image-Gen-Timing", image.timing.toString())
+                        it.res.addHeader("Content-Disposition", "inline; filename=\"Image took ${image.timing}ms to generate\"")
                         it.status(201).result(imgInBytes)
                     }
                     else -> {
