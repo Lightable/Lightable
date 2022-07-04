@@ -1,0 +1,73 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useAppStore } from '../../stores/AppStore';
+import { useClientStore } from '../../stores/ClientStore';
+import { NElement } from 'naive-ui';
+import ZLeftAccountPane from '../../components/account/ZLeftAccountPane.vue';
+let appStore = useAppStore();
+let clientStore = useClientStore();
+let account = computed(() => appStore.account ? appStore.account : undefined);
+let loading = ref(true);
+clientStore.lite.$getSelf().then(() => {
+    loading.value = false;
+})
+</script>
+
+<template>
+    <div class="settings-page">
+        <NElement type="div" class="account">
+            <ZLeftAccountPane :user="account" :loading="loading"/>
+            <div class="profile-right-pane space">
+                <router-view v-slot="{ Component }">
+                    <Transition name="nested" :duration="200">
+                        <component :is="Component"/>
+                    </Transition>
+                </router-view>
+            </div>
+        </NElement>
+    </div>
+</template>
+
+
+
+<style lang="scss" scoped>
+.account {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 90vh;
+
+    .space {
+        margin-left: 120px;
+    }
+}
+
+@media only screen and(max-width: 852px) {
+    .account {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        .space {
+            margin-top: 50px;
+            margin-left: 0;
+        }
+    }
+
+}
+
+.settings-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 80px);
+}
+
+.bottom {
+    margin-top: auto;
+}
+
+
+</style>

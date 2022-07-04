@@ -39,7 +39,7 @@ console.log(userExists)
                 <!-- <img src="../assets/RightHereHFlip.svg" height="148" class="img-r"/> -->
             </NTooltip>
         </div>
-        <NButton text type="info" size="large" @click="$router.push('settings')">
+        <NButton text type="info" size="large" @click="$router.push('/settings/public')">
             <template #icon>
                 <CogOutline />
             </template>

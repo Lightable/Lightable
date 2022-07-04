@@ -44,11 +44,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 header {
+     animation: bring-down-header 250ms ease-in-out;
    nav {
       display: flex;
       justify-content: space-between;
       padding: 4px;
-
+    
       .logo-wrapper {
          display: inline-flex;
          width: 160px;
@@ -73,6 +74,17 @@ header {
          justify-content: center;
          align-items: center;
       }
+   }
+}
+
+@keyframes bring-down-header {
+   0% {
+      opacity: 0;
+      transform: translateY(-46.4px);
+   }
+   100% {
+      opacity: 1;
+      transform: translateY(0);
    }
 }
 </style>

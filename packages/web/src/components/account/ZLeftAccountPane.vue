@@ -3,12 +3,14 @@ import { computed, defineProps, PropType } from 'vue';
 import { NElement, NAvatar, NButton, NSkeleton } from 'naive-ui';
 import { Account } from '../../User';
 import { useClientStore } from '../../stores/ClientStore';
+import { useRouter } from 'vue-router';
 const props = defineProps({
     user: Object as PropType<Account>,
     loading: Boolean
 });
 let lite = computed(() => useClientStore().lite)
 let viewPort = computed(() => window.innerWidth)
+console.log(useRouter().currentRoute)
 </script>
 
 <template>
@@ -28,8 +30,11 @@ let viewPort = computed(() => window.innerWidth)
             </span>
         </div>
         <div class="lower tabs">
-            <NButton text style="font-size: 24px;" disabled>
+            <NButton text style="font-size: 24px;" :disabled="($router.currentRoute.value.name == 'public')" @click="$router.push('/settings/public')">
                 Public
+            </NButton>
+            <NButton text style="font-size: 24px;" :disabled="($router.currentRoute.value.name == 'admin')" @click="$router.push('/settings/admin')" v-if="user?.admin">
+                Admin 
             </NButton>
         </div>
     </NElement>
@@ -64,7 +69,7 @@ let viewPort = computed(() => window.innerWidth)
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-
+        gap: 16px;
         &.lower {
             margin-top: 45px;
         }
