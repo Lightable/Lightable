@@ -216,7 +216,7 @@ class DeveloperController(val userCache: UserCache) {
                     "NAME" -> {
                         enabledUsersAll.forEach {
                             val toLower = it.name.lowercase()
-                            if (toLower.contains(search)) {
+                            if (toLower.contains(search.lowercase())) {
                                 enabledUsers.add(it.toPublic())
                             }
                         }
@@ -337,7 +337,7 @@ class DeveloperController(val userCache: UserCache) {
                     "NAME" -> {
                         disabledUsersAll.forEach {
                             val toLower = it.name.lowercase()
-                            if (toLower.contains(search)) {
+                            if (toLower.contains(search.lowercase())) {
                                 disabledUsers.add(it.toPublic())
                             }
                         }
