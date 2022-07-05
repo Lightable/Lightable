@@ -81,6 +81,7 @@ clientStore.lite.$getSelf().then(() => {
     align-items: center;
     max-height: 100%;
     overflow-y: scroll;
+    min-height: calc(100vh - 46.4px);
 }
 
 .bottom {

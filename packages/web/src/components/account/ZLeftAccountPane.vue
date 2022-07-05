@@ -29,10 +29,10 @@ let lite = computed(() => useClientStore().lite)
             </span>
         </div>
         <div class="lower tabs">
-            <NButton text style="font-size: 24px;" :disabled="($router.currentRoute.value.name == 'public')" @click="$router.push('/settings/public')">
+            <NButton text style="font-size: 18px;" :disabled="($router.currentRoute.value.name == 'public')" @click="$router.push('/settings/public')">
                 Public
             </NButton>
-            <NButton text style="font-size: 24px;" :disabled="($router.currentRoute.value.name == 'admin')" @click="$router.push('/settings/admin')" v-if="user?.admin">
+            <NButton text style="font-size: 18px;" :disabled="($router.currentRoute.value.name == 'admin')" @click="$router.push('/settings/admin')" v-if="user?.admin">
                 Admin
             </NButton>
         </div>
@@ -72,7 +72,7 @@ let lite = computed(() => useClientStore().lite)
         gap: 16px;
 
         &.lower {
-            margin-top: 45px;
+            margin-top: 35px;
         }
     }
 }
@@ -81,7 +81,6 @@ let lite = computed(() => useClientStore().lite)
     .profile-left {
         justify-content: center;
         align-items: center;
-
         .avatar-wrap {
             margin-bottom: 0;
         }
@@ -89,12 +88,6 @@ let lite = computed(() => useClientStore().lite)
         .basic-info {
             justify-content: center;
             align-items: center;
-        }
-
-        .tabs {
-            &.lower {
-                margin-top: 10px;
-            }
         }
     }
 }
