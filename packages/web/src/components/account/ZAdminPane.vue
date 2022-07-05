@@ -114,7 +114,7 @@ const searchDisabledUsers = (type: UserSearchType) => {
      <ZPaneWrapVue>
           <ZRightPane>
                <div class="card-header">
-                    <h2 style="color: var(--error-color);">Disabled Accounts</h2>
+                    <h2 style="color: var(--error-color);" class="header">Disabled Accounts</h2>
                     <!-- <NSkeleton :width="180" :height="30" round v-if="loading" /> -->
                     <span :style="{ color: 'var(--text-color-2)' }">Search By: </span>
                     <NButtonGroup>
@@ -132,7 +132,7 @@ const searchDisabledUsers = (type: UserSearchType) => {
                          <NInput placeholder="Search Name" @input="(e: any) => updateDisabledUserSearch('NAME', e as unknown as string)" v-if="currentSearchType == 'NAME'" style="width: 100%;" />
                          <NInputNumber placeholder="User ID" @input="(e: any) => updateDisabledUserSearch('ID', e as unknown as string)" clearable v-if="currentSearchType == 'ID'" style="width: 100%;" />
                          <NDatePicker placeholder="User created date" @update:value="(e: any) => updateDisabledUserSearch('CREATED', new Date(e as unknown as number).toISOString())" v-if="currentSearchType == 'CREATED'" style="width: 100%;" />
-                         <NButton quaternary @click="searchDisabledUsers(currentSearchType)">
+                         <NButton tertiary @click="searchDisabledUsers(currentSearchType)">
                               Search
                          </NButton>
                     </NInputGroup>
@@ -163,7 +163,7 @@ const searchDisabledUsers = (type: UserSearchType) => {
           </ZRightPane>
           <ZRightPane>
                <div class="card-header">
-                    <h2 style="color: var(--success-color)">Enabled Accounts</h2>
+                    <h2 style="color: var(--success-color)" class="header">Enabled Accounts</h2>
                     <span :style="{ color: 'var(--text-color-2)' }">Search By: </span>
                     <NButtonGroup>
                          <NButton quaternary :disabled="currentSearchType == 'NAME'" @click="currentSearchType = 'NAME'">
@@ -180,7 +180,7 @@ const searchDisabledUsers = (type: UserSearchType) => {
                          <NInput placeholder="Search Name" @input="(e: any) => updateEnabledUserSearch('NAME', e as unknown as string)" v-if="currentSearchType == 'NAME'" style="width: 100%;" />
                          <NInputNumber placeholder="User ID" @input="(e: any) => updateEnabledUserSearch('ID', e as unknown as string)" clearable v-if="currentSearchType == 'ID'" style="width: 100%;" />
                          <NDatePicker placeholder="User created date" @update:value="(e: any) => updateEnabledUserSearch('CREATED', new Date(e as unknown as number).toISOString())" v-if="currentSearchType == 'CREATED'" style="width: 100%;" />
-                         <NButton quaternary @click="searchEnabledUsers(currentSearchType)">
+                         <NButton tertiary @click="searchEnabledUsers(currentSearchType)">
                               Search
                          </NButton>
                     </NInputGroup>
@@ -244,10 +244,19 @@ const searchDisabledUsers = (type: UserSearchType) => {
      .inner {
           display: flex;
           flex-direction: row;
-          justify-content: center;
+          padding: 6px;
+          justify-content: space-between;
           flex-wrap: wrap;
           gap: 16px;
      }
 
+}
+@media only screen and(max-width: 852px) {
+   .card-header {
+     display: flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+   }
 }
 </style>
