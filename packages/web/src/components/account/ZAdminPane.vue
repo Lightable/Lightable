@@ -114,7 +114,7 @@ const searchDisabledUsers = (type: UserSearchType) => {
      <ZPaneWrapVue>
           <ZRightPane>
                <div class="card-header">
-                    <h2 style="color: var(--error-color)">Disabled Accounts</h2>
+                    <h2 style="color: var(--error-color);">Disabled Accounts</h2>
                     <!-- <NSkeleton :width="180" :height="30" round v-if="loading" /> -->
                     <span :style="{ color: 'var(--text-color-2)' }">Search By: </span>
                     <NButtonGroup>
@@ -205,8 +205,6 @@ const searchDisabledUsers = (type: UserSearchType) => {
                                    <NSpin />
                               </template>
                          </ZOverlay>
-
-
                     </div>
                </div>
           </ZRightPane>
@@ -224,18 +222,18 @@ const searchDisabledUsers = (type: UserSearchType) => {
      user-select: none;
      font-family: 'Titillium Web';
      padding: 8px;
-
+     h2 {
+          font-weight: 100;
+          padding: 0;
+          margin: 0;
+          font-size: 24px;
+     }
      &.flex {
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
           gap: 8px;
-     }
-
-     h2 {
-          padding: 0;
-          margin: 0;
      }
 }
 

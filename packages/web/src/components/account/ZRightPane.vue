@@ -13,7 +13,7 @@
         transition: 0.3s;
         border-radius: 8px;
         width: 100%;
-        margin-top: 50px;
+        margin-top: 10px;
         padding: 8px;
 
         &:hover {
@@ -27,6 +27,7 @@
             justify-content: center;
             align-items: center;
             width: 80%;
+    
         }
     }
 </style>

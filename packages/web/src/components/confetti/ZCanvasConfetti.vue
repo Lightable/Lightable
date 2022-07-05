@@ -11,7 +11,7 @@ const confettiStore = useConfettiStore()
 onMounted(() => {
     console.log(`[ConfettiFactory -> Create]: ${props.id}`);
     const instance = confetti.create(document.getElementById(props.id!!) as HTMLCanvasElement, {
-        useWorker: true,
+        useWorker: false,
         resize: true
     })
     instance({ ...props.options })?.then(() => confettiStore.confetti.delete(props.id!!));

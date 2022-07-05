@@ -19,6 +19,7 @@ import { NElement } from 'naive-ui';
         width: 100%;
         justify-content: center;
         align-items: center;
+        margin-bottom: 2%;
     }
 }
 </style>

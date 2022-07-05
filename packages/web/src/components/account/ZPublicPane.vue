@@ -68,26 +68,6 @@ const friends = computed(() => Array.from(clientStore.friends.values()))
                 </div>
             </div>
         </ZRightPane>
-        <ZRightPane>
-            <div class="card-header" style="color: var(--info-color);">
-                <h2>Friends</h2>
-            </div>
-            <div class="card-body">
-                <div class="friends-inner">
-                    <!-- @ts-ignore -->
-                    <NSkeleton class="friend" :height="48" :width="48" round v-if="loading" v-for="(_, index) in [0, 0, 0]" v-bind:key="index" />
-                    <div class="friend" v-for="(friend, index) in friends" :id="friend.id" v-bind:key="friend.id" v-else>
-                        <NTooltip trigger="hover" placement="bottom">
-                            <template #trigger>
-                                <NAvatar round :size="48" :src="(friend.avatar) ? lite.$getExternalAvatar(friend.id, friend.avatar.id) : undefined" :alt="`${friend.name} Profile Picture`" />
-                            </template>
-                            {{ friend.name }}
-                        </NTooltip>
-
-                    </div>
-                </div>
-            </div>
-        </ZRightPane>
     </ZPaneWrap>
 </template>
 

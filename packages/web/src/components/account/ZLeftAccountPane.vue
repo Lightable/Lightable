@@ -15,15 +15,15 @@ let lite = computed(() => useClientStore().lite)
 <template>
     <NElement class="profile-left">
         <div class="avatar-wrap">
-            <NSkeleton round :height="128" :width="128" v-if="loading"/>
-            <NAvatar :size="128" :src="(user?.avatar) ? lite.$getSelfAvatar()!! : undefined" round v-else alt="Your Profile Picture"/>
+            <NSkeleton round :height="128" :width="128" v-if="loading" />
+            <NAvatar :size="128" :src="(user?.avatar) ? lite.$getSelfAvatar()!! : undefined" round v-else alt="Your Profile Picture" />
         </div>
         <div class="lower basic-info">
-            <NSkeleton :width="150" :height="32" round v-if="loading"/>
+            <NSkeleton :width="150" :height="32" round v-if="loading" />
             <span class="name" v-else>
                 {{ props.user?.name }}
             </span>
-            <NSkeleton style="margin-top: 8px;" :width="150" :height="16" round v-if="loading"/>
+            <NSkeleton style="margin-top: 8px;" :width="150" :height="16" round v-if="loading" />
             <span class="id" style="font-size: 16px;" v-else>
                 {{ props.user?.id }}
             </span>
@@ -33,7 +33,7 @@ let lite = computed(() => useClientStore().lite)
                 Public
             </NButton>
             <NButton text style="font-size: 24px;" :disabled="($router.currentRoute.value.name == 'admin')" @click="$router.push('/settings/admin')" v-if="user?.admin">
-                Admin 
+                Admin
             </NButton>
         </div>
     </NElement>
@@ -59,6 +59,7 @@ let lite = computed(() => useClientStore().lite)
         .name {
             font-weight: bold;
         }
+
         .id {
             color: var(--text-color-3);
         }
@@ -69,21 +70,31 @@ let lite = computed(() => useClientStore().lite)
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
+
         &.lower {
             margin-top: 45px;
         }
     }
 }
-@media only screen and(max-width: 852px) { 
+
+@media only screen and(max-width: 852px) {
     .profile-left {
         justify-content: center;
         align-items: center;
+
         .avatar-wrap {
             margin-bottom: 0;
         }
+
         .basic-info {
             justify-content: center;
             align-items: center;
+        }
+
+        .tabs {
+            &.lower {
+                margin-top: 10px;
+            }
         }
     }
 }

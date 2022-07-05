@@ -55,7 +55,6 @@ clientStore.lite.$getSelf().then(() => {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    height: 90vh;
 
     .space {
         margin-left: 120px;
@@ -67,9 +66,8 @@ clientStore.lite.$getSelf().then(() => {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-
         .space {
-            margin-top: 50px;
+            margin-top: 0px;
             margin-left: 0;
         }
     }
@@ -81,7 +79,8 @@ clientStore.lite.$getSelf().then(() => {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: calc(100vh - 80px);
+    max-height: 100%;
+    overflow-y: scroll;
 }
 
 .bottom {
