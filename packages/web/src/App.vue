@@ -6,6 +6,7 @@ import { computed } from 'vue';
 import ZHeader from './components/ZHeader.vue';
 import { useAppStore } from './stores/AppStore';
 import { useClientStore } from './stores/ClientStore';
+import ZConfettiCanvasProvider from './components/confetti/ZConfettiCanvasProvider.vue';
 let appStore = useAppStore();
 let clientStore = useClientStore();
 document.getElementById('app')!!.style.backgroundColor = (appStore.isDark) ? 'var(--bg-dark)' : 'var(--bg-light)';
@@ -21,16 +22,20 @@ if (appStore.account) {
 
 <template>
   <div class="route">
-    <NConfigProvider :theme="(isDark) ? darkTheme : lightTheme">
-      <NDialogProvider>
-        <ZHeader />
-        <router-view v-slot="{ Component }">
-          <Transition name="nested" :duration="100">
-            <component :is="Component" />
-          </Transition>
-        </router-view>
-      </NDialogProvider>
-    </NConfigProvider>
+    <ZConfettiCanvasProvider>
+      <NConfigProvider :theme="(isDark) ? darkTheme : lightTheme">
+        <NDialogProvider>
+          <ZHeader />
+
+          <router-view v-slot="{ Component }">
+            <Transition name="nested" :duration="100">
+              <component :is="Component" />
+            </Transition>
+          </router-view>
+
+        </NDialogProvider>
+      </NConfigProvider>
+    </ZConfettiCanvasProvider>
   </div>
 </template>
 

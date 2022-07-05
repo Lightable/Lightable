@@ -8,12 +8,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/canvas-confetti": "^1.4.2",
     "@vicons/ionicons5": "^0.12.0",
     "@vueuse/head": "^0.7.6",
+    "canvas-confetti": "^1.5.1",
     "naive-ui": "^2.30.8",
     "pinia": "^2.0.14",
     "pinia-plugin-persistedstate": "^1.6.1",
     "sass": "^1.53.0",
+    "seemly": "^0.3.4",
     "vue": "^3.2.37",
     "vue-router": "^4.1.0"
   },

@@ -42,14 +42,7 @@ let formSubmit = (e: MouseEvent) => {
             let response = await clientStore.login(formValue.value.user.email, formValue.value.user.password);
             if (response != undefined) {
                 if (!response.id) {
-                    dialog.create(
-                        {
-                            type: 'error',
-                            title: 'That didn\'t work',
-                            content: 'Either you\'re trying crack for the first time or your account doesn\'t exist.',
-                            positiveText: 'Ok, shut up'
-                        }
-                    );
+                    
                     loginStatus.value.loading = false;
                     return
                 }
