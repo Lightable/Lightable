@@ -6,6 +6,7 @@ import rebase.schema.User
 
 interface IDMCache {
     val snowflake: Snowflake
+    val batchInterval: Int
     val channels: HashMap<Long, DMChannel>
     fun saveOrReplaceChannel(channel: DMChannel, saveToDB: Boolean = true)
 }

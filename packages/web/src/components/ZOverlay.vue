@@ -4,7 +4,8 @@ import { ref } from 'vue';
 const clicked = ref(false);
 
 const props = defineProps({
-    overlayClass: String
+    overlayClass: String,
+    disabled: Boolean
 })
 </script>
 
@@ -15,15 +16,16 @@ const props = defineProps({
         <div class="top">
             <slot name="header" />
         </div>
-        <div :class="`overlay ${overlayClass}`" @click="() => { clicked = true; $emit('overlay-click') }">
+        <div :class="`overlay ${overlayClass}`" @click="() => {(!disabled)  ? () => {clicked = true; $emit('overlay-click')} : () => {} }" :disabled="disabled">
 
             <div class="content">
                 <slot />
             </div>
-            <div class="container" v-if="!clicked">
+            <div class="container" v-if="!clicked && !disabled">
                 <slot name="hover" />
             </div>
-            <div class="container" v-else>
+            <div class="container" v-if="disabled"/>
+            <div class="container" v-else-if="clicked && !disabled">
                 <slot name="loading" />
             </div>
         </div>
@@ -50,9 +52,19 @@ const props = defineProps({
             display: none;
         }
 
+
+        &[disabled="true"] {
+              position: relative;
+            .content {
+                position: relative;
+                opacity: 0.4;
+                transition: opacity .2s ease-in-out;
+            }
+        }
         &:hover,
         &:focus,
         &:active {
+
             position: relative;
 
             .container {

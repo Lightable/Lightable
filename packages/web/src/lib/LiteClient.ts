@@ -11,7 +11,7 @@ export default class LiteClient {
     constructor(options: LiteClientOptions) {
         this.token = options.token;
         this.user = options.user;
-        this.api = 'https://api.zenspace.cf';
+        this.api = 'http://localhost:8080';
         this.store = useClientStore();
         this.app = useAppStore();
     }
@@ -126,11 +126,11 @@ export default class LiteClient {
     $getSelfAvatar(): string | null {
         //@ts-ignore
         if (!this.user?.avatar) return null
-        return `${this.api}/cdn/user/${this.user?.id}/avatars/avatar_${this.user?.avatar.id}`;
+        return `${this.api}/cdn/user/${this.user?.id}/avatars/avatar_${this.user?.avatar.id}?size=128`;
     }
 
     $getExternalAvatar(uid: string, avatarID: string) {
-        return `${this.api}/cdn/user/${uid}/avatars/avatar_${avatarID}`;
+        return `${this.api}/cdn/user/${uid}/avatars/avatar_${avatarID}?size=64`;
     }
 }
 

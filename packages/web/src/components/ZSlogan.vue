@@ -1,24 +1,25 @@
+<script setup lang="ts">
+    import { defineAsyncComponent } from 'vue';
+
+    const Element = defineAsyncComponent({
+        loader: () => import('naive-ui/lib/element/src/Element')
+    });
+    const Ellipsis = defineAsyncComponent({
+        loader: () => import('naive-ui/lib/ellipsis/src/Ellipsis')
+    });
+    const titleOptions = ['Talk to your loser friends', 'Chat with ease', 'Make it yours', 'Chat for all time', 'All I want for Christmas is youuuuuuu', '195 Countries, One ZenSpace'];
+    const option = titleOptions.sort(function () { return 0.5 - Math.random() })[0];
+</script>
+
+
 <template>
-    <NElement type="div" class="slog">
-        <NEllipsis style="max-width: 85vw"><h2 class="option">{{ option }}</h2></NEllipsis>
+    <Element type="div" class="slog">
+        <Ellipsis style="max-width: 85vw"><h2 class="option">{{ option }}</h2></Ellipsis>
         <h3 style="color: var(--text-color-2);">Open source, maybe secure</h3>
         <h2 style="color: var(--text-color-3)">Definitely stupid.</h2>
-    </NElement>
+    </Element>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { NElement, NEllipsis } from 'naive-ui';
-export default defineComponent({
-    setup() {
-        let titleOptions = ['Talk to your loser friends', 'Chat with ease', 'Make it yours', 'Chat for all time', 'All I want for Christmas is youuuuuuu', '195 Countries, One ZenSpace'];
-        let option = titleOptions.sort(function () { return 0.5 - Math.random() })[0];
-        return { option }
-    },
-    components: {NElement, NEllipsis}
-})
-
-</script>
 
 <style lang="scss">
 h2 {

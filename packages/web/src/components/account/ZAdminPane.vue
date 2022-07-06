@@ -140,7 +140,7 @@ const searchDisabledUsers = (type: UserSearchType) => {
                <div class="card-body">
                     <div class="disabled inner">
                          <NSkeleton class="friend" :height="64" :width="64" round v-if="disabledUsersLoading" v-for="(_, index) in [0, 0, 0]" v-bind:key="index" />
-                         <ZOverlay overlay-class="treat-as-button disabled" v-for="(user, index) in disabledUsers" v-bind:key="user.id" v-on:overlay-click="lite.enableUser(user.id)">
+                         <ZOverlay overlay-class="treat-as-button disabled" v-for="(user, index) in disabledUsers" v-bind:key="user.id" v-on:overlay-click="lite.enableUser(user.id)" :disabled="user.admin || user.id == lite?.user?.id">
                               <template #header>
                                    <span style="color: var(--text-color-3); font-size: 18px; font-family: 'strawfordregular'">{{ user.name }}</span>
                               </template>
@@ -190,7 +190,7 @@ const searchDisabledUsers = (type: UserSearchType) => {
                <div class="card-body">
                     <div class="enabled inner">
                          <NSkeleton class="friend" :height="64" :width="64" round v-if="enabledUsersLoading" v-for="(_, index) in [0, 0, 0]" v-bind:key="index" />
-                         <ZOverlay overlay-class="treat-as-button enabled" v-for="(user, index) in enabledUsers" v-bind:key="user.id" v-on:overlay-click="lite.disableUser(user.id)">
+                         <ZOverlay overlay-class="treat-as-button enabled" v-for="(user, index) in enabledUsers" v-bind:key="user.id" v-on:overlay-click="lite.disableUser(user.id)" :disabled="user.admin || user.id == lite?.user?.id">
                               <template #header>
                                    <span style="color: var(--text-color-3); font-size: 18px; font-family: 'strawfordregular';">{{ user.name }}</span>
                               </template>

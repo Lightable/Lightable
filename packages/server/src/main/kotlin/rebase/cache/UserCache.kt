@@ -11,10 +11,13 @@ import rebase.interfaces.cache.IUserCache
 import rebase.schema.ChattyRelease
 import rebase.schema.User
 import java.io.ByteArrayOutputStream
+import java.util.Timer
 import java.util.concurrent.ExecutorService
 import kotlin.collections.HashMap
 
-class UserCache(private val executor: ExecutorService, val db: RebaseMongoDatabase, override val snowflake: Snowflake, val server: Server, val fileController: FileController): IUserCache {
+class UserCache(private val executor: ExecutorService, val db: RebaseMongoDatabase, override val snowflake: Snowflake, val server: Server, val fileController: FileController,
+                override val batchInterval: Int
+): IUserCache {
     val logger = LoggerFactory.getLogger("Rebase -> UserCache")
     val userColl = db.getUserCollection()
     val releaseColl = db.getReleaseCollection()
@@ -90,8 +93,28 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
         val testID = snowflake.nextId()
         users[testID] = User(test = true, identifier = snowflake.nextId())
         logger.info("Created test account -> ${users[testID]}")
+        if (batchInterval >= 0) {
+            Timer().scheduleAtFixedRate(UserUpdateBatch(), 5000, (batchInterval * 1000).toLong())
+        }
     }
 
+    inner class UserUpdateBatch : java.util.TimerTask() {
+        override fun run() {
+            logger.info("Batch get is running... (${batchInterval}s)")
+            userColl.find().forEach { user ->
+                val existing = users[user.identifier]
+                if (existing == null) {
+                    user.cache = this@UserCache
+                    logger.info("Found existing user (${user.identifier}) on DB that isn't on this API instance... Creating it now")
+                    users[user.identifier] = user
+                    user.avatar?.idJSON = user.avatar?.identifier.toString()
+                    FileController().createUserDir(user.identifier)
+                } else if (existing != user) {
+                    existing.replace(user)
+                }
+            }
+        }
+    }
     companion object {
     }
 }

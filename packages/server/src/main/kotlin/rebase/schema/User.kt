@@ -38,7 +38,7 @@ data class User constructor(
     @BsonProperty("enabled") var enabled: Boolean = true,
     @field:BsonProperty(useDiscriminator = true) @BsonProperty("avatar") var avatar: Avatar? = null,
     @BsonIgnore @JsonIgnore var test: Boolean = false,
-    @BsonProperty("created") @JsonProperty val created: Instant = Instant.now()
+    @BsonProperty("created") @JsonProperty var created: Instant = Instant.now()
 ) : BucketImpl {
     @BsonIgnore
     @JsonIgnore
@@ -163,6 +163,40 @@ data class User constructor(
         return FriendsPublic(friendList, pendings, requests)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (this === other) return true
+        if (other !is User) return false
+        if (other.name != this.name) return false
+        if (other.email != this.email) return false
+        if (other.password != this.password) return false
+        if (other.token != this.token) return false
+        if (other.enabled != this.enabled) return false
+        if (other.notice != this.notice) return false
+        if (other.relationships != this.relationships) return false
+        if (other.state != this.state) return false
+        if (other.status != this.status) return false
+        if (other.admin != this.admin) return false
+        if (other.avatar != this.avatar) return false
+        if (other.created != this.created) return false
+        return true
+    }
+
+    fun replace(user: User) {
+        this.name = user.name
+        this.email = user.email
+        this.password = user.password
+        this.token = user.token
+        this.enabled = user.enabled
+        this.notice = user.notice
+        this.relationships = user.relationships
+        this.state = user.state
+        this.status = user.status
+        this.admin = user.admin
+        this.avatar = user.avatar
+        this.created = user.created
+        this.save(false)
+    }
     init {
         jackson.findAndRegisterModules()
     }

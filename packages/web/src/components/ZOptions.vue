@@ -1,56 +1,73 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { NButton, NIcon, NTooltip } from 'naive-ui';
-import { LogoWindows, BrowsersOutline, CogOutline, LogOutOutline } from '@vicons/ionicons5';
+import { computed, defineAsyncComponent } from 'vue';
+import { NIcon } from 'naive-ui';
 import { useAppStore } from '../stores/AppStore';
-let appStore = useAppStore();
-let userExists = computed(() => appStore.account != null)
-console.log(userExists)
+const appStore = useAppStore();
+const userExists = computed(() => appStore.account != null);
+
+const Tooltip = defineAsyncComponent({
+    loader: () => import('naive-ui/lib/tooltip/src/Tooltip')
+});
+const Button = defineAsyncComponent({
+    loader: () => import('naive-ui/lib/button/src/Button')
+});
+const LogoWindows = defineAsyncComponent({
+    loader: () => import('@vicons/ionicons5/LogoWindows')
+});
+const BrowsersOutline = defineAsyncComponent({
+    loader: () => import('@vicons/ionicons5/BrowsersOutline')
+});
+const CogOutline = defineAsyncComponent({
+    loader: () => import('@vicons/ionicons5/CogOutline')
+});
+const LogOutOutline = defineAsyncComponent({
+    loader: () => import('@vicons/ionicons5/LogOutOutline')
+});
 </script>
 <template>
     <div class="options">
         <!-- <img src="../assets/RightHere.svg" height="148" class="img-l"/> -->
         <div class="wrap">
-            <NTooltip trigger="hover">
+            <Tooltip trigger="hover">
                 <template #trigger>
-                    <NButton size="large" class="download-btn btn" type="primary" disabled>
+                    <Button size="large" class="download-btn btn" type="primary" disabled>
                         <template #icon>
                             <NIcon>
                                 <LogoWindows />
                             </NIcon>
                         </template>
                         Download For Windows
-                    </NButton>
+                    </Button>
                 </template>
                 You don't want to see that anyways...
-            </NTooltip>
-            <NTooltip trigger="hover">
+            </Tooltip>
+            <Tooltip trigger="hover">
                 <template #trigger>
-                    <NButton size="large" class="web-btn space btn" type="info" tertiary disabled>
+                    <Button size="large" class="web-btn space btn" type="info" tertiary disabled>
                         <template #icon>
                             <NIcon>
                                 <BrowsersOutline />
                             </NIcon>
                         </template>
                         Open Web Client
-                    </NButton>
+                    </Button>
                 </template>
                 I haven't even created the project yet 💀
                 <!-- <img src="../assets/RightHereHFlip.svg" height="148" class="img-r"/> -->
-            </NTooltip>
+            </Tooltip>
         </div>
-        <NButton text type="info" size="large" @click="$router.push('/settings/public')">
+        <Button text type="info" size="large" @click="$router.push('/settings/public')">
             <template #icon>
                 <CogOutline />
             </template>
             Account Settings
-        </NButton>
-        <NButton text type="error" size="large" @click="$router.push('logout')" v-if="userExists">
+        </Button>
+        <Button text type="error" size="large" @click="$router.push('logout')" v-if="userExists">
             <template #icon>
                 <LogOutOutline />
             </template>
             Logout
-        </NButton>
+        </Button>
     </div>
 </template>
 

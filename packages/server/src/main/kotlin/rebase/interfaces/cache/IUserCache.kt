@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService
 
 interface IUserCache {
     val snowflake: Snowflake
+    val batchInterval: Int
     val users: HashMap<Long, User>
     val avatarCache: HashMap<Long, ByteArrayOutputStream>
     fun saveOrReplaceUser(user: User, saveToDB: Boolean = true)

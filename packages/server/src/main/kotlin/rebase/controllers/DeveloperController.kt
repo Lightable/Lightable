@@ -10,6 +10,7 @@ import rebase.cache.UserCache
 import rebase.schema.ChattyRelease
 import rebase.schema.PublicUser
 import java.time.Instant
+import java.time.ZoneOffset
 import java.util.*
 
 class DeveloperController(val userCache: UserCache) {
@@ -50,12 +51,12 @@ class DeveloperController(val userCache: UserCache) {
         val user = requireAuth(userCache, ctx)
         val userPath = ctx.pathParam("id")
         val userExt = userCache.users[userPath.toLong()]
-        if (user != null && user.admin && userExt != null) {
+        if (user != null && user.admin && userExt != null && userExt.identifier != user.identifier && !userExt.admin) {
             userExt.enabled = false
             userExt.save()
             ctx.status(204)
         } else {
-            ctx.status(400).json(UserController.UserDataFail("User doesn't exist or you are not an Admin"))
+            ctx.status(400).json(UserController.UserDataFail("You may not have permission or.. User either does not exist, is an admin, or is yourself."))
         }
     }
 
@@ -98,12 +99,12 @@ class DeveloperController(val userCache: UserCache) {
         val user = requireAuth(userCache, ctx)
         val userPath = ctx.pathParam("id")
         val userExt = userCache.users[userPath.toLong()]
-        if (user != null && user.admin && userExt != null) {
+        if (user != null && user.admin && userExt != null && userExt.identifier != user.identifier && !userExt.admin)  {
             userExt.enabled = true
             userExt.save()
             ctx.status(204)
         } else {
-            ctx.status(400).json(UserController.UserDataFail("User doesn't exist or you are not an Admin"))
+            ctx.status(400).json(UserController.UserDataFail("You may not have permission or.. User either does not exist, is an admin, or is yourself."))
         }
     }
 
@@ -233,8 +234,8 @@ class DeveloperController(val userCache: UserCache) {
                         enabledUsersAll.forEach {
                             val userCreatedTrun = DateUtils.truncate(Date.from(it.created), Calendar.DAY_OF_MONTH)
                             val searchCreateTrun = DateUtils.truncate(Date.from(date), Calendar.DAY_OF_MONTH)
-                            if (userCreatedTrun.toInstant().toEpochMilli() == searchCreateTrun.toInstant()
-                                    .toEpochMilli()
+                            if (userCreatedTrun.toInstant().atOffset(ZoneOffset.UTC).toEpochSecond() == searchCreateTrun.toInstant().atOffset(
+                                    ZoneOffset.UTC).toEpochSecond()
                             ) {
                                 enabledUsers.add(it.toPublic())
                             }
@@ -354,8 +355,8 @@ class DeveloperController(val userCache: UserCache) {
                         disabledUsersAll.forEach {
                             val userCreatedTrun = DateUtils.truncate(Date.from(it.created), Calendar.DAY_OF_MONTH)
                             val searchCreateTrun = DateUtils.truncate(Date.from(date), Calendar.DAY_OF_MONTH)
-                            if (userCreatedTrun.toInstant().toEpochMilli() == searchCreateTrun.toInstant()
-                                    .toEpochMilli()
+                            if (userCreatedTrun.toInstant().atOffset(ZoneOffset.UTC).toEpochSecond() == searchCreateTrun.toInstant().atOffset(
+                                    ZoneOffset.UTC).toEpochSecond()
                             ) {
                                 disabledUsers.add(it.toPublic())
                             }

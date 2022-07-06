@@ -49,6 +49,7 @@ class Server(
     var dbport: Int = 27017,
     var dbuser: String = "root",
     var dbpass: String = "rootpass",
+    var batchInterval: Int,
     var session: CqlSession
 ) {
     val logger: org.slf4j.Logger = LoggerFactory.getLogger("Server")!!
@@ -99,8 +100,8 @@ class Server(
             }
         }
     }
-    val userCache = UserCache(async, db, snowflake, this, fileController)
-    val dmCache = DMChannelCache(async, db, session, snowflake)
+    val userCache = UserCache(async, db, snowflake, this, fileController, batchInterval)
+    val dmCache = DMChannelCache(async, db, session, snowflake, batchInterval)
     private val websocketController = WebSocketController(logger, userCache, isProd)
 
     private val developerController = DeveloperController(userCache)
@@ -291,6 +292,7 @@ fun main(args: Array<String>) {
     var dbport: Int = 27017
     var dbuser: String = "root"
     var dbpass: String = "rootpass"
+    var dbBatchUpdateInterval = System.getenv("batchint").toInt() ?: 30
     var prod = false
     val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
     println("Working -> ${File("./storage").absolutePath}")
@@ -322,7 +324,7 @@ fun main(args: Array<String>) {
     val scyllaHost = System.getenv("SCYLLA_HOST") ?: "192.168.50.111"
     val connector = ScyllaConnector()
     connector.connect(scyllaHost, 9042, "datacenter1")
-    val server = Server(dbhost, dbport, dbuser, dbpass, connector.getSession())
+    val server = Server(dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, connector.getSession())
     server.isProd = prod
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (!System.getenv("port").isNullOrBlank()) {

@@ -7,13 +7,17 @@ import rebase.schema.ChattyRelease
 import rebase.schema.User
 import java.io.ByteArrayOutputStream
 
-class MockCache(override val snowflake: Snowflake): IUserCache {
+class MockCache(override val snowflake: Snowflake, override val batchInterval: Int): IUserCache {
     val logger = LoggerFactory.getLogger("Rebase -> CACHE")
     override val users = HashMap<Long, User>()
     override val avatarCache = HashMap<Long, ByteArrayOutputStream>()
 
     override fun saveOrReplaceUser(user: User, saveToDB: Boolean) {
         users[user.identifier] = user
+    }
+
+    override fun deleteUser(user: Long) {
+        TODO("Not yet implemented")
     }
 
     override fun removeAllTestUsers() {

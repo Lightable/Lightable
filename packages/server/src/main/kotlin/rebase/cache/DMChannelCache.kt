@@ -12,7 +12,9 @@ import rebase.messages.DMDao
 import rebase.schema.DMChannel
 import java.util.concurrent.ExecutorService
 
-class DMChannelCache(private val executor: ExecutorService, private val db: RebaseMongoDatabase, private val session: CqlSession, override val snowflake: Snowflake) : IDMCache {
+class DMChannelCache(private val executor: ExecutorService, private val db: RebaseMongoDatabase, private val session: CqlSession, override val snowflake: Snowflake,
+                     override val batchInterval: Int
+) : IDMCache {
     override val channels: HashMap<Long, DMChannel> = HashMap()
     private val logger: Logger = LoggerFactory.getLogger("Rebase -> DMChannelCache")
     val dmChannelColl = db.getDMCollection()

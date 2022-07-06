@@ -135,7 +135,7 @@ class UserTest {
         println("⚠️ Start userCache creation")
         val snowflakeCreator = Snowflake()
         println("✅ Created Snowflake singleton")
-        mockedCache = MockCache(snowflakeCreator)
+        mockedCache = MockCache(snowflakeCreator, 0)
         println("✅ Created mock userCache")
         firstUser = User(cache = mockedCache, identifier = snowflakeCreator.nextId())
         println("Created Default User ⬇")

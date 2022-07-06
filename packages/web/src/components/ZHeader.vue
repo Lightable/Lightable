@@ -1,46 +1,41 @@
-
+<script setup lang="ts">
+import { computed, defineAsyncComponent } from "vue";
+import { useAppStore } from "../stores/AppStore";
+import { NIcon as Icon } from "naive-ui";
+const Element = defineAsyncComponent({
+   loader: () => import('naive-ui/lib/element/src/Element')
+});
+const Button = defineAsyncComponent({
+   loader: () => import('naive-ui/lib/button/src/Button')
+});
+const ButtonGroup = defineAsyncComponent({
+   loader: () => import('naive-ui/lib/button-group/src/ButtonGroup')
+});
+const ChatBoxIcon = defineAsyncComponent({
+   loader: () => import('@vicons/ionicons5/Chatbox')
+})
+const appStore = useAppStore();
+const isDark = computed(() => appStore.isDark);
+const setTheme = appStore.setTheme
+</script>
 <template>
    <header :style="(isDark) ? 'background-color: var(--header-dark);' : 'background-color: var(--header-light);'">
       <nav>
-         <NElement type="div" class="logo-wrapper selectable" @click="$router.push('/')">
-            <NIcon :size="32" color="var(--text-color-1)">
-               <Chatbox height="32" width="32" />
-            </NIcon>
+         <Element type="div" class="logo-wrapper selectable" @click="$router.push('/')">
+            <Icon :size="32" color="var(--text-color-1)">
+               <ChatBoxIcon height="32" width="32" />
+            </Icon>
             <span class="ztext">ZenSpace</span>
-         </NElement>
-         <NElement type="div" class="theme-select">
-            <NButtonGroup>
-               <NButton round @click="setTheme(false)" :disabled="!isDark">Light</NButton>
-               <NButton round @click="setTheme(true)" :disabled="isDark">Dark</NButton>
-            </NButtonGroup>
-         </NElement>
+         </Element>
+         <Element type="div" class="theme-select">
+            <ButtonGroup>
+               <Button round @click="setTheme(false)" :disabled="!isDark">Light</Button>
+               <Button round @click="setTheme(true)" :disabled="isDark">Dark</Button>
+            </ButtonGroup>
+         </Element>
       </nav>
    </header>
 </template>
-
-<script lang="ts">
-import { computed, defineComponent } from "vue";
-import { NElement, NIcon, NButton, NButtonGroup } from 'naive-ui';
-import { Chatbox } from '@vicons/ionicons5';
-import { useAppStore } from '../stores/AppStore';
-export default defineComponent({
-   name: 'ZHeader',
-   components: {
-      NIcon,
-      Chatbox,
-      NElement,
-      NButton,
-      NButtonGroup
-   },
-   setup() {
-      let appStore = useAppStore();
-      return {
-         isDark: computed(() => appStore.isDark),
-         setTheme: appStore.setTheme
-      }
-   }
-})
-</script>
 
 <style lang="scss" scoped>
 header {

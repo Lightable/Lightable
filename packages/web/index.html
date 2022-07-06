@@ -40,9 +40,14 @@
       document.isDark = false;
     }
   </script> 
-  <script src="/src/main.ts"
+  <script async
+        defer
+        src="/src/main.ts"
         type="module"></script>
   <style lang="scss">
+
+
+
 
 
 
@@ -103,7 +108,7 @@
       font-size: var(--font-size-base);
       color: var(--color-text);
       background-color: var(--color-bg);
-      transition: color .3s var(--n-bezier), background-color .3s var(--n-bezier), opacity .3s var(--n-bezier), border-color .3s var(--n-bezier);
+      /* transition: color .3s var(--n-bezier), background-color .3s var(--n-bezier), opacity .3s var(--n-bezier), border-color .3s var(--n-bezier); */
     }
     .selectable {
       cursor: pointer;

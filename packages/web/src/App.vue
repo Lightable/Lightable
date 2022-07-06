@@ -11,7 +11,6 @@ let appStore = useAppStore();
 let clientStore = useClientStore();
 document.getElementById('app')!!.style.backgroundColor = (appStore.isDark) ? 'var(--bg-dark)' : 'var(--bg-light)';
 let isDark = computed(() => appStore.isDark);
-
 if (appStore.account) {
   // @ts-ignore
   clientStore.lite.token = appStore.account.token.token;
@@ -26,13 +25,11 @@ if (appStore.account) {
       <NConfigProvider :theme="(isDark) ? darkTheme : lightTheme">
         <NDialogProvider>
           <ZHeader />
-
           <router-view v-slot="{ Component }">
             <Transition name="nested" :duration="100">
               <component :is="Component" />
             </Transition>
           </router-view>
-
         </NDialogProvider>
       </NConfigProvider>
     </ZConfettiCanvasProvider>

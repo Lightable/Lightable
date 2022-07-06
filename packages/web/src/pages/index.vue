@@ -1,3 +1,27 @@
+<script setup lang="ts">
+import { defineAsyncComponent } from "vue";
+import { useHead } from "@vueuse/head";
+const ZSlogan = defineAsyncComponent({
+  loader: () => import('../components/ZSlogan.vue')
+});
+const ZOptions = defineAsyncComponent({
+  loader: () => import('../components/ZOptions.vue')
+});
+const ZTestimonial = defineAsyncComponent({
+  loader: () => import('../components/ZTestimonial.vue')
+});
+
+ useHead({
+      title: 'ZenSpace 🡪 Home',
+      meta: [
+        {
+          property: 'og:title',
+          content: 'ZenSpace 🡪 Home',
+        },
+      ]
+    });
+</script>
+
 <template>
   <div class="main-page">
     <ZSlogan />
@@ -7,33 +31,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent } from "vue";
-import ZSlogan from "../components/ZSlogan.vue";
-import ZOptions from "../components/ZOptions.vue";
-import ZTestimonial from "../components/ZTestimonial.vue";
-import { useHead } from "@vueuse/head";
-export default defineComponent({
-  name: 'ZHome',
-  components: {
-    ZSlogan,
-    ZOptions,
-    ZTestimonial
-  },
-  setup() {
-    useHead({
-      title: 'ZenSpace 🡪 Home',
-      meta: [
-        {
-          property: 'og:title',
-          content: 'ZenSpace 🡪 Home',
-        },
-      ]
-    })
-  }
-});
-</script>
 
 <style lang="scss" scoped>
 .main-page {
