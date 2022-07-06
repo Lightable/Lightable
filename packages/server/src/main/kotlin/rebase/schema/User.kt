@@ -193,7 +193,8 @@ data class User constructor(
         this.state = user.state
         this.status = user.status
         this.admin = user.admin
-        this.avatar = user.avatar
+        this.avatar?.identifier = user.avatar?.identifier!!
+        this.avatar?.animated = user.avatar?.animated == true
         this.created = user.created
         this.save(false)
     }

@@ -80,9 +80,9 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
         userColl.find().forEach { user ->
             user.cache = this
             println("Found existing user: ${user.name} ${user.identifier} With Friends = ${user.relationships.friends}")
-            users[user.identifier] = user
             user.avatar?.idJSON = user.avatar?.identifier.toString()
             FileController().createUserDir(user.identifier)
+            users[user.identifier] = user
         }
         releaseColl.find().forEach { release ->
             releases[release.tag] = release
@@ -106,9 +106,9 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
                 if (existing == null) {
                     user.cache = this@UserCache
                     logger.info("Found existing user (${user.identifier}) on DB that isn't on this API instance... Creating it now")
-                    users[user.identifier] = user
                     user.avatar?.idJSON = user.avatar?.identifier.toString()
                     FileController().createUserDir(user.identifier)
+                    users[user.identifier] = user
                 } else if (existing != user) {
                     existing.replace(user)
                 }
