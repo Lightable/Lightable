@@ -16,7 +16,7 @@ const props = defineProps({
         <div class="top">
             <slot name="header" />
         </div>
-        <div :class="`overlay ${overlayClass}`" @click="() => {(!disabled)  ? () => {clicked = true; $emit('overlay-click')} : () => {} }" :disabled="disabled">
+        <div :class="`overlay ${overlayClass}`" @click="(disabled) ? () => {} : $emit('overlay-click')" :disabled="disabled">
 
             <div class="content">
                 <slot />
