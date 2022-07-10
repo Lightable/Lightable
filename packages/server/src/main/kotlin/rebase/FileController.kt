@@ -2,6 +2,7 @@ package rebase
 
 import com.luciad.imageio.webp.WebPWriteParam
 import io.javalin.http.UploadedFile
+import rebase.detection.NudeDetection
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -34,7 +35,7 @@ class FileController() {
         out.close()
         return out
     }
-    fun addAvatar(user: Long, imageID: Long, avatar: UploadedFile, type: String) {
+    fun addAvatar(napi: NudeDetection, user: Long, imageID: Long, avatar: UploadedFile, type: String) {
         val path = "./storage/user/$user/avatars/avatar_$imageID.webp"
         val file = File(path)
         val existingFiles = File("./storage/user/$user/avatars/").listFiles()
@@ -45,8 +46,18 @@ class FileController() {
         }
         if (type == "png" || type == "jpg" || type == "webp") {
             val image = ImageIO.read(ByteArrayInputStream(avatar.content.readBytes()))
-            val compressWriteTiming = compressAndWriteImage(file, image)
-            println("Compression took ${compressWriteTiming}ms")
+            val napiReq = napi.detect(mutableMapOf(Pair("avatar.webp", image)))
+            if (napiReq?.prediction?.isNotEmpty() == true) {
+                napiReq.prediction["avatar.webp"]?.forEach {
+                    if (it?.label == "FACE_F" || it?.label == "FACE_M") {
+                        return@forEach
+                    } else {
+                        throw InvalidAvatarException("Avatar can't be lewd!", napiReq.prediction.values.toMutableList()[0]!!)
+                    }
+                }
+                val compressWriteTiming = compressAndWriteImage(file, image)
+                println("Compression took ${compressWriteTiming}ms")
+            }
         }
         if (type == "gif") {
         }
@@ -72,4 +83,7 @@ class FileController() {
             writer.dispose()
         }
     }
+}
+
+class InvalidAvatarException(override val message: String?, val predictions: MutableList<NudeDetection.ImageAttribute?>) : Exception(message) {
 }

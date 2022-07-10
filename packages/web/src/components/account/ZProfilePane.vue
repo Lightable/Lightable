@@ -2,6 +2,8 @@
 import { computed, defineAsyncComponent, PropType } from 'vue';
 import { Account, Friend } from '../../User';
 import { useClientStore } from '../../stores/ClientStore';
+import { UserPatchProfilePair } from '../../lib/LiteClient';
+import { useMessage } from 'naive-ui';
 const props = defineProps({
     user: Object as PropType<Account>,
     loading: Boolean
@@ -9,10 +11,10 @@ const props = defineProps({
 let clientStore = useClientStore();
 const lite = computed(() => clientStore.lite);
 const friends = computed(() => Array.from(clientStore.friends.values()));
-
 const ZRightPane = defineAsyncComponent({
     loader: () => import('./ZRightPane.vue')
 });
+const message = useMessage();
 const ZPaneWrap = defineAsyncComponent({
     loader: () => import('./ZPaneWrap.vue')
 });
@@ -31,13 +33,51 @@ const Tooltip = defineAsyncComponent({
 const Skeleton = defineAsyncComponent({
     loader: () => import('naive-ui/lib/skeleton/src/Skeleton')
 });
+const updateProfileOptions = async (option: string, value: boolean) => {
+    if (props.user?.profileOptions.get(option) == value) return
+    let arr: UserPatchProfilePair[] = [];
+    arr.push({ key: option, value });
+    let obj = {};
+    arr.forEach(i => {
+        // @ts-ignore
+        obj[i.key] = i.value;
+    })
+    // @ts-ignore
+    lite.value.$update({ profileOptions: obj }).then(() => {
+        if (value) {
+            message.success('Anyone but blocked users are able to view your profile', {closable: true});
+        } else {
+            message.warning('No-one but your friends are able to view your profile', {closable: true});
+        }
+    });
+}
 </script>
 
 <template>
     <ZPaneWrap>
         <ZRightPane>
+            <div class="card-header flex">
+                <span class="pane-header small">Public Profile</span>
+                <ButtonGroup>
+                    <Tooltip trigger="hover">
+                        <template #trigger>
+                            <Button type="error" size="small" round quaternary :disabled="!user?.profileOptions.get('IsPublic')" @click="updateProfileOptions('IsPublic', false)">Deny</Button>
+                        </template>
+                        Deny anyone but your friends to view profile
+                    </Tooltip>
+                    <Tooltip trigger="hover">
+                        <template #trigger>
+                            <Button type="success" size="small" round quaternary :disabled="user?.profileOptions.get('IsPublic')" @click="updateProfileOptions('IsPublic', true)">Allow</Button>
+                        </template>
+                        Allow anyone but blocked users to view your profile
+                    </Tooltip>
+
+                </ButtonGroup>
+            </div>
+        </ZRightPane>
+        <ZRightPane>
             <div class="card-header flex" style="color: var(--info-color);">
-                <h2>Stats</h2>
+                <span class="pane-header">Stats</span>
                 <Skeleton :width="110" :height="30" round v-if="loading" />
                 <ButtonGroup v-else>
                     <Tooltip trigger="hover">
@@ -89,7 +129,7 @@ const Skeleton = defineAsyncComponent({
         </ZRightPane>
         <ZRightPane>
             <div class="card-header" style="color: var(--info-color);">
-                <h2>Friends</h2>
+                <span class="pane-header">Friends</span>
             </div>
             <div class="card-body">
                 <div class="friends-inner">
@@ -116,6 +156,15 @@ const Skeleton = defineAsyncComponent({
     user-select: none;
     font-family: 'Titillium Web';
     padding: 8px;
+
+    .pane-header {
+        font-size: 24px;
+        color: var(--info-color);
+
+        &.small {
+            font-size: 16px;
+        }
+    }
 
     &.flex {
         display: flex;

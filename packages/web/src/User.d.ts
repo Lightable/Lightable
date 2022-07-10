@@ -11,6 +11,7 @@ export interface Account {
     admin: boolean;
     state: UserState;
     enabled: boolean;
+    profileOptions: Map<string, boolean>
 }
 
 export interface Friend {

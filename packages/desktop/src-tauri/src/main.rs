@@ -5,23 +5,12 @@
 use tauri::{Manager, Runtime, Wry, Window};
 use tauri_plugin_log::{LogTarget, LoggerBuilder};
 use tauri_plugin_store::PluginBuilder;
-use tokio::{net::TcpStream, sync::Mutex};
-use tokio_tungstenite::{
-  connect_async_with_config,
-  tungstenite::{
-    protocol::{CloseFrame as ProtocolCloseFrame, WebSocketConfig},
-    Message,
-  },
-  MaybeTlsStream, WebSocketStream,
-};
 use window_shadows::set_shadow;
 use window_vibrancy::{
   apply_acrylic, apply_blur, apply_mica, clear_acrylic, clear_blur, clear_mica,
 };
 use winreg::{enums::HKEY_CURRENT_USER, RegKey};
 
-use flate2::read::ZlibDecoder;
-use tauri_plugin_websocket::{ConnectionConfig, ConnectionManager, Id, WebSocketMessage, Error};
 fn main() {
   // Logging targets
   let targets = [LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview];
@@ -52,62 +41,6 @@ fn main() {
     .expect("error while running tauri application");
 }
 
-fn connect_to_gateway<R: Runtime>(
-  window: Window<R>,
-  url: String,
-  config: Option<ConnectionConfig>,
-) -> tauri_plugin_websocket::Result<Id> {
-  let zlib = url.contains("?compression=zlib");
-  let id = rand::random();
-  let (ws_stream, _) =
-    tauri::async_runtime::block_on(connect_async_with_config(url, config.map(Into::into)))?;
-
-  tauri::async_runtime::spawn(async move {
-    let (write, read) = ws_stream.split();
-    let manager = window::state::<ConnectionManager>();
-    manager.0.lock().await.insert(id, write);
-    read
-      .for_each(move |message| {
-        let window_ = window.clone();
-        async move {
-          if let Ok(Message::Close(_)) = message {
-            let manager = window_.state::<ConnectionManager>();
-            manager.0.lock().await.remove(&id);
-          }
-
-          let response = match message {
-            Ok(Message::Text(t)) => serde_json::to_value(WebSocketMessage::Text(t)).unwrap(),
-            Ok(Message::Binary(t)) => {
-              if zlib {
-                let mut decoder = ZlibDecoder::new(&t[..]);
-                let mut decoded_string = decoder.read_to_string(&mut s);
-                serde_json::to_value(WebSocketMessage::Text(decoded_string)).unwrap()
-              } else {
-                serde_json::to_value(WebSocketMessage::Binary(t)).unwrap()
-              }
-            }
-            Ok(Message::Ping(t)) => serde_json::to_value(WebSocketMessage::Ping(t)).unwrap(),
-            Ok(Message::Pong(t)) => serde_json::to_value(WebSocketMessage::Pong(t)).unwrap(),
-            Ok(Message::Close(t)) => {
-              serde_json::to_value(WebSocketMessage::Close(t.map(|v| CloseFrame {
-                code: v.code.into(),
-                reason: v.reason.into_owned(),
-              })))
-              .unwrap()
-            }
-            Ok(Message::Frame(_)) => serde_json::Value::Null, // This value can't be recieved.
-            Err(e) => serde_json::to_value(Error::from(e)).unwrap(),
-          };
-          let js = format_callback(callback_function, &response)
-            .expect("unable to serialize websocket message");
-          let _ = window_.eval(js.as_str());
-        }
-      })
-      .await;
-  });
-
-  Ok(id)
-}
 // #[tauri::command]
 // fn get_battery_percentage() -> Result<i32, String> {
 //   return Ok(30);

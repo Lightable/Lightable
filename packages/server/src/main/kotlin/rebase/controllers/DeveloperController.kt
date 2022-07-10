@@ -150,7 +150,7 @@ class DeveloperController(val userCache: UserCache) {
         responses = [
             OpenApiResponse(
                 "200",
-                content = [OpenApiContent(UserController.UserDataFail::class, type = "application/json")]
+                content = [OpenApiContent(UserPagedPayload::class, type = "application/json")]
             ),
             OpenApiResponse(
                 "403",

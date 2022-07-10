@@ -1,23 +1,35 @@
 import { useAppStore } from "../stores/AppStore";
 import { useClientStore } from "../stores/ClientStore";
 import { Account, Friend } from "../User";
+import EventEmitter from "events";
 
-export default class LiteClient {
+
+
+
+export declare interface LiteClient {
+    on(event: 'self:avatar:upload:progress', listener: (p: number) => void): this;
+    on(event: 'self:avatar:upload:finish', listener: (p: object) => void): this;
+    on(event: 'self:avatar:upload:lewd', listener: (p: object) => void): this;
+    on(event: 'self:avatar:upload:500', listener: (p: object) => void): this;
+}
+export class LiteClient extends EventEmitter {
     token: string;
     user: Account | null;
     api: string;
     store: any;
     app: any;
     constructor(options: LiteClientOptions) {
+        super();
         this.token = options.token;
         this.user = options.user;
-        this.api = 'https://api.zenspace.cf';
+        this.api = 'http://localhost:8080';
         this.store = useClientStore();
         this.app = useAppStore();
     }
     async $getSelf() {
         let req = await this.$request<Account>('GET', '/user/@me', undefined);
         if (req.ok) {
+            req.data!!.profileOptions = this.$convertStringBooleanKeyPair(req.data?.profileOptions!!);
             this.user = req.data;
             this.app.account = req.data;
         } else if (req.status == 403) {
@@ -25,6 +37,18 @@ export default class LiteClient {
             this.app.account.enabled = false;
             return
         }
+    }
+    $convertStringBooleanKeyPair(map: Map<string, boolean>): Map<string, boolean> {
+        let convertedValues = Object.entries(map);
+        let realMap = new Map<string, boolean>();
+        for (let pi = 0; convertedValues.length > pi; pi++) {
+            // @ts-ignore
+            let profileOptionPair = convertedValues[pi];
+            let key = profileOptionPair[0];
+            let value = profileOptionPair[1] as boolean; 
+            realMap.set(key, value);
+        }
+        return realMap
     }
     async $request<T>(method: string, path: string, body: string | undefined): Promise<ResponseData<T>> {
         let res = await fetch(`${this.api}${path}`, {
@@ -132,6 +156,48 @@ export default class LiteClient {
     $getExternalAvatar(uid: string, avatarID: string) {
         return `${this.api}/cdn/user/${uid}/avatars/avatar_${avatarID}?size=64`;
     }
+
+    async $update(patch: UserPatch) {
+        let req = await this.$request<Account>('PATCH', '/user/@me', JSON.stringify(patch));
+        req.data!!.profileOptions = this.$convertStringBooleanKeyPair(req.data?.profileOptions!!);
+        this.app.account = req.data;
+        this.user = req.data;
+        return req;
+    }
+
+    async $updateAvatar(file: File) {
+        let form = new FormData();
+        form.append('avatar', file, 'avatar');
+        let request = new XMLHttpRequest();
+        request.open('POST', `${this.api}/user/@me/avatar`);
+        request.setRequestHeader('Authorization', this.token);
+        request.upload.onprogress = (e: ProgressEvent) => {
+            let {loaded, total} = e;
+            let percentage = Math.ceil((loaded / total) * 100);
+            this.emit('self:avatar:upload:progress', percentage);
+        }
+        request.send(form);
+        request.onload = (d) => {
+            let response = JSON.parse(request.responseText);
+            switch (request.status) {
+                case 200: {
+                    this!!.user!!.avatar = response.avatar;
+                    this.app.account.avatar = response.avatar;
+                    return Promise.resolve(this.emit('self:avatar:upload:finish', response));
+                }
+                case 403: {
+                    this.emit('self:avatar:upload:lewd', response);
+                    break;
+                }
+                case 500: {
+                    this.emit('self:avatar:upload:500')
+                }
+            }
+        }
+    }
+    async getProfile(name: string) {
+        
+    }
 }
 
 export type UserSearchType = "NAME" | "ID" | "CREATED"
@@ -154,4 +220,14 @@ export interface ResponseData<T> {
     status: number;
     error: string | null;
     data: T | null;
+}
+export interface UserPatch {
+         name?: String,
+         email?: String,
+         profileOptions?: UserPatchProfilePair[]
+}
+
+export interface UserPatchProfilePair {
+    key: string,
+    value: boolean
 }

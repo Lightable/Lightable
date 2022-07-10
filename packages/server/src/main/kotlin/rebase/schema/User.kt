@@ -38,7 +38,8 @@ data class User constructor(
     @BsonProperty("enabled") var enabled: Boolean = true,
     @field:BsonProperty(useDiscriminator = true) @BsonProperty("avatar") var avatar: Avatar? = null,
     @BsonIgnore @JsonIgnore var test: Boolean = false,
-    @BsonProperty("created") @JsonProperty var created: Instant = Instant.now()
+    @BsonProperty("created") @JsonProperty var created: Instant = Instant.now(),
+    @BsonProperty("profileOptions") @JsonIgnore var profileOptions: MutableMap<String, Boolean>? = mutableMapOf(Pair("ShowStatus", false), Pair("IsPublic", false))
 ) : BucketImpl {
     @BsonIgnore
     @JsonIgnore
@@ -212,6 +213,7 @@ data class PrivateUser(@JsonIgnore private val user: User) {
     val admin = user.admin
     val avatar = user.avatar
     val enabled = user.enabled
+    val profileOptions = user.profileOptions
 }
 
 data class PublicUser(@JsonIgnore private val user: User) {
@@ -265,3 +267,4 @@ enum class UserState {
     AWAY,
     DND
 }
+

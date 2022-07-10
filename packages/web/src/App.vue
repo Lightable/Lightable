@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import { NConfigProvider, NDialogProvider, darkTheme, lightTheme } from 'naive-ui';
+import { NConfigProvider, NDialogProvider, darkTheme, lightTheme, NMessageProvider } from 'naive-ui';
 import { computed } from 'vue';
 import ZHeader from './components/ZHeader.vue';
 import { useAppStore } from './stores/AppStore';
@@ -25,11 +25,13 @@ if (appStore.account) {
       <NConfigProvider :theme="(isDark) ? darkTheme : lightTheme">
         <NDialogProvider>
           <ZHeader />
-          <router-view v-slot="{ Component }">
-            <Transition name="nested" :duration="100">
-              <component :is="Component" />
-            </Transition>
-          </router-view>
+          <NMessageProvider placement="bottom">
+            <router-view v-slot="{ Component }">
+              <Transition name="nested" :duration="100">
+                <component :is="Component" />
+              </Transition>
+            </router-view>
+          </NMessageProvider>
         </NDialogProvider>
       </NConfigProvider>
     </ZConfettiCanvasProvider>

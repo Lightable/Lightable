@@ -45,7 +45,7 @@ export class Client extends EventEmitter {
         this.apiURL = (options.rest?.api != undefined) ? options.rest.api : 'https://zenspace.cf';
         this.store = options.store as IClientStore;
         this.HTTPClient = options.rest?.client!!;
-        this.gateway = (this.release) ? 'wss://api.zenspace.cf' : 'ws://localhost:8081';
+        this.gateway = (this.release) ? 'wss://api.zenspace.cf' : 'ws://localhost:8080';
         this.ws = new ChattySocket(this);
         this.logger = new Logger();
         this.logger.logInfo('ChattyClient', 'Init', null);

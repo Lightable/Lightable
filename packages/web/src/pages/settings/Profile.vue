@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useAppStore } from '../../stores/AppStore';
 import { useClientStore } from '../../stores/ClientStore';
-import ZPublicPane from '../../components/account/ZPublicPane.vue';
+import ZPublicPane from '../../components/account/ZProfilePane.vue';
 let appStore = useAppStore();
 let clientStore = useClientStore();
 let loading = ref(true);

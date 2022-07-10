@@ -10,7 +10,9 @@ const ZOptions = defineAsyncComponent({
 const ZTestimonial = defineAsyncComponent({
   loader: () => import('../components/ZTestimonial.vue')
 });
-
+const ZAdminDisplay = defineAsyncComponent({
+  loader: () => import('../components/ZAdminDisplay.vue')
+});
  useHead({
       title: 'ZenSpace 🡪 Home',
       meta: [
@@ -26,6 +28,7 @@ const ZTestimonial = defineAsyncComponent({
   <div class="main-page">
     <ZSlogan />
     <ZOptions />
+    <ZAdminDisplay/>
     <div class="bottom">
       <ZTestimonial />
     </div>

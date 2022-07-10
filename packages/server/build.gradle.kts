@@ -32,6 +32,7 @@ dependencies {
 //    implementation("org.imgscalr:imgscalr-lib:4.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
     implementation("com.sksamuel.scrimage:scrimage-core:4.0.30")
+    implementation("com.sksamuel.scrimage:scrimage-filters:4.0.30")
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta4")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compileOnly(kotlin("serialization", version = kotlinVersion))

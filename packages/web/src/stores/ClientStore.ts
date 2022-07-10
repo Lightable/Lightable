@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import LiteClient from "../lib/LiteClient";
+import { LiteClient } from "../lib/LiteClient";
 import { Account, Friend } from "../User";
 import { useAppStore } from "./AppStore";
 

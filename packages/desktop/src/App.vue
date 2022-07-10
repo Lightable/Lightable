@@ -46,7 +46,7 @@ export default defineComponent({
         store: client,
         rest: {
           client: await getClient(),
-          api: (window.__PROD__) ? 'https://api.zenspace.cf' : 'https://api.zenspace.cf',
+          api: (window.__PROD__) ? 'https://api.zenspace.cf' : 'http://localhost:8080',
           headers: {
             'x-usmell': true,
           },

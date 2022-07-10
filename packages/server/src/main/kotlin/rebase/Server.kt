@@ -26,6 +26,7 @@ import rebase.cache.UserCache
 import rebase.controllers.CDNController
 import rebase.controllers.DeveloperController
 import rebase.controllers.WebSocketController
+import rebase.detection.NudeDetection
 import rebase.generator.EmbedImageGenerator
 import rebase.messages.ScyllaConnector
 import java.awt.Color
@@ -50,6 +51,7 @@ class Server(
     var dbuser: String = "root",
     var dbpass: String = "rootpass",
     var batchInterval: Int,
+    var nudeAPIGateway: String = "http://localhost:8089",
     var session: CqlSession
 ) {
     val logger: org.slf4j.Logger = LoggerFactory.getLogger("Server")!!
@@ -65,6 +67,7 @@ class Server(
     private val async: ExecutorService = Executors.newCachedThreadPool()
     private val fileController = FileController()
     private val db: RebaseMongoDatabase = RebaseMongoDatabase(dbuser, dbpass, dbhost, dbport)
+    private val napi = NudeDetection(nudeAPIGateway)
     private val imageGen = EmbedImageGenerator()
     val javalin: Javalin = Javalin.create {
         it.showJavalinBanner = false
@@ -105,7 +108,7 @@ class Server(
     private val websocketController = WebSocketController(logger, userCache, isProd)
 
     private val developerController = DeveloperController(userCache)
-    val user = rebase.controllers.UserController(userCache, dmCache, session, snowflake, async, isProd, fileController)
+    val user = rebase.controllers.UserController(userCache, dmCache, session, snowflake, async, isProd, fileController, napi)
     private val cdnController = CDNController(userCache, fileController)
     private var serverOverloaded = false
     private var serverCPUUsage = 0L
@@ -194,6 +197,11 @@ class Server(
                 post("/test", user::createTestUsers)
                 post(user::createUser)
                 get(user::getAllUsers)
+                path("/profiles") {
+                    val profiles = user.Profiles()
+                    get("/", profiles::getProfiles)
+                    get("profile/{id}", profiles::getProfile)
+                }
                 path("/@me") {
                     post("login", documented(user.loginUserDoc, user::login))
                     get(documented(user.getSelfUserDoc, user::getSelfUser))
@@ -293,6 +301,7 @@ fun main(args: Array<String>) {
     var dbuser: String = "root"
     var dbpass: String = "rootpass"
     var dbBatchUpdateInterval = System.getenv("batchint").toInt() ?: 30
+    var nudeAPIGateway = System.getenv("napi")
     var prod = false
     val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
     println("Working -> ${File("./storage").absolutePath}")
@@ -321,10 +330,11 @@ fun main(args: Array<String>) {
         println("${t.colors.brightGreen.invoke("Production mode is enabled ")}✅")
         prod = true
     }
+    println("Nudity Detection Gateway -> $nudeAPIGateway")
     val scyllaHost = System.getenv("SCYLLA_HOST") ?: "192.168.50.111"
     val connector = ScyllaConnector()
     connector.connect(scyllaHost, 9042, "datacenter1")
-    val server = Server(dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, connector.getSession())
+    val server = Server(dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession())
     server.isProd = prod
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (!System.getenv("port").isNullOrBlank()) {

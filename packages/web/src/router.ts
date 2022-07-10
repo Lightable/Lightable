@@ -1,9 +1,9 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import { useAppStore } from './stores/AppStore';
 
 
 const router = createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes: [
         {
             path: '/',
@@ -26,10 +26,10 @@ const router = createRouter({
             name: 'settings',
             children: [
                 {
-                    path: 'public',
-                    name: 'public',
+                    path: 'profile',
+                    name: 'settings-profile',
                     component() {
-                        return import('./pages/settings/Public.vue');
+                        return import('./pages/settings/Profile.vue');
                     }
                 },
                 {
@@ -52,7 +52,21 @@ const router = createRouter({
                 // @ts-ignore
                 return import('./pages/logout.vue');
             },
-        }
+        },
+        {
+            path: '/profiles',
+            name: 'profiles',
+            component() {
+                return import('./pages/profiles.vue')
+            }
+        },
+        {
+            path: '/profile/:id',
+            name: 'profile',
+            component() {
+                return import('./pages/profile/index.vue')
+            }
+        }   
     ]
 });
 

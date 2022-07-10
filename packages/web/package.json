@@ -9,9 +9,12 @@
   },
   "dependencies": {
     "@types/canvas-confetti": "^1.4.2",
+    "@vicons/fa": "^0.12.0",
     "@vicons/ionicons5": "^0.12.0",
     "@vueuse/head": "^0.7.6",
     "canvas-confetti": "^1.5.1",
+    "clipboard": "^2.0.11",
+    "events": "^3.3.0",
     "naive-ui": "^2.30.8",
     "pinia": "^2.0.14",
     "pinia-plugin-persistedstate": "^1.6.1",

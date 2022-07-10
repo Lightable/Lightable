@@ -56,13 +56,13 @@ const LogOutOutline = defineAsyncComponent({
                 <!-- <img src="../assets/RightHereHFlip.svg" height="148" class="img-r"/> -->
             </Tooltip>
         </div>
-        <Button text type="info" size="large" @click="$router.push('/settings/public')">
+        <Button text type="info" tag="a" size="large" href="/settings/profile" :style="{width: 'fit-content'}">
             <template #icon>
                 <CogOutline />
             </template>
             Account Settings
         </Button>
-        <Button text type="error" size="large" @click="$router.push('logout')" v-if="userExists">
+        <Button text type="error" size="large" @click="$router.push('logout')" v-if="userExists" :style="{width: 'fit-content'}">
             <template #icon>
                 <LogOutOutline />
             </template>
@@ -75,7 +75,7 @@ const LogOutOutline = defineAsyncComponent({
 .options {
     display: flex;
     flex-direction: column;
-
+    align-items: center;
     .wrap {
         display: flex;
         flex-direction: row;

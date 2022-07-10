@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "serve": "vite --port 8080",
+    "serve": "vite --port 8085",
     "serve:native": "VITE_HTTP_HANDLER=NATIVE vite --port 8080",
     "preview": "vite preview --port 8080",
     "build": "vite build",

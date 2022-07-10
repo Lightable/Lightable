@@ -1,15 +1,18 @@
 package rebase.controllers
 
 import com.datastax.oss.driver.api.core.CqlSession
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.javalin.http.Context
 import io.javalin.plugin.openapi.annotations.*
 import io.javalin.plugin.openapi.dsl.document
 import io.javalin.plugin.openapi.dsl.documentedContent
 import io.javalin.plugin.openapi.dsl.oneOf
 import me.kosert.flowbus.GlobalBus
+import org.litote.kmongo.json
 import rebase.*
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
+import rebase.detection.NudeDetection
 import rebase.interfaces.FailImpl
 import rebase.interfaces.cache.IUserCache
 import rebase.messages.DMDao
@@ -25,7 +28,8 @@ class UserController(
     val snowflake: Snowflake,
     val executor: ExecutorService,
     val isProd: Boolean,
-    val fileController: FileController
+    val fileController: FileController,
+    val napi: NudeDetection
 ) {
     @OpenApi(
         path = "/user",
@@ -193,8 +197,16 @@ class UserController(
             if (updatedUser.email != null && NewUser.validateEmail(updatedUser.email, ctx)) user.email =
                 updatedUser.email
             if (updatedUser.notice != null) user.notice = updatedUser.notice
+            if (updatedUser.profileOptions != null) {
+                user.profileOptions?.keys?.forEach {
+                    if (updatedUser.profileOptions.containsKey(it)) {
+                        user.profileOptions!![it] = updatedUser.profileOptions[it]!!
+                    }
+                }
+            }
+
             user.save()
-            ctx.status(200).json(user.toPublic())
+            ctx.status(200).json(user.toPrivate())
             GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.identifier, "user", user.toPublic()))
             GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
             return
@@ -215,23 +227,34 @@ class UserController(
                         return
                     }
                     "image/png", "image/jpeg" -> {
-                        val image = Avatar(false, snowflake.nextId())
-                        fileController.addAvatar(user.identifier, image.identifier, file, "png")
-                        user.avatar = image
-                        user.save()
-                        GlobalBus.post(
-                            FriendUpdatePayload(
-                                user.toPublic(),
-                                user.toPublic().id,
-                                "user",
-                                user.toPublic()
+                        try {
+                            val image = Avatar(false, snowflake.nextId())
+                            fileController.addAvatar(napi, user.identifier, image.identifier, file, "png")
+                            user.avatar = image
+                            user.save()
+                            GlobalBus.post(
+                                FriendUpdatePayload(
+                                    user.toPublic(),
+                                    user.toPublic().id,
+                                    "user",
+                                    user.toPublic()
+                                )
                             )
-                        )
-                        GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
-                        GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.identifier, "user", user.toPublic()))
-                        ctx.json(201).json(user.toPublic())
+                            GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
+                            GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.identifier, "user", user.toPublic()))
+                            ctx.json(201).json(user.toPublic())
+                            return
+                        } catch (e: InvalidAvatarException) {
+                            ctx.status(403).json(object {
+                                val code = "LEWD_AVATAR"
+                                val message = e.message
+                                val prediction = e.predictions
+                            })
+                            user.avatar = null
+                            user.save()
+                            return
+                        }
 
-                        return
                     }
                     else -> {
                         ctx.status(403).json(UserDataFail("Content type must be ImageType"))
@@ -241,7 +264,123 @@ class UserController(
             }
         }
     }
-
+    inner class Profiles {
+        @OpenApi(
+            path = "/profiles/{profile}",
+            method = HttpMethod.GET,
+            responses = [
+                OpenApiResponse("400"),
+                OpenApiResponse("403", content = [OpenApiContent(UserNotEnabledFail::class, type = "application/json")]),
+                OpenApiResponse("200", content = [OpenApiContent(PublicUser::class, type = "application/json")])
+            ],
+            pathParams = [
+                OpenApiParam(name = "profile", type = String::class, description = "The user you want to find", required = true, allowEmptyValue = false, isRepeatable = true)
+            ],
+            headers = [
+                    OpenApiParam(
+                        name = "Authorization",
+                        type = String::class,
+                        description = "The Token authorization header",
+                        required = false,
+                        allowEmptyValue = false,
+                        isRepeatable = false
+                    ),
+            ],
+            summary = "Get public profile",
+            description = "Get profile, if public, or if friends with this user",
+            tags = ["Profile","User"]
+        )
+        fun getProfile(ctx: Context) {
+            val user = requireAuthOptional(userCache, ctx)
+            val profileKey = ctx.pathParam("name")
+            val profile = userCache.users.values.find { u -> u.name == profileKey }
+            if (profile == null) {
+                ctx.status(400)
+                return
+            }
+           if (!user.failed && profile.profileOptions?.get("IsPublic") == true) {
+               ctx.status(200).json(profile.toPublic())
+               return
+           } else if (!user.failed && profile.relationships.friends.contains(user.user?.identifier)) {
+               ctx.status(200).json(profile.toPublic())
+               return
+           }
+            return
+        }
+        @OpenApi(
+            path = "/admin/users/enabled",
+            method = HttpMethod.GET,
+            responses = [
+                OpenApiResponse(
+                    "200",
+                    content = [OpenApiContent(DeveloperController.UserPagedPayload::class, type = "application/json")]
+                ),
+                OpenApiResponse(
+                    "403",
+                    content = [OpenApiContent(UserDataFail::class, type = "application/json")]
+                )
+            ],
+            queryParams = [
+                OpenApiParam(
+                    name = "page",
+                    type = Int::class,
+                    description = "The page you want to get",
+                    required = false,
+                    allowEmptyValue = false,
+                    isRepeatable = false
+                )
+            ],
+            headers = [
+                OpenApiParam(
+                    name = "Authorization",
+                    type = String::class,
+                    description = "The token authorization header",
+                    required = true,
+                    allowEmptyValue = false,
+                    isRepeatable = false
+                ),
+                OpenApiParam(
+                    name = "search",
+                    type = String::class,
+                    description = "The search value",
+                    required = false,
+                    allowEmptyValue = true,
+                    isRepeatable = false
+                ),
+            ],
+            summary = "Get enabled users",
+            description = "Get a paginated list of enabled users",
+            tags = ["User", "Admin"],
+            operationId = "adminGetEnabledUsers"
+        )
+        fun getProfiles(ctx: Context) {
+            val user = requireAuth(userCache, ctx)
+            val wantedPage = ctx.queryParam("page")?.toInt() ?: 0
+            val search = ctx.queryParam("search")
+            if (user != null) {
+                val profilesAll = userCache.users.values.filter { u -> u.profileOptions?.get("IsPublic") == true }
+                val profilesRaw = profilesAll.chunked(50)
+                if (profilesRaw.size <= wantedPage) {
+                    ctx.status(400).json(UserDataFail("Page exceeded length of ${profilesRaw.size-1}"))
+                    return
+                }
+                val selectedPage = profilesRaw[wantedPage]
+                val profiles = mutableListOf<PublicUser>()
+                if (search != null && search.isNotEmpty()) {
+                    profilesAll.forEach {
+                        profiles.add(it.toPublic())
+                    }
+                } else {
+                    selectedPage.forEach {
+                        profiles.add(it.toPublic())
+                    }
+                }
+                val payload = DeveloperController.UserPagedPayload(profiles, profilesRaw.size)
+                ctx.status(200).json(payload)
+                return
+            }
+        }
+    }
     inner class Relationships {
         val createPendingRelationshipDoc =
             document()
@@ -854,6 +993,7 @@ class UserController(
         val email: String?,
         val notice: UserNotice?,
         val status: Status?,
+        val profileOptions: MutableMap<String, Boolean>?
     )
 
     data class UserCreateToken(val token: String)
@@ -863,11 +1003,8 @@ class UserController(
 
         fun validate(userCache: UserCache, ctx: Context): Boolean {
             val emailVal = validateEmail(email, ctx)
-            println("Email validation: ${emailVal}")
             val passwordVal = validatePassword(password, ctx)
-            println("Password validation: ${passwordVal}")
             val usernameVal = validateUsername(username, userCache, ctx)
-            println("Username validation: ${usernameVal}")
             return emailVal.and(passwordVal).and(usernameVal)
         }
 
@@ -905,9 +1042,6 @@ class UserController(
 
 fun requireAuth(userCache: UserCache, ctx: Context): User? {
     val auth = ctx.header("Authorization")
-    userCache.users.values.forEach {
-        println("User ${it.name} (${it.identifier}) - ${it.token.token} Compare $auth")
-    }
     if (auth == null) {
         ctx.status(401).json(UserController.UserAuthFail())
     } else {
@@ -924,3 +1058,23 @@ fun requireAuth(userCache: UserCache, ctx: Context): User? {
     }
     return null
 }
+
+fun requireAuthOptional(userCache: UserCache, ctx: Context): PotentialUser {
+    val auth = ctx.header("Authorization")
+    if (auth == null) {
+        ctx.header("With-No-Auth", true.toString())
+        return PotentialUser(null, false)
+    } else {
+        val user = userCache.users.values.find { user -> user.token.token == auth }
+        if (user == null) {
+            ctx.header("With-No-User", true.toString())
+            return PotentialUser(null, false)
+        } else if (!user.enabled) {
+            ctx.status(403).json(UserController.UserNotEnabledFail())
+            return PotentialUser(null, true)
+        }
+    }
+    return PotentialUser(null, true)
+}
+
+data class PotentialUser(val user: User?, val failed: Boolean)

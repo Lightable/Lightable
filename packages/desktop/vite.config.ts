@@ -9,7 +9,7 @@ import viteCompression from 'vite-plugin-compression';
 export default defineConfig({
   plugins: [ViteEjsPlugin(), vue(), viteCompression()],
   server: {
-    port: 8080
+    port: 8081
   },
   resolve: {
     alias: [
