@@ -9,24 +9,25 @@
   },
   "dependencies": {
     "@types/canvas-confetti": "^1.4.2",
+    "@types/events": "^3.0.0",
     "@vicons/fa": "^0.12.0",
     "@vicons/ionicons5": "^0.12.0",
     "@vueuse/head": "^0.7.6",
     "canvas-confetti": "^1.5.1",
     "clipboard": "^2.0.11",
     "events": "^3.3.0",
-    "naive-ui": "^2.30.8",
+    "naive-ui": "^2.31.0",
     "pinia": "^2.0.14",
     "pinia-plugin-persistedstate": "^1.6.1",
     "sass": "^1.53.0",
     "seemly": "^0.3.4",
     "vue": "^3.2.37",
-    "vue-router": "^4.1.0"
+    "vue-router": "^4.1.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
     "typescript": "^4.7.4",
-    "vite": "^2.9.13",
-    "vue-tsc": "^0.38.2"
+    "vite": "^2.9.14",
+    "vue-tsc": "^0.38.3"
   }
 }
