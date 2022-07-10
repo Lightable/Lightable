@@ -84,7 +84,7 @@ const uploadAvatarFile = () => {
 }
 const { toClipboard } = useClipboard();
 const copyLinkToClipboard = () => {
-    toClipboard(`https://zenspaceweb.vercel.app/profile/${lite?.value?.user?.name}`);
+    toClipboard(new URL(location.href).origin+`/profile/${lite?.value?.user?.name}`);
     message.success('Link copied to clipboard');
 }
 </script>

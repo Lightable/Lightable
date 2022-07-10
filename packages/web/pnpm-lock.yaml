@@ -2,14 +2,12 @@ lockfileVersion: 5.4
 
 specifiers:
   '@types/canvas-confetti': ^1.4.2
-  '@types/events': ^3.0.0
   '@vicons/fa': ^0.12.0
   '@vicons/ionicons5': ^0.12.0
   '@vitejs/plugin-vue': ^2.3.3
   '@vueuse/head': ^0.7.6
   canvas-confetti: ^1.5.1
   clipboard: ^2.0.11
-  events: ^3.3.0
   naive-ui: ^2.31.0
   pinia: ^2.0.14
   pinia-plugin-persistedstate: ^1.6.1
@@ -23,13 +21,11 @@ specifiers:
 
 dependencies:
   '@types/canvas-confetti': 1.4.2
-  '@types/events': 3.0.0
   '@vicons/fa': 0.12.0
   '@vicons/ionicons5': 0.12.0
   '@vueuse/head': 0.7.6_vue@3.2.37
   canvas-confetti: 1.5.1
   clipboard: 2.0.11
-  events: 3.3.0
   naive-ui: 2.31.0_vue@3.2.37
   pinia: 2.0.14_j6bzmzd4ujpabbp5objtwxyjp4
   pinia-plugin-persistedstate: 1.6.1_pinia@2.0.14
@@ -90,10 +86,6 @@ packages:
 
   /@types/canvas-confetti/1.4.2:
     resolution: {integrity: sha512-t45KUDHlwrD9PJVRHc5z1SlXhO82BQEgMKUXGEV1KnWLFMPA6Y5LfUsLTHHzH9KcKDHZLEiYYH5nIDcjRKWNTg==}
-    dev: false
-
-  /@types/events/3.0.0:
-    resolution: {integrity: sha512-EaObqwIvayI5a8dCzhFrjKzVwKLxjoG9T6Ppd5CEo07LRKfQ8Yokw54r5+Wq7FaBQ+yXRvQAYPrHwya1/UFt9g==}
     dev: false
 
   /@types/jest/27.5.2:
@@ -581,11 +573,6 @@ packages:
 
   /estree-walker/2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
-
-  /events/3.3.0:
-    resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
-    engines: {node: '>=0.8.x'}
-    dev: false
 
   /evtd/0.2.3:
     resolution: {integrity: sha512-tmiT1YUVqFjTY+BSBOAskL83xNx41iUfpvKP6Gcd/xMHjg3mnER98jXGXJyKnxCG19uPc6EhZiUC+MUyvoqCtw==}
