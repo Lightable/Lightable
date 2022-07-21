@@ -71,6 +71,11 @@
 /packages/server/.idea/dynamic.xml
 /packages/server/.idea/uiDesigner.xml
 
+/packages/desktop-wails/.vscode
+/packages/desktop-wails/frontend/node_modules
+/packages/desktop-wails/build
+/packages/desktop-wails/frontend/dist
+
 # Gradle:
 /packages/server/.idea/gradle.xml
 /packages/server/.idea/libraries

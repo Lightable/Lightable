@@ -33,6 +33,9 @@ const Tooltip = defineAsyncComponent({
 const Skeleton = defineAsyncComponent({
     loader: () => import('naive-ui/lib/skeleton/src/Skeleton')
 });
+const ZConnect4Board = defineAsyncComponent({
+    loader: () => import('../game/Connect4/ZConnect4Board.vue')
+});
 const updateProfileOptions = async (option: string, value: boolean) => {
     if (props.user?.profileOptions.get(option) == value) return
     let arr: UserPatchProfilePair[] = [];
@@ -45,9 +48,9 @@ const updateProfileOptions = async (option: string, value: boolean) => {
     // @ts-ignore
     lite.value.$update({ profileOptions: obj }).then(() => {
         if (value) {
-            message.success('Anyone but blocked users are able to view your profile', {closable: true});
+            message.success('Anyone but blocked users are able to view your profile', { closable: true });
         } else {
-            message.warning('No-one but your friends are able to view your profile', {closable: true});
+            message.warning('No-one but your friends are able to view your profile', { closable: true });
         }
     });
 }
@@ -145,6 +148,14 @@ const updateProfileOptions = async (option: string, value: boolean) => {
 
                     </div>
                 </div>
+            </div>
+        </ZRightPane>
+        <ZRightPane>
+            <div class="card-header" style="color: var(--info-color);">
+                <span class="pane-header">Live Games</span>
+            </div>
+            <div class="card-body">
+                <ZConnect4Board/>
             </div>
         </ZRightPane>
     </ZPaneWrap>

@@ -9,8 +9,8 @@ let loading = ref(true);
 clientStore.lite.getFriends().then(() => {
     loading.value = false;
 });
-let account = computed(() => appStore.account ? appStore.account : undefined);
-
+let account = computed(() => clientStore.lite.user ? clientStore.lite.user : undefined);
+console.log(account);
 </script>
 
 <template>

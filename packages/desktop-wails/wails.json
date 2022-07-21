@@ -1,0 +1,10 @@
+{
+  "name": "Lightable Green",
+  "outputfilename": "Lightable Green",
+  "frontend:dev:watcher": "pnpm run dev",
+  "frontend:dev:serverUrl": "http://localhost:3000",
+  "author": {
+    "name": "Brys",
+    "email": "35676267+brys0@users.noreply.github.com"
+  }
+}
