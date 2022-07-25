@@ -14,7 +14,7 @@ const ZC4Item = defineAsyncComponent({
 
 <template>
     <tr class="c4-row">
-        <ZC4Item class="c4-item" v-for="(item, itemPos) in row" v-bind:key="index" :pos="{x: itemPos, y: index!!}" :item="item" :board="board"/>
+        <ZC4Item class="c4-item" v-for="(item, itemPos) in row" v-bind:key="index" :pos="{x: itemPos, y: index!!}" :item="(item) ? item : undefined" :board="board"/>
     </tr>
 </template>
 

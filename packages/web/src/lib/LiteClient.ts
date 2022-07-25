@@ -140,6 +140,16 @@ export class LiteClient extends EventEmitter {
         }
     }
 
+    async rollbackInvitedUser(email: string) {
+        if (!this.user?.admin) return
+        let req = await this.$request<InviteRegister>('DELETE', `/invite/rollback?email=${email}`, undefined);
+        if (req.status == 200) {
+            let indexOfExisting = this.store.invites.findIndex((e: InviteRegister) => e.email == req?.data?.email) as number
+            this.store.invites[indexOfExisting] = req.data;
+            return email;
+        }
+    }
+
     async enableUser(id: string) {
         if (!this.user?.admin) return
         let req = await this.$request<UserPayload>('PATCH', `/admin/users/enable/${id}`, undefined);

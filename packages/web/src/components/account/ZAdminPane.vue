@@ -244,7 +244,12 @@ const searchDisabledUsers = (type: UserSearchType) => {
                                         <NSkeleton :width="200" :height="150" style="margin-top: 10px" />
                                    </div>
                                    <div class="entry" v-if="!invitedUsersLoading" v-for="(item, index) in invitedUsersWithCode" v-bind:key="index">
-                                        <span class="email">{{ item.email }} <span class="code">{{ item.code }}</span></span>
+                                        <span class="email">{{ item.email }} </span>
+                                        <span class="code">{{ item.code }}</span>
+                                        <div class="action">
+
+                                             <NButton text type="error" @click="lite.rollbackInvitedUser(item.email)">Rollback</NButton>
+                                        </div>
                                    </div>
                               </div>
                          </div>
@@ -316,11 +321,9 @@ const searchDisabledUsers = (type: UserSearchType) => {
                     flex-direction: row;
                     gap: 8px;
 
-                    .email {
-                         .code {
-                              color: var(--text-color-3);
-                              opacity: .8;
-                         }
+                    .code {
+                         color: var(--text-color-3);
+                         opacity: .8;
                     }
                }
           }

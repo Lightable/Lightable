@@ -205,6 +205,7 @@ class Server(
             path("/invite") {
                 post("register", inviteCodeController::signup)
                 post("accept", inviteCodeController::accept)
+                delete("rollback", inviteCodeController::rollbackCode)
                 get("list", inviteCodeController::getList)
             }
             path("/cdn") {

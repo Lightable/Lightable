@@ -52,6 +52,18 @@ class InviteCodeController(val db: RebaseMongoDatabase, val userCache: UserCache
         }
     }
 
+    fun rollbackCode(ctx: Context) {
+        val user = requireAuth(userCache, ctx)
+        val email = ctx.queryParam("email")
+        if (user != null && user.admin && email != null) {
+            invites.updateOne(InviteCode::email eq email, setValue(InviteCode::code,null))
+            ctx.status(200).json(InviteCode(null, email))
+        } else {
+            ctx.status(403)
+            return
+        }
+    }
+
     data class InviteCodeRegister(val email: String) {
         fun validate(): Boolean {
             return email.matches(Constants.REGEX.EMAIL)
