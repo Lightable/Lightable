@@ -22,7 +22,7 @@ export class LiteClient extends EventEmitter {
         super();
         this.token = options.token;
         this.user = options.user;
-        this.api = 'http://localhost:8080';
+        this.api = 'https://api.zenspace.cf';
         this.store = useClientStore();
         this.app = useAppStore();
     }
