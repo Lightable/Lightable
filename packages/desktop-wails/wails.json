@@ -1,10 +1,17 @@
 {
-  "name": "Lightable Green",
-  "outputfilename": "Lightable Green",
+  "name": "Lightable Red",
+  "outputfilename": "Lightable Red",
   "frontend:dev:watcher": "pnpm run dev",
   "frontend:dev:serverUrl": "http://localhost:3000",
   "author": {
     "name": "Brys",
     "email": "35676267+brys0@users.noreply.github.com"
-  }
+  },
+  "info": { 
+        "companyName": "com.lightable.red",
+        "productName": "Lightable Red",
+        "productVersion": "0.0.0.0-ALPHA",
+        "copyright": "Copyright Brys (Author)",
+        "comments": "Enjoy it.. It's not very developed yet"
+    }
 }

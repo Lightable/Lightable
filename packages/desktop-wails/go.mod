@@ -1,8 +1,12 @@
-module changeme
+module red
 
 go 1.17
 
-require github.com/wailsapp/wails/v2 v2.0.0-beta.39.2
+require (
+	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
+	github.com/gorilla/websocket v1.5.0
+	github.com/wailsapp/wails/v2 v2.0.0-beta.39.2
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect

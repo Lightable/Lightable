@@ -3,6 +3,9 @@ package rebase
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import com.datastax.oss.driver.api.core.CqlSession
+import com.fasterxml.jackson.core.io.JsonEOFException
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.github.ajalt.mordant.terminal.Terminal
 import com.sun.management.OperatingSystemMXBean
 import io.javalin.Javalin
@@ -20,11 +23,13 @@ import me.kosert.flowbus.GlobalBus
 import me.kosert.flowbus.subscribe
 import okio.ByteString.Companion.encodeUtf8
 import okio.internal.commonAsUtf8ToByteArray
+import org.bson.json.JsonParseException
 import org.slf4j.LoggerFactory
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
 import rebase.controllers.CDNController
 import rebase.controllers.DeveloperController
+import rebase.controllers.InviteCodeController
 import rebase.controllers.WebSocketController
 import rebase.detection.NudeDetection
 import rebase.generator.EmbedImageGenerator
@@ -42,9 +47,11 @@ import java.util.Timer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.imageio.ImageIO
+import kotlin.reflect.javaType
 
 val t = Terminal()
 
+@OptIn(ExperimentalStdlibApi::class)
 class Server(
     var dbhost: String = "localhost",
     var dbport: Int = 27017,
@@ -108,8 +115,9 @@ class Server(
     private val websocketController = WebSocketController(logger, userCache, isProd)
 
     private val developerController = DeveloperController(userCache)
-    val user = rebase.controllers.UserController(userCache, dmCache, session, snowflake, async, isProd, fileController, napi)
+    val user = rebase.controllers.UserController(userCache, dmCache, db.getInviteCodeCollection(), session, snowflake, async, isProd, fileController, napi)
     private val cdnController = CDNController(userCache, fileController)
+    private val inviteCodeController = InviteCodeController(db, userCache)
     private var serverOverloaded = false
     private var serverCPUUsage = 0L
     private val events = EventsReceiver()
@@ -132,6 +140,26 @@ class Server(
             thread.stackTrace.forEach { trace ->
                 System.err.println(trace.toString())
             }
+        }
+        javalin.exception(MissingKotlinParameterException::class.java) { e, ctx ->
+            ctx.status(400).json(object { val message = "Missing parameter ${e.parameter.name} with type ${e.parameter.type}" })
+            return@exception
+        }
+        javalin.exception(JsonEOFException::class.java) { e, ctx ->
+            ctx.status(400).json(object { val message = "Excepted } for end of JSON"})
+            return@exception
+        }
+        javalin.exception(com.fasterxml.jackson.core.JsonParseException::class.java) { e, ctx ->
+            ctx.status(400).json(object { val message = e.message })
+            return@exception
+        }
+        javalin.exception(MismatchedInputException::class.java) {e, ctx ->
+            ctx.status(400).json(object { val message = "Expected parameter to be of type ${e.targetType.name}" })
+            return@exception
+        }
+        javalin.exception(Exception::class.java) {e, ctx ->
+            ctx.status(500).json(object { val message = e.message })
+            return@exception
         }
         javalin.routes {
             get("/experimental/image/generate") {
@@ -173,6 +201,11 @@ class Server(
                 it.onConnect(websocketController::connection)
                 it.onMessage(websocketController::message)
                 it.onClose(websocketController::close)
+            }
+            path("/invite") {
+                post("register", inviteCodeController::signup)
+                post("accept", inviteCodeController::accept)
+                get("list", inviteCodeController::getList)
             }
             path("/cdn") {
                 path("/releases") {

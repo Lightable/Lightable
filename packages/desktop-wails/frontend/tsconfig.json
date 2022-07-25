@@ -10,6 +10,7 @@
     "resolveJsonModule": true,
     "isolatedModules": false,
     "esModuleInterop": true,
+    "allowJs": true,
     "lib": [
       "esnext",
       "dom"
@@ -20,7 +21,7 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue"
-  ],
+, "src/composable/Logger.js"  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

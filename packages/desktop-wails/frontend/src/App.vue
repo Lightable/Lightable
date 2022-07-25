@@ -1,37 +1,47 @@
 <script lang="ts" setup>
-import {computed} from 'vue';
-import { NConfigProvider, darkTheme, lightTheme, NElement } from 'naive-ui';
+import { computed, ref } from 'vue';
+import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement, NDrawer, NDrawerContent } from 'naive-ui';
 import Titlebar from './components/Titlebar.vue';
 import LeftDrawer from './components/LeftDrawer.vue';
 import { useAppStore } from './stores/AppStore';
+import DebugSocket from './components/debug/DebugSocket.vue';
+import ConfettiCanvasProvider from './components/confetti/ConfettiCanvasProvider.vue';
 const appStore = useAppStore();
 appStore.load();
-
+appStore.startRealtime();
 let theme = computed(() => appStore.theme);
+
 </script>
 
 <template>
-  <div class="lightable-green">
-    <NConfigProvider :theme="(theme == 'Dark') ? darkTheme : lightTheme">
-      <NElement>
-        <Titlebar />
-        <div class="general-co">
-          <div class="lightable-drawer hide">
-            <LeftDrawer />
-          </div>
-          <div class="page" :style="{'background': ($router.currentRoute.value.name == 'login') ? 'transparent' : `${theme == 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}`}">
-            <div class="content">
-              <router-view />
-            </div>
-          </div>
-        </div>
-      </NElement>
-    </NConfigProvider>
+  <div class="lightable-red">
+    <ConfettiCanvasProvider>
+      <NConfigProvider :theme="(theme == 'Dark') ? darkTheme : lightTheme">
+        <NDialogProvider>
+          <NElement>
+            <Titlebar />
+            <NMessageProvider>
+              <div class="general-co">
+                <div class="lightable-drawer hide">
+                  <LeftDrawer />
+                </div>
+                <div class="page" :style="{ 'background': ($router.currentRoute.value.name == 'login' || $router.currentRoute.value.name == 'home' || $router.currentRoute.value.name == 'signup') ? 'transparent' : `${theme == 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
+                  <div class="content">
+                    <router-view />
+                  </div>
+                </div>
+              </div>
+              <DebugSocket />
+            </NMessageProvider>
+          </NElement>
+        </NDialogProvider>
+      </NConfigProvider>
+    </ConfettiCanvasProvider>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.lightable-green {
+.lightable-red {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

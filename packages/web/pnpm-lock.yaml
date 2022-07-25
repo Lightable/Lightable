@@ -14,6 +14,7 @@ specifiers:
   sass: ^1.53.0
   seemly: ^0.3.5
   typescript: ^4.7.4
+  vfonts: ^0.0.3
   vite: ^3.0.0
   vue: ^3.2.37
   vue-router: ^4.1.2
@@ -31,6 +32,7 @@ dependencies:
   pinia-plugin-persistedstate: 1.6.1_pinia@2.0.16
   sass: 1.53.0
   seemly: 0.3.5
+  vfonts: 0.0.3
   vue: 3.2.37
   vue-router: 4.1.2_vue@3.2.37
 
@@ -778,6 +780,10 @@ packages:
     dependencies:
       evtd: 0.2.3
       vue: 3.2.37
+    dev: false
+
+  /vfonts/0.0.3:
+    resolution: {integrity: sha512-nguyw8L6Un8eelg1vQ31vIU2ESxqid7EYmy8V+MDeMaHBqaRSkg3dTBToC1PR00D89UzS/SLkfYPnx0Wf23IQQ==}
     dev: false
 
   /vite/3.0.0_sass@1.53.0:

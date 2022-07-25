@@ -1,24 +1,30 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Titillium+Web:wght@400;600;700&display=swap");
 
 :root {
+  /* Stable */
   --lightable-green: rgba(40, 241, 130, 0.692);
-  --lightable-amber: rgba(249, 252, 57, 0.616);
+  /* Beta */
+  --lightable-amber: rgb(246, 248, 108);
+  /* Alpha */
   --lightable-red: rgba(250, 94, 67, 0.637);
-
-
   --lightable-dark-bg: #111111;
   --lightable-light-bg: #ebebeb;
 }
 
 html {
   background-color: transparent;
-  text-align: center;
   color: white;
   margin: 0;
 }
+
 .hide {
   display: none !important;
 }
+
+.ns {
+  user-select: none;
+}
+
 body {
   margin: 0;
   color: white;
@@ -34,5 +40,23 @@ body {
 
 #app {
   height: 100vh;
-  text-align: center;
+  text-align: left;
+}
+
+.json-key {
+  color: rgb(243, 158, 158);
+}
+
+.json-value {
+  color: rgb(247, 192, 120);
+}
+
+.json-string {
+  color: var(--lightable-red);
+}
+
+.n-drawer {
+  background-color: rgba(14, 14, 14, 0.685);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
 }

@@ -9,6 +9,7 @@ import org.bson.codecs.pojo.PojoCodecProvider
 import org.litote.kmongo.getCollection
 import rebase.schema.ChattyRelease
 import rebase.schema.DMChannel
+import rebase.schema.InviteCode
 import rebase.schema.User
 
 class RebaseMongoDatabase(val username: String = "root", val password: String = "rootpass", val host: String = "192.168.50.111", val port: Int = 27017) {
@@ -29,5 +30,9 @@ class RebaseMongoDatabase(val username: String = "root", val password: String = 
     }
     fun getReleaseCollection(): MongoCollection<ChattyRelease> {
         return database.getCollection<ChattyRelease>().withCodecRegistry(codecRegistry)
+    }
+
+    fun getInviteCodeCollection(): MongoCollection<InviteCode> {
+        return database.getCollection<InviteCode>().withCodecRegistry(codecRegistry)
     }
 }

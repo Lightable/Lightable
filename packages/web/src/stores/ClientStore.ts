@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { LiteClient } from "../lib/LiteClient";
+import { InviteRegister, LiteClient } from "../lib/LiteClient";
 import { Account, Friend } from "../User";
 import { useAppStore } from "./AppStore";
 
@@ -9,6 +9,7 @@ export const useClientStore = defineStore('clientStore', {
             friends: new Map<string, Friend>(),
             enabledUsers: new Map<string, Friend>(),
             disabledUsers: new Map<string, Friend>(),
+            invites: new Array<InviteRegister>() 
     }),
     actions: {
         async login(email: string, pass: string) {

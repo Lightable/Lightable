@@ -11,6 +11,7 @@ const emit = defineEmits(['searchEnabled', 'stopSearchEnabled', 'searchDisabled'
 const props = defineProps({
      enabledUsersLoading: Boolean,
      disabledUsersLoading: Boolean,
+     invitedUsersLoading: Boolean
 });
 let clientStore = useClientStore();
 const currentSearchType = ref("NAME") as Ref<UserSearchType>
@@ -24,6 +25,8 @@ const currentDisabledSearchDate = ref("");
 
 const enabledUsers = computed(() => Array.from(clientStore.enabledUsers.values()));
 const disabledUsers = computed(() => Array.from(clientStore.disabledUsers.values()));
+const invitedUsersWithCode = computed(() => clientStore.invites.filter(i => i.code != null || i.code != undefined));
+const invitedUsersWithoutCode = computed(() => clientStore.invites.filter(i => i.code == null || i.code == undefined));
 const lite = computed(() => clientStore.lite);
 
 const searchEnabledUsers = (type: UserSearchType) => {
@@ -157,8 +160,8 @@ const searchDisabledUsers = (type: UserSearchType) => {
                               </template>
                          </ZOverlay>
 
-
                     </div>
+
                </div>
           </ZRightPane>
           <ZRightPane>
@@ -208,6 +211,46 @@ const searchDisabledUsers = (type: UserSearchType) => {
                     </div>
                </div>
           </ZRightPane>
+          <ZRightPane>
+               <div class="card-header">
+                    <h2 style="color: var(--info-color);" class="header">Invites</h2>
+               </div>
+               <div class="card-body">
+                    <div class="inner invites-inner">
+                         <div class="invite-requests">
+                              <div class="header">
+                                   <h3 class="title">Requests</h3>
+                                   <div class="underline" />
+                              </div>
+                              <div class="invites-data">
+                                   <div class="entry" v-if="invitedUsersLoading">
+                                        <NSkeleton :width="200" :height="150" style="margin-top: 10px" />
+                                   </div>
+                                   <div class="entry" v-if="!invitedUsersLoading" v-for="(item, index) in invitedUsersWithoutCode" v-bind:key="index">
+                                        <span class="email">{{ item.email }}</span>
+                                        <div class="action">
+                                             <NButton text type="primary" @click="lite.acceptPendingInviteUser(item.email)">Accept</NButton>
+                                        </div>
+                                   </div>
+                              </div>
+                         </div>
+                         <div class="invite-requests">
+                              <div class="header">
+                                   <h3 class="title">Accepted</h3>
+                                   <div class="underline" />
+                              </div>
+                              <div class="invites-data">
+                                   <div class="entry" v-if="invitedUsersLoading">
+                                        <NSkeleton :width="200" :height="150" style="margin-top: 10px" />
+                                   </div>
+                                   <div class="entry" v-if="!invitedUsersLoading" v-for="(item, index) in invitedUsersWithCode" v-bind:key="index">
+                                        <span class="email">{{ item.email }} <span class="code">{{ item.code }}</span></span>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
+               </div>
+          </ZRightPane>
      </ZPaneWrapVue>
 </template>
 
@@ -222,18 +265,65 @@ const searchDisabledUsers = (type: UserSearchType) => {
      user-select: none;
      font-family: 'Titillium Web';
      padding: 8px;
+
      h2 {
           font-weight: 100;
           padding: 0;
           margin: 0;
           font-size: 24px;
      }
+
      &.flex {
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
           gap: 8px;
+     }
+}
+
+.invites-inner {
+     color: var(--text-color-2);
+     font-family: v-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+     .invite-requests {
+          max-width: 50%;
+          justify-content: center;
+          align-items: center;
+          flex-direction: row;
+
+          .header {
+               display: flex;
+               flex-direction: column;
+
+               .title {
+                    font-weight: normal;
+                    margin-top: 8px;
+                    margin-bottom: 8px;
+               }
+
+               .underline {
+                    background-color: gray;
+                    height: 2px;
+                    width: 100%;
+                    border-radius: 20px;
+               }
+          }
+
+          .invites-data {
+               .entry {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 8px;
+
+                    .email {
+                         .code {
+                              color: var(--text-color-3);
+                              opacity: .8;
+                         }
+                    }
+               }
+          }
      }
 }
 
@@ -251,12 +341,32 @@ const searchDisabledUsers = (type: UserSearchType) => {
      }
 
 }
+
 @media only screen and(max-width: 852px) {
-   .card-header {
-     display: flex;
-     flex-direction: column;
-     justify-content: center;
-     align-items: center;
-   }
+     .card-header {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+     }
+
+     .invites-inner {
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+
+          .invite-requests {
+               display: flex !important;
+               flex-direction: column !important;
+
+               .invites-data {
+                    .entry {
+                         flex-direction: column !important;
+                         justify-content: center !important;
+                         align-items: center !important;
+                    }
+               }
+          }
+     }
 }
 </style>

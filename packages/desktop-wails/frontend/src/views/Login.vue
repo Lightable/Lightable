@@ -36,7 +36,6 @@ import { LogInOutline } from '@vicons/ionicons5';
 
     .form {
         width: 30%;
-
         .item {
             .input {
                 text-align: left;

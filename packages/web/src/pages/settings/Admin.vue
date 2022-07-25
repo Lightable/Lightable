@@ -6,17 +6,21 @@ import { useClientStore } from '../../stores/ClientStore';
 let clientStore = useClientStore();
 let enabledUsersLoading = ref(true);
 let disabledUsersLoading = ref(true);
+let invitedUsersLoading = ref(true);
 clientStore.lite.getEnabledUsers(null, null).then(() => {
     enabledUsersLoading.value = false
     clientStore.lite.getDisabledUsers(null, null).then(() => {
         disabledUsersLoading.value = false;
+        clientStore.lite.getInvitedUsers().then(() => {
+            invitedUsersLoading.value = false;
+        });
     });
 });
 </script>
 
 <template>
     <div class="root">
-        <ZAdminPane :enabled-users-loading="enabledUsersLoading" @search-enabled="enabledUsersLoading = true" @stop-search-enabled="enabledUsersLoading = false" @search-disabled="disabledUsersLoading = true" @stop-search-disabled="disabledUsersLoading = false" :disabled-users-loading="disabledUsersLoading"/>
+        <ZAdminPane :enabled-users-loading="enabledUsersLoading" @search-enabled="enabledUsersLoading = true" @stop-search-enabled="enabledUsersLoading = false" @search-disabled="disabledUsersLoading = true" @stop-search-disabled="disabledUsersLoading = false" :disabled-users-loading="disabledUsersLoading" :invited-users-loading="invitedUsersLoading"/>
     </div>
 </template>
 

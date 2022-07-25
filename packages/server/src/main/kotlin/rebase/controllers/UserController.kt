@@ -2,12 +2,15 @@ package rebase.controllers
 
 import com.datastax.oss.driver.api.core.CqlSession
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.mongodb.client.MongoCollection
 import io.javalin.http.Context
 import io.javalin.plugin.openapi.annotations.*
 import io.javalin.plugin.openapi.dsl.document
 import io.javalin.plugin.openapi.dsl.documentedContent
 import io.javalin.plugin.openapi.dsl.oneOf
 import me.kosert.flowbus.GlobalBus
+import org.litote.kmongo.eq
+import org.litote.kmongo.findOne
 import org.litote.kmongo.json
 import rebase.*
 import rebase.cache.DMChannelCache
@@ -24,6 +27,7 @@ import kotlin.system.measureTimeMillis
 class UserController(
     val userCache: UserCache,
     val dmCache: DMChannelCache,
+    val inviteDB: MongoCollection<InviteCode>,
     val cqlSession: CqlSession,
     val snowflake: Snowflake,
     val executor: ExecutorService,
@@ -48,10 +52,7 @@ class UserController(
     )
     fun createUser(ctx: Context) {
         val body = ctx.bodyAsClass<NewUser>()
-        println("Users -> ${userCache.users.values}\nPersonal Email -> ${body.email}")
-        println("UserCache users -> Body.email -> ${userCache.users.values.find { user -> user.email == body.email } == null}")
-        println("Body validate -> ${body.validate(userCache, ctx)}")
-        if (body.validate(userCache, ctx)) {
+        if (body.validate(inviteDB, userCache, ctx)) {
             if (userCache.users.values.find { user -> user.email == body.email } == null) {
                 val salt = Utils.getNextSalt()
                 val user =
@@ -241,7 +242,14 @@ class UserController(
                                 )
                             )
                             GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
-                            GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.identifier, "user", user.toPublic()))
+                            GlobalBus.post(
+                                FriendUpdatePayload(
+                                    user.toPublic(),
+                                    user.identifier,
+                                    "user",
+                                    user.toPublic()
+                                )
+                            )
                             ctx.json(201).json(user.toPublic())
                             return
                         } catch (e: InvalidAvatarException) {
@@ -264,31 +272,42 @@ class UserController(
             }
         }
     }
+
     inner class Profiles {
         @OpenApi(
             path = "/profiles/{profile}",
             method = HttpMethod.GET,
             responses = [
                 OpenApiResponse("400"),
-                OpenApiResponse("403", content = [OpenApiContent(UserNotEnabledFail::class, type = "application/json")]),
+                OpenApiResponse(
+                    "403",
+                    content = [OpenApiContent(UserNotEnabledFail::class, type = "application/json")]
+                ),
                 OpenApiResponse("200", content = [OpenApiContent(PublicUser::class, type = "application/json")])
             ],
             pathParams = [
-                OpenApiParam(name = "profile", type = String::class, description = "The user you want to find", required = true, allowEmptyValue = false, isRepeatable = true)
+                OpenApiParam(
+                    name = "profile",
+                    type = String::class,
+                    description = "The user you want to find",
+                    required = true,
+                    allowEmptyValue = false,
+                    isRepeatable = true
+                )
             ],
             headers = [
-                    OpenApiParam(
-                        name = "Authorization",
-                        type = String::class,
-                        description = "The Token authorization header",
-                        required = false,
-                        allowEmptyValue = false,
-                        isRepeatable = false
-                    ),
+                OpenApiParam(
+                    name = "Authorization",
+                    type = String::class,
+                    description = "The Token authorization header",
+                    required = false,
+                    allowEmptyValue = false,
+                    isRepeatable = false
+                ),
             ],
             summary = "Get public profile",
             description = "Get profile, if public, or if friends with this user",
-            tags = ["Profile","User"]
+            tags = ["Profile", "User"]
         )
         fun getProfile(ctx: Context) {
             val user = requireAuthOptional(userCache, ctx)
@@ -298,15 +317,16 @@ class UserController(
                 ctx.status(400)
                 return
             }
-           if (!user.failed && profile.profileOptions?.get("IsPublic") == true) {
-               ctx.status(200).json(profile.toPublic())
-               return
-           } else if (!user.failed && profile.relationships.friends.contains(user.user?.identifier)) {
-               ctx.status(200).json(profile.toPublic())
-               return
-           }
+            if (!user.failed && profile.profileOptions?.get("IsPublic") == true) {
+                ctx.status(200).json(profile.toPublic())
+                return
+            } else if (!user.failed && profile.relationships.friends.contains(user.user?.identifier)) {
+                ctx.status(200).json(profile.toPublic())
+                return
+            }
             return
         }
+
         @OpenApi(
             path = "/admin/users/enabled",
             method = HttpMethod.GET,
@@ -361,7 +381,7 @@ class UserController(
                 val profilesAll = userCache.users.values.filter { u -> u.profileOptions?.get("IsPublic") == true }
                 val profilesRaw = profilesAll.chunked(50)
                 if (profilesRaw.size <= wantedPage) {
-                    ctx.status(400).json(UserDataFail("Page exceeded length of ${profilesRaw.size-1}"))
+                    ctx.status(400).json(UserDataFail("Page exceeded length of ${profilesRaw.size - 1}"))
                     return
                 }
                 val selectedPage = profilesRaw[wantedPage]
@@ -381,6 +401,7 @@ class UserController(
             }
         }
     }
+
     inner class Relationships {
         val createPendingRelationshipDoc =
             document()
@@ -999,16 +1020,31 @@ class UserController(
     data class UserCreateToken(val token: String)
     data class UserLogin(val email: String, val password: String)
     data class MessageCreate(val content: String)
-    data class NewUser(val email: String, val password: String, val username: String) {
+    data class NewUser(val code: String, val email: String, val password: String, val username: String) {
 
-        fun validate(userCache: UserCache, ctx: Context): Boolean {
+        fun validate(inviteDB: MongoCollection<InviteCode>, userCache: UserCache, ctx: Context): Boolean {
             val emailVal = validateEmail(email, ctx)
             val passwordVal = validatePassword(password, ctx)
             val usernameVal = validateUsername(username, userCache, ctx)
-            return emailVal.and(passwordVal).and(usernameVal)
+            val validateCodeVal = validateCode(inviteDB, code, email, ctx)
+            return emailVal.and(passwordVal).and(usernameVal).and(validateCodeVal)
         }
 
         companion object {
+
+
+            fun validateCode(
+                invites: MongoCollection<InviteCode>,
+                code: String,
+                email: String,
+                ctx: Context?
+            ): Boolean {
+                if (invites.findOne(InviteCode::email eq email)?.code != null) {
+                    return true
+                }
+                ctx?.status(403)?.json(UserDataFail("Code required"))
+                return false
+            }
 
             fun validatePassword(password: String, ctx: Context?): Boolean {
                 if (password.isBlank() || password.length < 6) {

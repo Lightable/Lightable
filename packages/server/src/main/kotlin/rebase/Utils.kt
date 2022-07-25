@@ -27,7 +27,7 @@ object Utils {
         val rand = (10000000..99999999).random()
         return "${rand}${Instant.now().toEpochMilli()}" // Parse 8 chars to get timestamp
     }
-    fun generateGenericAuth(len: Int = 25): String {
+    fun generateGenericInvite(len: Int = 25): String {
         val alphanumerics = CharArray(26) { it -> (it + 97).toChar() }.toSet()
             .union(CharArray(9) { it -> (it + 48).toChar() }.toSet())
         return (0 until len).map {

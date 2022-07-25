@@ -22,7 +22,7 @@ export class LiteClient extends EventEmitter {
         super();
         this.token = options.token;
         this.user = options.user;
-        this.api = 'https://api.zenspace.cf';
+        this.api = 'http://localhost:8080';
         this.store = useClientStore();
         this.app = useAppStore();
     }
@@ -45,7 +45,7 @@ export class LiteClient extends EventEmitter {
             // @ts-ignore
             let profileOptionPair = convertedValues[pi];
             let key = profileOptionPair[0];
-            let value = profileOptionPair[1] as boolean; 
+            let value = profileOptionPair[1] as boolean;
             realMap.set(key, value);
         }
         return realMap
@@ -122,6 +122,23 @@ export class LiteClient extends EventEmitter {
             }
         }
     }
+    async getInvitedUsers() {
+        if (!this.user?.admin) return
+        let req = await this.$request<Array<InviteRegister>>('GET', '/invite/list', undefined);
+        if (req.status == 200) {
+            this.store.invites = req.data;
+        }
+    }
+
+    async acceptPendingInviteUser(email: string) {
+        if (!this.user?.admin) return
+        let req = await this.$request<InviteRegister>('POST', `/invite/accept?email=${email}`, undefined);
+        if (req.status == 201) {
+            let indexOfExisting = this.store.invites.findIndex((e: InviteRegister) => e.email == req?.data?.email) as number
+            this.store.invites[indexOfExisting] = req.data;
+            return email;
+        }
+    }
 
     async enableUser(id: string) {
         if (!this.user?.admin) return
@@ -172,7 +189,7 @@ export class LiteClient extends EventEmitter {
         request.open('POST', `${this.api}/user/@me/avatar`);
         request.setRequestHeader('Authorization', this.token);
         request.upload.onprogress = (e: ProgressEvent) => {
-            let {loaded, total} = e;
+            let { loaded, total } = e;
             let percentage = Math.ceil((loaded / total) * 100);
             this.emit('self:avatar:upload:progress', percentage);
         }
@@ -196,7 +213,7 @@ export class LiteClient extends EventEmitter {
         }
     }
     async getProfile(name: string) {
-        
+
     }
 }
 
@@ -222,11 +239,14 @@ export interface ResponseData<T> {
     data: T | null;
 }
 export interface UserPatch {
-         name?: String,
-         email?: String,
-         profileOptions?: UserPatchProfilePair[]
+    name?: String,
+    email?: String,
+    profileOptions?: UserPatchProfilePair[]
 }
-
+export interface InviteRegister {
+    email: string
+    code?: string
+}
 export interface UserPatchProfilePair {
     key: string,
     value: boolean

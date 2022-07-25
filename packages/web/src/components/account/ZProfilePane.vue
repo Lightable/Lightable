@@ -155,7 +155,7 @@ const updateProfileOptions = async (option: string, value: boolean) => {
                 <span class="pane-header">Live Games</span>
             </div>
             <div class="card-body">
-                <ZConnect4Board/>
+               Games are currently not supported
             </div>
         </ZRightPane>
     </ZPaneWrap>

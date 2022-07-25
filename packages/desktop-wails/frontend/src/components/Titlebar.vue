@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { NButton, NIcon } from 'naive-ui';
+import { computed, ref } from 'vue';
+import { NButton, NIcon, NModal, NInput, NProgress } from 'naive-ui';
 import { Settings32Regular, SquareMultiple24Filled, Subtract24Filled } from '@vicons/fluent';
-import { CloseOutline, MoonOutline, SunnyOutline } from '@vicons/ionicons5';
+import { CloseOutline, MoonOutline, SunnyOutline, SquareOutline as Square, DownloadOutline as Download } from '@vicons/ionicons5';
 import { WindowToggleMaximise, WindowMinimise, Quit } from '../../wailsjs/runtime';
 import { useAppStore } from '../stores/AppStore';
+import { debug } from '../composable/Logger';
+import { DownloadUpdate, Restart } from '../../wailsjs/go/app/App';
+import { EventsOn } from '../../wailsjs/runtime/runtime';
 const appStore = useAppStore();
 
+const downloadModal = ref({
+    show: false,
+    downloading: false,
+    percent: 0,
+    url: null as string | null,
+    finished: false
+});
 const theme = computed(() => appStore.theme);
 
 const lightTheme = () => {
@@ -15,13 +25,62 @@ const lightTheme = () => {
 const darkTheme = () => {
     appStore.changeTheme('Dark');
 }
+const updateWSDrawer = () => {
+    appStore.drawers.websocket = true;
+}
+const showDownload = () => {
+    downloadModal.value.show = true;
+}
+const startDownload = () => {
+    downloadModal.value.downloading = true;
+    debug('Download', 'Initiating download of URL', downloadModal.value.url);
+    DownloadUpdate(downloadModal.value.url as string);
+    EventsOn('download:total', (total: number) => {
+        let time = performance.now()
+        EventsOn('download:progress', (percent: number) => {
+            downloadModal.value.percent = parseInt((percent / total * 100).toFixed());
+            if (downloadModal.value.percent == 100) {
+                downloadModal.value.finished = true;
+                debug('Download', `Download finished in ${(performance.now() - time).toFixed(3)}ms`)
+
+            }
+        })
+    });
+}
+const restartLightable = () => {
+    Restart()
+}
 </script>
 
 <template>
+    <NModal v-model:show="downloadModal.show" preset="dialog" :closable="!downloadModal.finished">
+        <template #header>
+            {{ downloadModal.downloading ? 'Downloading exe...' : 'Input EXE URL' }}
+        </template>
+        <div class="content">
+            <NInput placeholder="URL" v-if="!downloadModal.downloading" v-model:value="downloadModal.url" />
+            <div class="progress" v-if="downloadModal.downloading">
+                <NProgress type="line" :percentage="downloadModal.percent" />
+            </div>
+        </div>
+        <template #action>
+            <NButton type="primary" quaternary @click="startDownload" :loading="downloadModal.downloading" v-if="!downloadModal.finished">Download</NButton>
+            <NButton type="warning" quaternary v-else @click="restartLightable">Restart</NButton>
+        </template>
+    </NModal>
     <div class="titlebar" data-wails-drag>
-        <div class="titlebar-right">
+        <div class="titlebar-right" data-wails-no-drag>
             <div class="item">
-                <NButton title="Settings" text style="padding: 0" type="info">
+                <NButton title="Download" text style="padding: 0" @click="showDownload">
+                    <template #icon>
+                        <NIcon>
+                            <Download />
+                        </NIcon>
+                    </template>
+                </NButton>
+            </div>
+            <div class="item">
+                <NButton title="Settings" text style="padding: 0" type="info" @click="updateWSDrawer">
                     <template #icon>
                         <NIcon>
                             <Settings32Regular />
@@ -59,8 +118,8 @@ const darkTheme = () => {
             <div class="item">
                 <NButton title="Maximize" text style="padding: 0" type="primary" @click="WindowToggleMaximise()">
                     <template #icon>
-                        <NIcon>
-                            <SquareMultiple24Filled />
+                        <NIcon :size="16">
+                            <Square />
                         </NIcon>
                     </template>
                 </NButton>

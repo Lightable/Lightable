@@ -9,7 +9,7 @@ import { NButton, NIcon } from 'naive-ui';
     <div class="drawer-container">
         <div class="header">
             <div class="icon">
-                <Light id="logo" color="var(--lightable-green)"/>
+                <Light id="logo" color="var(--lightable-red)"/>
             </div>
             <span class="title">
                 Lightable
