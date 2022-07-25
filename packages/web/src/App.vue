@@ -9,6 +9,7 @@ import { useClientStore } from './stores/ClientStore';
 import ZConfettiCanvasProvider from './components/confetti/ZConfettiCanvasProvider.vue';
 let appStore = useAppStore();
 let clientStore = useClientStore();
+document.documentElement!!.style.setProperty('--color-bg', (appStore.isDark) ? 'var(--bg-dark)' : 'var(--bg-light)');
 document.getElementById('app')!!.style.backgroundColor = (appStore.isDark) ? 'var(--bg-dark)' : 'var(--bg-light)';
 let isDark = computed(() => appStore.isDark);
 if (appStore.account) {
@@ -44,7 +45,7 @@ if (appStore.account) {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  min-height: 100%;
+  min-height: 100vh;
 }
 
 .route {

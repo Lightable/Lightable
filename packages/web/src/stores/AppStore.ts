@@ -22,6 +22,7 @@ export const useAppStore = defineStore('appStore', {
     actions: {
         setTheme(isDark: boolean) {
             this.isDark = isDark;
+            document.documentElement!!.style.setProperty('--color-bg', (this.isDark) ? 'var(--bg-dark)' : 'var(--bg-light)');
             document.getElementById('app')!!.style.backgroundColor = (this.isDark) ? 'var(--bg-dark)' : 'var(--bg-light)';
         },
     }
