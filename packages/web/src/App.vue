@@ -44,7 +44,7 @@ if (appStore.account) {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  background-color: var(--bg-light);
+  min-height: 100%;
 }
 
 .route {
