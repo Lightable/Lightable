@@ -11,7 +11,7 @@ const Tooltip = defineAsyncComponent({
 <template>
     <Element tag="div" class="admin-display">
         <div class="header">
-            <h3 class="header-text">Meet the
+            <h3 class="header-text" style="text-align: center;">Meet the
                 <Tooltip trigger="hover">
                     <template #trigger>
                         <s class="the-truth">social rejects</s>

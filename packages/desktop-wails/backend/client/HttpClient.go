@@ -61,6 +61,15 @@ func (h *HttpClient) RegisterEmail(email string) HttpResponse {
 	}
 }
 
+func (h *HttpClient) RegisterUser(username string, email string, password string, code string) {
+	u := h.CreateURL("/user")
+	json := bytes.NewBuffer([]byte(fmt.Sprintf(`{"username": "%s", "email": "%s", "password": "%s", "code": "%s"}`, username, email, password, code)))
+	resp, err := h.Http.Post(u.String(), "application/json", json)
+	if err != nil {
+		
+	}
+}
+
 /* Utils */
 
 func (h *HttpClient) CreateURL(path string) url.URL {
