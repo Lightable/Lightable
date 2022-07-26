@@ -13,3 +13,5 @@ export function PingDelay():void;
 export function PreInit():void;
 
 export function Restart():void;
+
+export function SetCurrentUser(arg1:mocks.PrivateUser):void;

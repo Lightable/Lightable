@@ -7,6 +7,8 @@ export function CreateURL(arg1:string):Promise<url.URL>;
 
 export function RegisterEmail(arg1:string):Promise<client.HttpResponse>;
 
+export function RegisterUser(arg1:string,arg2:string,arg3:string,arg4:string):Promise<client.HttpResponse>;
+
 export function SetAPI(arg1:string):void;
 
 export function SetSecure(arg1:boolean):void;

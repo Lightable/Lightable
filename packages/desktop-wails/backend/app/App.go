@@ -90,6 +90,11 @@ func (a *App) ChangeTheme(theme string) {
 	WriteAppConfig(a.Dir, a.Config)
 }
 
+func (a *App) SetCurrentUser(user mocks.PrivateUser) {
+	a.Config.LoggedInUser = user
+	WriteAppConfig(a.Dir, a.Config)
+}
+
 // Make an empty method to test ipc ms delay
 func (c *App) PingDelay() {
 	return

@@ -20,8 +20,8 @@ export const useAppStore = defineStore('AppStore', {
         async load() {
             let config = await GetConfig()
             let history = await GetSocketHistory()
-            this.theme = config.Theme as LightableTheme;
-            debug('Theme', `Current theme is "${config.Theme}"`);
+            this.theme = config.theme as LightableTheme;
+            debug('Theme', `Current theme is "${config.theme}"`);
             if (history) {
                 this.history.websocket = history;
                 return
@@ -47,5 +47,5 @@ export type LightableTheme = "Dark" | "Light"
 
 
 export interface AppConfig {
-    Theme: LightableTheme
+    theme: LightableTheme
 }

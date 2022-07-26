@@ -10,6 +10,10 @@ export function RegisterEmail(arg1) {
   return window['go']['client']['HttpClient']['RegisterEmail'](arg1);
 }
 
+export function RegisterUser(arg1, arg2, arg3, arg4) {
+  return window['go']['client']['HttpClient']['RegisterUser'](arg1, arg2, arg3, arg4);
+}
+
 export function SetAPI(arg1) {
   return window['go']['client']['HttpClient']['SetAPI'](arg1);
 }

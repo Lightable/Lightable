@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { NButton, NIcon, NForm, NFormItem, NInput, FormInst, NModal } from 'naive-ui';
+import { NButton, NIcon, NForm, NFormItem, NInput, FormInst, NModal, useMessage } from 'naive-ui';
 import { debug } from '../composable/Logger';
 import { LogInOutline } from '@vicons/ionicons5';
+import { RegisterUser } from '../../wailsjs/go/client/HttpClient';
+
+const message = useMessage();
 
 const inputCodeModal = ref({
     show: false,
@@ -41,6 +44,17 @@ const onFormSubmit = (e: MouseEvent) => {
     });
 }
 
+const onCodeSubmit = async () => {
+    let formValues = formValue.value;
+    let userRegister = await RegisterUser(formValues.username, formValues.email, formValues.password, inputCodeModal.value.code);
+    let json = JSON.parse(userRegister.Json);
+    if (userRegister.status == 403) {
+        message.error(json.bad);
+    } else if (userRegister.status == 201) {
+
+    } 
+}
+
 </script>
 
 
@@ -53,7 +67,7 @@ const onFormSubmit = (e: MouseEvent) => {
             <NInput placeholder="Invite Code" v-model:value="inputCodeModal.code" :loading="loading" status="warning" />
         </div>
         <template #action>
-            <NButton quaternary type="warning">
+            <NButton quaternary type="warning" @click="onCodeSubmit" :loading="loading">
                 Submit
             </NButton>
         </template>

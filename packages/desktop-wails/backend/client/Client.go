@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"red/backend/app"
 	"red/mocks"
 	"time"
 
@@ -26,12 +27,12 @@ type Client struct {
 }
 
 /* Client */
-func NewClient(ctx *context.Context, config *mocks.AppConfig) *Client {
+func NewClient(ctx *context.Context, config *mocks.AppConfig, a *app.App) *Client {
 	client := Client{
 		Config: config,
 		Ctx:    ctx,
 	}
-	client.Http = CreateHTTP(&client)
+	client.Http = CreateHTTP(&client, a)
 	return &client
 }
 

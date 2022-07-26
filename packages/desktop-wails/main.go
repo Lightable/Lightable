@@ -21,7 +21,7 @@ func main() {
 	
 	app := app.NewApp(currentVersion)
 	app.PreInit()
-	client := client.NewClient(&app.Ctx, &app.Config)
+	client := client.NewClient(&app.Ctx, &app.Config, app)
 	fmt.Printf("Preinit took approx %v\n", time.Since(start))
 
 	// Create application with options

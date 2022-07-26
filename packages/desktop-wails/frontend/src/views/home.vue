@@ -9,11 +9,11 @@ SetAPI('localhost:8080')
 <template>
     <div class="home">
         <h2 class="h ns">Sign-up for closed beta below</h2>
-        <NButton size="large" tertiary type="primary" style="--n-width: 248px" round @click="$router.push('/signup')">
+        <NButton size="large" tertiary type="primary" style="--n-width: 248px" round @click="$router.push('/invite/signup')">
             Sign-up
         </NButton>
         <h2 class="h ns">I have an invite code</h2>
-        <NButton size="large" tertiary type="info" style="--n-width: 248px" round>
+        <NButton size="large" tertiary type="info" style="--n-width: 248px" round @click="$router.push('/signup')">
             Enter invite code
         </NButton>
     </div>

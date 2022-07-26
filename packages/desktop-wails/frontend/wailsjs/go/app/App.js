@@ -25,3 +25,7 @@ export function PreInit() {
 export function Restart() {
   return window['go']['app']['App']['Restart']();
 }
+
+export function SetCurrentUser(arg1) {
+  return window['go']['app']['App']['SetCurrentUser'](arg1);
+}
