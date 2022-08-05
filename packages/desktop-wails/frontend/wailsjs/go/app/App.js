@@ -14,6 +14,14 @@ export function GetConfig() {
   return window['go']['app']['App']['GetConfig']();
 }
 
+export function GetVersion() {
+  return window['go']['app']['App']['GetVersion']();
+}
+
+export function HasUser(arg1) {
+  return window['go']['app']['App']['HasUser'](arg1);
+}
+
 export function PingDelay() {
   return window['go']['app']['App']['PingDelay']();
 }
@@ -28,4 +36,8 @@ export function Restart() {
 
 export function SetCurrentUser(arg1) {
   return window['go']['app']['App']['SetCurrentUser'](arg1);
+}
+
+export function SetUser(arg1, arg2) {
+  return window['go']['app']['App']['SetUser'](arg1, arg2);
 }

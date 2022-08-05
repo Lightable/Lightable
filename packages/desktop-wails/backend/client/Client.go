@@ -4,21 +4,26 @@ import (
 	"bytes"
 	"compress/zlib"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"red/backend/app"
 	"red/mocks"
+	r "runtime"
 	"time"
 
 	"github.com/asaskevich/EventBus"
 	"github.com/gorilla/websocket"
+	"github.com/rs/zerolog"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type Client struct {
 	Config        *mocks.AppConfig
+	Logger        *zerolog.Logger
+	CurrentUser   *mocks.PrivateUser
 	Api           string
 	Connection    *mocks.Connection
 	Ctx           *context.Context
@@ -27,13 +32,18 @@ type Client struct {
 }
 
 /* Client */
-func NewClient(ctx *context.Context, config *mocks.AppConfig, a *app.App) *Client {
+func NewClient(ctx *context.Context, logger *zerolog.Logger, config *mocks.AppConfig, a *app.App) *Client {
 	client := Client{
 		Config: config,
+		Logger: logger,
 		Ctx:    ctx,
 	}
 	client.Http = CreateHTTP(&client, a)
 	return &client
+}
+
+func (c *Client) SetSocket(socket string) {
+	c.Api = socket
 }
 
 /* Socket */
@@ -50,10 +60,10 @@ func (c *Client) DialSocket() string {
 	}
 	cha, _, err := websocket.DefaultDialer.Dial(u.String(), wsHeaders)
 	if err != nil {
-		runtime.LogErrorf(*c.Ctx, "Dial failed: %v\n", err)
+		fmt.Printf("Dial failed: %v\n", err)
 		return fmt.Sprintf("Dial Failed: %v\n", err)
 	}
-	runtime.LogInfof(*c.Ctx, "Connecting to %s\n", u.String())
+	fmt.Printf("Connecting to %s\n", u.String())
 
 	c.Connection = &mocks.Connection{
 		Send: make(chan []byte, 256),
@@ -69,21 +79,59 @@ func (c *Client) DialSocket() string {
 		}
 	}()
 	bus.Subscribe("ws:read:message", c.ReadAndRespond)
-	runtime.LogInfof(*c.Ctx, "New connection established LOCAL=%v REMOTE=%v\n", c.Connection.Ws.LocalAddr().String(), u.String())
+	fmt.Printf("New connection established LOCAL=%v REMOTE=%v\n", c.Connection.Ws.LocalAddr().String(), u.String())
 	return "All is good :)"
 }
 
 func (c *Client) ReadAndRespond(m []byte) {
+	tParse := mocks.GenericSocketMessage{}
+	err := json.Unmarshal(m, &tParse)
+	if err != nil {
+		c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to read socket generic message")
+		runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
+		return
+	}
+	switch tParse.T {
+	case 11:
+		cData := mocks.ServerStartMessage{}
+		err := json.Unmarshal(m, &tParse)
+		if err != nil {
+			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to read server ready message")
+			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
+			return
+		}
+		runtime.EventsEmit(*c.Ctx, "ws:read:server|ready", cData.D)
+		c.Logger.Info().Msg(fmt.Sprintf("Server ready with client: %v", cData.D.Id))
+	}
 	decoded := DecodeMessage(m)
 	if len(c.SocketHistory) > 50 {
 		c.SocketHistory = c.SocketHistory[:len(c.SocketHistory)-1]
 	}
 	c.SocketHistory = append(c.SocketHistory, decoded)
 
-	fmt.Printf("\nDecoded message: %v\n", decoded)
+	fmt.Printf("Decoded message: %v\n", decoded)
 	runtime.EventsEmit(*c.Ctx, "ws:read:decode", decoded)
-
 }
+
+func (c *Client) LoginToSocket() {
+	SendMessage(c, mocks.ClientReadyMessage{
+		T: 0,
+		D: mocks.ClientReadyPayload{
+			Os: r.GOOS,
+			Browser: "Desktop",
+			Build: "1.9.2",
+		},
+	})
+}
+
+func SendMessage[T any](c *Client, u T) {
+	b, err := json.Marshal(u)
+	if err != nil {
+		c.Logger.Err(err)
+	}
+	c.Connection.Write(websocket.TextMessage, b)
+}
+
 func (c *Client) GetSocketHistory() []string {
 	return c.SocketHistory
 }

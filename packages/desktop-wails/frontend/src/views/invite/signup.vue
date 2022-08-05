@@ -67,7 +67,7 @@ const onFormSubmit = (e: MouseEvent) => {
                     <PersonAdd />
                 </NIcon>
             </template>
-            Sign-up
+            Sign-up for an invite
         </NButton>
     </div>
 </template>

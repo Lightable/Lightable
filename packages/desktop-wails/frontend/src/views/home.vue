@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import { NButton } from 'naive-ui';
-import { SetAPI } from '../../wailsjs/go/client/HttpClient';
+import { computed } from 'vue';
+import { HasUser } from '../../wailsjs/go/app/App';
+import { SetAPI, SetSecure } from '../../wailsjs/go/client/HttpClient';
+import { useAppStore } from '../stores/AppStore';
 
-SetAPI('localhost:8080')
+const appStore = useAppStore();
+const hasUser = computed(() => appStore.hasUser)
+SetAPI('api.zenspace.cf');
+SetSecure(true);
+
+const setHasUser = (bool: boolean) => {
+    HasUser(bool);
+    appStore.load();
+}
+
 </script>
 
 
 <template>
-    <div class="home">
+    <div class="home" v-if="!hasUser">
         <h2 class="h ns">Sign-up for closed beta below</h2>
         <NButton size="large" tertiary type="primary" style="--n-width: 248px" round @click="$router.push('/invite/signup')">
             Sign-up
@@ -15,6 +27,18 @@ SetAPI('localhost:8080')
         <h2 class="h ns">I have an invite code</h2>
         <NButton size="large" tertiary type="info" style="--n-width: 248px" round @click="$router.push('/signup')">
             Enter invite code
+        </NButton>
+        <NButton class="subtext" text @click="setHasUser(true)">
+            Bring me back to login
+        </NButton>
+    </div>
+    <div class="home" v-else>
+        <h2 class="h ns">Please Log In</h2>
+        <NButton size="large" tertiary type="info" style="--n-width: 248px" round @click="$router.push('/login')">
+            Log In
+        </NButton>
+        <NButton class="subtext" text @click="setHasUser(false)">
+            I want to register another user
         </NButton>
     </div>
 </template>
@@ -31,6 +55,13 @@ SetAPI('localhost:8080')
     gap: 32px;
     .h {
         color: var(--text-color-1);
+    }
+    .subtext {
+        color: var(--text-color-3);
+        font-weight: normal;
+        &:hover {
+            color: var(--text-color-2);
+        }
     }
 }
 </style>

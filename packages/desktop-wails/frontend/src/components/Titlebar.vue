@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { NButton, NIcon, NModal, NInput, NProgress } from 'naive-ui';
 import { Settings32Regular, SquareMultiple24Filled, Subtract24Filled } from '@vicons/fluent';
-import { CloseOutline, MoonOutline, SunnyOutline, SquareOutline as Square, DownloadOutline as Download } from '@vicons/ionicons5';
+import { CloseOutline, MoonOutline, SunnyOutline, SquareOutline as Square, DownloadOutline as Download, ChevronBack } from '@vicons/ionicons5';
 import { WindowToggleMaximise, WindowMinimise, Quit } from '../../wailsjs/runtime';
 import { useAppStore } from '../stores/AppStore';
 import { debug } from '../composable/Logger';
@@ -17,7 +17,9 @@ const downloadModal = ref({
     url: null as string | null,
     finished: false
 });
+
 const theme = computed(() => appStore.theme);
+const leftDrawer = computed(() => appStore.leftDrawer);
 
 const lightTheme = () => {
     appStore.changeTheme('Light');
@@ -69,6 +71,17 @@ const restartLightable = () => {
         </template>
     </NModal>
     <div class="titlebar" data-wails-drag>
+        <div class="titlebar-left" data-wails-no-drag v-if="!leftDrawer.show">
+            <div class="item" id="go-back">
+                <NButton text type="success" @click="$router.back()" :disabled="$router.currentRoute.value.name == 'home'">
+                    <template #icon>
+                        <NIcon>
+                            <ChevronBack/>
+                        </NIcon>
+                    </template>
+                </NButton>
+            </div>
+        </div>
         <div class="titlebar-right" data-wails-no-drag>
             <div class="item">
                 <NButton title="Download" text style="padding: 0" @click="showDownload">
@@ -148,8 +161,13 @@ const restartLightable = () => {
     position: absolute;
     top: 0;
     width: 100vw;
-
-    .titlebar-right {
+    .titlebar-left {
+        margin-right: auto;
+        #go-back {
+            padding: 0 8px;
+        }
+    }
+    .titlebar-right, .titlebar-left {
         display: flex;
         flex-direction: row;
         align-items: center;

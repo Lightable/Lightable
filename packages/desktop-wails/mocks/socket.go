@@ -16,7 +16,10 @@ type Connection struct {
 	Send chan []byte
 	// Bus to comm between structs
 	Bus EventBus.Bus
+
+	Closed bool
 }
+
 func (c *Connection) ReadPump() {
 	defer func() {
 		c.Bus.Publish("ws:close")
@@ -27,7 +30,8 @@ func (c *Connection) ReadPump() {
 		_, message, err := c.Ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				fmt.Printf("\nUnexpected errror occured in socket: %v", err)
+				c.Closed = true
+				fmt.Printf("\nUnexpected errror occurred in socket: %v", err)
 				c.Bus.Publish("ws:read:close:error", message)
 			}
 			break
@@ -37,6 +41,9 @@ func (c *Connection) ReadPump() {
 }
 
 func (c *Connection) Write(mt int, payload []byte) error {
+	if c.Closed {
+		return nil
+	}
 	return c.Ws.WriteMessage(mt, payload)
 }
 
@@ -45,11 +52,50 @@ func (c *Connection) Ping() {
 }
 
 func NewPing() GenericSocketMessage {
-	return GenericSocketMessage{t: 2}
+	return GenericSocketMessage{T: 2}
 }
 
-	/* <------------ Message Structs ------------> */
+/* <------------ Message Structs ------------> */
 
-	type GenericSocketMessage struct {
-		t int
-	}
+type ClientReadyMessage struct {
+	T int
+	D ClientReadyPayload
+}
+
+type ClientReadyPayload struct {
+	Os      string
+	Browser string
+	Build   string
+}
+
+type GenericSocketMessage struct {
+	T int `json:"t"`
+}
+
+type ServerStartMessage struct {
+	T int                `json:"t"`
+	D ServerStartPayload `json:"d"`
+}
+
+type ServerStartPayload struct {
+	User          PublicUser                 `json:"user"`
+	Status        UserStatus                 `json:"status"`
+	Admin         bool                       `json:"admin"`
+	Enabled       bool                       `json:"enabled"`
+	State         int                        `json:"state"`
+	Avatar        UserAvatar                 `json:"avatar"`
+	Id            string                     `json:"id"`
+	Relationships ServerRelationshipsPayload `json:"relationships"`
+	Meta          ServerMetaPayload          `json:"meta"`
+}
+
+type ServerRelationshipsPayload struct {
+	Friends  []PublicUser `json:"friends"`
+	Pending  []PublicUser `json:"pending"`
+	Requests []PublicUser `json:"requests"`
+	Empty    bool         `json:"empty"`
+}
+
+type ServerMetaPayload struct {
+	Production bool `json:"prod"`
+}

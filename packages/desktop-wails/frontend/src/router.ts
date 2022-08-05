@@ -30,6 +30,36 @@ const router = createRouter({
             component() {
                 return import('./views/invite/signup.vue')
             }
+        },
+        {
+            path: '/concepts',
+            name: 'soon',
+            component() {
+                return import('./views/concepts/ComingSoon.vue')
+            }
+        },
+        {
+            path: '/concepts/ui',
+            name: 'ui',
+            children: [
+                {
+                    path: 'message',
+                    name: 'concepts-ui-message',
+                    component() {
+                        return import('./views/concepts/ui/component/Message.vue')
+                    }
+                },
+                {
+                    path: 'chat-input',
+                    name: 'concepts-ui-chat-input',
+                    component() {
+                        return import('./views/concepts/ui/component/ChatInput.vue')
+                    }
+                }
+            ],
+            component() {
+                return import('./views/concepts/ui/index.vue')
+            }
         }
     ]
 });

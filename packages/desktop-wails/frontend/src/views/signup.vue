@@ -4,7 +4,8 @@ import { NButton, NIcon, NForm, NFormItem, NInput, FormInst, NModal, useMessage 
 import { debug } from '../composable/Logger';
 import { LogInOutline } from '@vicons/ionicons5';
 import { RegisterUser } from '../../wailsjs/go/client/HttpClient';
-
+import { HasUser } from '../../wailsjs/go/app/App';
+import { useRouter } from 'vue-router';
 const message = useMessage();
 
 const inputCodeModal = ref({
@@ -12,6 +13,7 @@ const inputCodeModal = ref({
     code: '',
 });
 
+const router = useRouter();
 const loading = ref(false);
 const formValue = ref({ username: '', email: '', password: '' });
 const formRules = {
@@ -47,12 +49,19 @@ const onFormSubmit = (e: MouseEvent) => {
 const onCodeSubmit = async () => {
     let formValues = formValue.value;
     let userRegister = await RegisterUser(formValues.username, formValues.email, formValues.password, inputCodeModal.value.code);
-    let json = JSON.parse(userRegister.Json);
-    if (userRegister.status == 403) {
-        message.error(json.bad);
-    } else if (userRegister.status == 201) {
-
-    } 
+    if (userRegister.status == 0) {
+        message.error(userRegister.Err);
+        return
+    } else {
+        let json = JSON.parse(userRegister.Json);
+        if (userRegister.status == 403) {
+            message.error(json.bad);
+            return
+        } else if (userRegister.status == 201) {
+            HasUser(true)
+            router.push('/');
+        }
+    }
 }
 
 </script>

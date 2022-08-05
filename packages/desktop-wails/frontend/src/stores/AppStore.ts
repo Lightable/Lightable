@@ -1,16 +1,22 @@
-import { defineStore } from "pinia"
-import { GetConfig, ChangeTheme, PingDelay } from '../../wailsjs/go/app/App'
+import { defineStore } from "pinia";
+import { GetConfig, ChangeTheme, PingDelay, GetVersion } from '../../wailsjs/go/app/App'
 import { GetSocketHistory } from '../../wailsjs/go/client/Client';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
-import { debug } from '../composable/Logger'
+import { debug } from '../composable/Logger';
 export const useAppStore = defineStore('AppStore', {
     state: () => ({
+        version: 'Unknown Version' as string,
         theme: 'Dark' as LightableTheme,
+        hasUser: false as boolean,
 
         drawers: {
             websocket: false
         },
-
+        leftDrawer: {
+            show: false,
+            components: [] as Array<LightableDrawerComponentPair>,
+            groups: [] as Array<LightableDrawerComponentPair>,
+        },
         history: {
             websocket: [] as Array<string>
         }
@@ -18,9 +24,12 @@ export const useAppStore = defineStore('AppStore', {
 
     actions: {
         async load() {
-            let config = await GetConfig()
-            let history = await GetSocketHistory()
+            let config = await GetConfig();
+            let history = await GetSocketHistory();
+            let version = await GetVersion();
             this.theme = config.theme as LightableTheme;
+            this.hasUser = config.hasUser;
+            this.version = version;
             debug('Theme', `Current theme is "${config.theme}"`);
             if (history) {
                 this.history.websocket = history;
@@ -48,4 +57,12 @@ export type LightableTheme = "Dark" | "Light"
 
 export interface AppConfig {
     theme: LightableTheme
+}
+
+export interface LightableDrawerComponentPair {
+    icon: any,
+    text: string,
+    cb: Function,
+    disabled: boolean,
+    color?: string | '#fff',
 }

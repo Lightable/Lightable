@@ -6,8 +6,24 @@ export function CreateURL(arg1) {
   return window['go']['client']['HttpClient']['CreateURL'](arg1);
 }
 
+export function CreateURLWithAuthorization(arg1, arg2) {
+  return window['go']['client']['HttpClient']['CreateURLWithAuthorization'](arg1, arg2);
+}
+
+export function LoginWithEmailAndPassword(arg1, arg2) {
+  return window['go']['client']['HttpClient']['LoginWithEmailAndPassword'](arg1, arg2);
+}
+
+export function LoginWithToken(arg1) {
+  return window['go']['client']['HttpClient']['LoginWithToken'](arg1);
+}
+
 export function RegisterEmail(arg1) {
   return window['go']['client']['HttpClient']['RegisterEmail'](arg1);
+}
+
+export function RegisterLoginWithClient(arg1) {
+  return window['go']['client']['HttpClient']['RegisterLoginWithClient'](arg1);
 }
 
 export function RegisterUser(arg1, arg2, arg3, arg4) {

@@ -2,7 +2,8 @@
 import { computed } from 'vue';
 import JSONHighlight from '../../composable/JSONHighlight';
 import { useAppStore } from '../../stores/AppStore';
-import { NDrawer, NDrawerContent } from 'naive-ui';
+import { NDrawer, NDrawerContent, NButton, NIcon, NElement } from 'naive-ui';
+import { FileStorage } from '@vicons/carbon';
 const appStore = useAppStore();
 let websocketDrawer = computed(() => appStore.drawers.websocket);
 const data = computed(() => appStore.history.websocket);
@@ -25,12 +26,26 @@ const highlight = (s: string) => {
                     <h2>Socket is not connected at this time</h2>
                 </div>
                 <div class="item" v-for="(item, index) in data" v-bind:key="index">
-                    Receive
+                    <NElement class="type ns" tag="span">Receive</NElement>
                     <code>
                         <pre v-html="highlight(JSON.stringify(JSON.parse(item), null, 2))"></pre>
                     </code>
                 </div>
             </div>
+            <div class="action">
+                <NButton type="info" text disabled>
+                    <template #icon>
+                        <FileStorage/>
+                    </template>
+                    Save To File
+                </NButton>
+            </div>
         </NDrawerContent>
     </NDrawer>
 </template>
+
+<style lang="scss" scoped>
+.type {
+    color: var(--text-color-3);
+}
+</style>

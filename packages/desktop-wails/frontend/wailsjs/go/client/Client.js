@@ -10,6 +10,14 @@ export function GetSocketHistory() {
   return window['go']['client']['Client']['GetSocketHistory']();
 }
 
+export function LoginToSocket() {
+  return window['go']['client']['Client']['LoginToSocket']();
+}
+
 export function ReadAndRespond(arg1) {
   return window['go']['client']['Client']['ReadAndRespond'](arg1);
+}
+
+export function SetSocket(arg1) {
+  return window['go']['client']['Client']['SetSocket'](arg1);
 }

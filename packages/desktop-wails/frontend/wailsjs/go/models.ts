@@ -82,12 +82,12 @@ export namespace mocks {
 	    id: string;
 	    email: string;
 	    // Go type: UserStatus
-	    status: any;
+	    status?: any;
 	    // Go type: StandardToken
 	    token: any;
 	    admin: boolean;
 	    // Go type: UserAvatar
-	    avatar: any;
+	    avatar?: any;
 	    profileOptions: {[key: string]: boolean};
 	
 	    static createFrom(source: any = {}) {
@@ -126,7 +126,9 @@ export namespace mocks {
 	}
 	export class AppConfig {
 	    theme: string;
-	    currentUser: PrivateUser;
+	    currentUser?: PrivateUser;
+	    hasUser: boolean;
+	    users?: {[key: string]: PrivateUser};
 	
 	    static createFrom(source: any = {}) {
 	        return new AppConfig(source);
@@ -136,6 +138,8 @@ export namespace mocks {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.theme = source["theme"];
 	        this.currentUser = this.convertValues(source["currentUser"], PrivateUser);
+	        this.hasUser = source["hasUser"];
+	        this.users = source["users"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

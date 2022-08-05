@@ -9,7 +9,7 @@ specifiers:
   naive-ui: ^2.31.0
   pinia: ^2.0.16
   sass: ^1.53.0
-  typescript: ^4.7.4
+  typescript: ^4.6.4
   vite: ^2.9.5
   vue: ^3.2.25
   vue-router: ^4.1.2
