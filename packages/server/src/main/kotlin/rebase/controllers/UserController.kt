@@ -406,9 +406,9 @@ class UserController(
         val createPendingRelationshipDoc =
             document()
                 .operation {
-                    it.description("Create Pending Relationship")
+                    it.description("Create Relationship")
                     it.operationId("createRelationship")
-                    it.summary("Create Pending Relationship")
+                    it.summary("Create Relationship")
                     it.addTagsItem("Self")
                     it.addTagsItem("Relationship")
                 }
@@ -427,6 +427,7 @@ class UserController(
                     ctx.status(400).json(RelationshipRequestFail("Friend doesn't exist"))
                     return
                 }
+
                 if (!user.checkValidFriendRequest(friend.identifier)) {
                     ctx.status(403)
                         .json(
@@ -435,18 +436,39 @@ class UserController(
                             )
                         )
                     return
-                } else {
-                    if (friend.identifier == user.identifier) {
-                        ctx.status(403).json(RelationshipRequestFail("You can't add yourself"))
-                        return
-                    }
-                    user.addRequest(friend.identifier)
-                    ctx.status(201).json(friend.toPublic()).run {
-                        user.save()
-                        friend.save()
-                    }
+                }
+                if (friend.identifier == user.identifier) {
+                    ctx.status(403).json(RelationshipRequestFail("You can't add yourself"))
                     return
                 }
+                if (user.relationships.pending.contains(friend.identifier) && friend.relationships.requests.contains(
+                        user.identifier
+                    )
+                ) {
+                    if (user.acceptRequest(friend.identifier)) {
+                        val dmChannelID = snowflake.nextId()
+                        val dmChannel = DMChannel(
+                            dmCache,
+                            identifier = dmChannelID,
+                            users = mutableListOf(user.identifier, friend.identifier),
+                            dao = DMDao("dm_${dmChannelID}", cqlSession)
+                        )
+                        dmChannel.dao!!.init()
+                        println("Ran dao")
+                        ctx.status(201).json(userCache.users[friend.identifier]?.toPublic()!!)
+                        dmCache.saveOrReplaceChannel(dmChannel)
+                        return
+                    } else {
+                        ctx.status(403).json(UserDataFail("${friend.identifier} isn't pending with you"))
+                        return
+                    }
+                }
+                user.addRequest(friend.identifier)
+                ctx.status(201).json(friend.toPublic()).run {
+                    user.save()
+                    friend.save()
+                }
+                return
             }
         }
 

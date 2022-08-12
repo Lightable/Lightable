@@ -21,16 +21,20 @@ const clickEvent = () => {
         }
         case "Function": {
             if (pair.cb) pair.cb();
+            break;
+        }
+        default: {
+            // @ts-ignore
+            props?.cb();
+            break
         }
     }
-    // @ts-ignore
-    props?.cb();
 }
 
 </script>
 
 <template>
-    <div class="drawer-component" :disabled="(pair.t !==  `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '') ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
+    <div class="drawer-component" :disabled="(pair.t !== `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '') ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
         <NIcon :size="18" v-if="pair.icon">
             <component :is="pair.icon" />
         </NIcon>

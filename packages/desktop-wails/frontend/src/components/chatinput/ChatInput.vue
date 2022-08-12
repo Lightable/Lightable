@@ -23,6 +23,7 @@ const onKey = (e: KeyboardEvent) => {
         src!!.style.height = src.scrollHeight + 24 + 'px';
     } else if (e.key == 'Enter' && !shiftMod) {
         e.preventDefault();
+        src!!.style.height = src!!.style.minHeight;
         contentToSend.value = '';
     }
 }

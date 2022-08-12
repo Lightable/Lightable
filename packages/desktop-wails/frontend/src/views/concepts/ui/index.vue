@@ -11,23 +11,26 @@ const router = useRouter();
 appStore.leftDrawer.show = true;
 appStore.leftDrawer.components = [
     {
-        icon: Chat, text: 'Message', color: '#fff', cb: () => {
-            router.push('/concepts/ui/message')
-        }, disabled: false
+        t: 'Route',
+        icon: Chat, 
+        text: 'Message', 
+        color: '#fff', 
+        path: '/concepts/ui/message'
     },
     {
-        icon: ChatInputIcon, text: 'Chat Input', color: '#fff', cb: () => {
-            router.push('/concepts/ui/chat-input')
-        }, disabled: false
+        t: 'Route',
+        icon: ChatInputIcon, 
+        text: 'Chat Input', 
+        color: '#fff',
+        path: '/concepts/ui/chat-input'
     },
-    {
-        icon: Reload,
-        text: 'Loading',
-        cb: () => {
-            router.push('/concepts/ui/loading')
-        },
-        disabled: false
-    }
+   {
+        t: 'Route',
+        icon: Reload, 
+        text: 'Loading', 
+        color: '#fff',
+        path: '/concepts/ui/loading'
+    },
 ];
 </script>
 

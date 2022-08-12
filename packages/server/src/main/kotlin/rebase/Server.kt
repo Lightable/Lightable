@@ -247,13 +247,6 @@ class Server(
                         get(documented(relationship.getSelfRelationshipsDoc, relationship::getRelationships))
                         get("{id}", documented(relationship.getSelfRelationshipDoc, relationship::getRelationship))
                         path("/pending") {
-                            post(
-                                "{id}",
-                                documented(
-                                    relationship.addPendingRelationshipDoc,
-                                    relationship::acceptPendingRelationship
-                                )
-                            )
                             delete(
                                 "{id}",
                                 documented(
