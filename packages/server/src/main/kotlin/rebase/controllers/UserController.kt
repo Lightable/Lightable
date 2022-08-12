@@ -1061,7 +1061,8 @@ class UserController(
                 email: String,
                 ctx: Context?
             ): Boolean {
-                if (invites.findOne(InviteCode::email eq email)?.code != null) {
+                val codeInv = invites.findOne(InviteCode::email eq email)?.code
+                if (codeInv != null && codeInv == code) {
                     return true
                 }
                 ctx?.status(403)?.json(UserDataFail("Code required"))

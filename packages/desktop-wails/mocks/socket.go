@@ -88,6 +88,13 @@ type ServerStartMessage struct {
 	D ServerStartPayload `json:"d"`
 }
 
+type UserStatusUpdateMessage struct {
+	T int `json:"t"`
+	D UserStatusUpdatePayload `json:"d"`
+}
+type UserStatusUpdatePayload struct {
+	User PublicUser `json:"user"`
+}
 type ServerStartPayload struct {
 	User          PublicUser                 `json:"user"`
 	Status        UserStatus                 `json:"status"`

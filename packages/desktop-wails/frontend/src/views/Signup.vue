@@ -4,9 +4,10 @@ import { NButton, NIcon, NForm, NFormItem, NInput, FormInst, NModal, useMessage 
 import { debug } from '../composable/Logger';
 import { LogInOutline } from '@vicons/ionicons5';
 import { RegisterUser } from '../../wailsjs/go/client/HttpClient';
-import { HasUser } from '../../wailsjs/go/app/App';
+import { HasUser, SetCurrentUser } from '../../wailsjs/go/app/App';
 import { useRouter } from 'vue-router';
 import { useAppStore } from '../stores/AppStore';
+import { mocks } from '../../wailsjs/go/models';
 
 const appStore = useAppStore();
 const message = useMessage();
@@ -58,11 +59,13 @@ const onCodeSubmit = async () => {
         return
     } else {
         let json = JSON.parse(userRegister.Json);
+        console.log(json);
         if (userRegister.status == 403) {
             message.error(json.bad);
             return
         } else if (userRegister.status == 201) {
             HasUser(true)
+            SetCurrentUser(json as mocks.PrivateUser);
             router.push('/');
         }
     }

@@ -14,6 +14,20 @@ export namespace mocks {
 	        this.id = source["id"];
 	    }
 	}
+	export class StandardToken {
+	    permissions: string[];
+	    token: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new StandardToken(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.permissions = source["permissions"];
+	        this.token = source["token"];
+	    }
+	}
 	export class Icon {
 	    cdn: string;
 	    animated: string;
@@ -62,96 +76,6 @@ export namespace mocks {
 		    }
 		    return a;
 		}
-	}
-	export class PublicUser {
-	    name: string;
-	    id: string;
-	    // Go type: UserStatus
-	    status?: any;
-	    admin: boolean;
-	    // Go type: UserAvatar
-	    avatar?: any;
-	    state?: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new PublicUser(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.id = source["id"];
-	        this.status = this.convertValues(source["status"], null);
-	        this.admin = source["admin"];
-	        this.avatar = this.convertValues(source["avatar"], null);
-	        this.state = source["state"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class RelationshipStruct {
-	    pending: PublicUser[];
-	    requests: PublicUser[];
-	    friends: PublicUser[];
-	
-	    static createFrom(source: any = {}) {
-	        return new RelationshipStruct(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.pending = this.convertValues(source["pending"], PublicUser);
-	        this.requests = this.convertValues(source["requests"], PublicUser);
-	        this.friends = this.convertValues(source["friends"], PublicUser);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class StandardToken {
-	    permissions: string[];
-	    token: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new StandardToken(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.permissions = source["permissions"];
-	        this.token = source["token"];
-	    }
 	}
 	export class PrivateUser {
 	    name: string;
@@ -237,6 +161,82 @@ export namespace mocks {
 		}
 	}
 	
+	export class PublicUser {
+	    name: string;
+	    id: string;
+	    // Go type: UserStatus
+	    status?: any;
+	    admin: boolean;
+	    // Go type: UserAvatar
+	    avatar?: any;
+	    state?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PublicUser(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.id = source["id"];
+	        this.status = this.convertValues(source["status"], null);
+	        this.admin = source["admin"];
+	        this.avatar = this.convertValues(source["avatar"], null);
+	        this.state = source["state"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class RelationshipStruct {
+	    pending: PublicUser[];
+	    requests: PublicUser[];
+	    friends: PublicUser[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RelationshipStruct(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pending = this.convertValues(source["pending"], PublicUser);
+	        this.requests = this.convertValues(source["requests"], PublicUser);
+	        this.friends = this.convertValues(source["friends"], PublicUser);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 

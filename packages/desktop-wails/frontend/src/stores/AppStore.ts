@@ -55,6 +55,9 @@ export const useAppStore = defineStore('AppStore', {
             EventsOn('ws:read:server|start', async () => {
                 this.relationships = await GetRelations();
             });
+            EventsOn('ws:read:user|status', async (_) => {
+                this.relationships = await GetRelations();
+            });
         },
         async changeTheme(theme: LightableTheme) {
             this.theme = theme;

@@ -129,7 +129,7 @@ func (c *Client) ReadAndRespond(m []byte) {
 			return
 		}
 		d := cData.D
-		fmt.Printf("Req: %v\n", d)
+		c.RelationshipManager.ClearRelations()
 		if !d.Relationships.Empty {
 			relation := d.Relationships
 			for f := 0; f < len(relation.Friends); f++ {
@@ -144,6 +144,23 @@ func (c *Client) ReadAndRespond(m []byte) {
 		}
 		runtime.EventsEmit(*c.Ctx, "ws:read:server|start", cData.D)
 		c.Logger.Info().Msg(fmt.Sprintf("Server start with client: %v", cData.D.User.Id))
+	case 24:
+		uData := mocks.UserStatusUpdateMessage{}
+		err := json.Unmarshal(decoded, &uData)
+		if err != nil {
+			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to read user status update message")
+			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
+			return
+		}
+		d := uData.D.User
+		m, id, err := c.RelationshipManager.FindRelation(&d)
+		if err != nil {
+			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to find user for update message")
+			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
+			return
+		}
+		(*m)[*id] = d
+		runtime.EventsEmit(*c.Ctx, "ws:read:user|status", d)
 	}
 
 	if len(c.SocketHistory) > 50 {

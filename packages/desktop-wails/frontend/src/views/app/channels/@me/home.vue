@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, Ref, ref } from 'vue';
-import { GetRelations } from '../../../../../wailsjs/go/client/RelationshipManager';
+import { GetRelations, RequestFriend } from '../../../../../wailsjs/go/client/RelationshipManager';
 import { useAppStore } from '../../../../stores/AppStore';
 import { NButton, NIcon, NTooltip } from 'naive-ui';
 import ProfileCard from '../../../../components/ProfileCard.vue';
 import { Chatbox, CheckmarkCircle as Checkmark, CloseCircle as Close } from '@vicons/ionicons5';
+import { mocks } from '../../../../../wailsjs/go/models';
 
 const appStore = useAppStore();
 const loadingStates = ref(new Map()) as Ref<Map<string, boolean>>;
@@ -19,13 +20,18 @@ const relations = computed(() => appStore.relationships);
 const cancelRequest = (id: string) =>  {
 
 }
+const acceptFriend = async (pend: mocks.PublicUser) => {
+    loadingStates.value.set(pend.id, true);
+    await RequestFriend(pend.name)
+    loadingStates.value.set(pend.id, false);
+}
 </script>
 
 
 <template>
     <div class="user-home">
         <div class="grid-relations">
-            <div class="sub friends-grid">
+            <div class="sub friends-grid" v-if="relations.friends.length > 0">
                 <div class="header ns">
                     <span>Friends</span>
                 </div>
@@ -43,7 +49,7 @@ const cancelRequest = (id: string) =>  {
                     </ProfileCard>
                 </div>
             </div>
-            <div class="sub pending-grid">
+            <div class="sub pending-grid" v-if="relations.pending.length > 0">
                 <div class="header ns">
                     <span>Pending</span>
                 </div>
@@ -64,7 +70,7 @@ const cancelRequest = (id: string) =>  {
                             </NTooltip>
                             <NTooltip trigger="hover">
                                 <template #trigger>
-                                    <NButton text type="success">
+                                    <NButton text type="success" @click="acceptFriend(pending)">
                                         <template #icon>
                                             <NIcon :size="32">
                                                 <Checkmark />
@@ -78,7 +84,7 @@ const cancelRequest = (id: string) =>  {
                     </ProfileCard>
                 </div>
             </div>
-            <div class="sub requests-grid">
+            <div class="sub requests-grid" v-if="relations.requests.length > 0">
                 <div class="header ns">
                     <span>Requests</span>
                 </div>
