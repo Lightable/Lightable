@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { NButton } from 'naive-ui';
-import { computed } from 'vue';
+import { computed, onBeforeMount } from 'vue';
 import { HasUser } from '../../wailsjs/go/app/App';
+import { SetSocket } from '../../wailsjs/go/client/Client';
 import { SetAPI, SetSecure } from '../../wailsjs/go/client/HttpClient';
 import { useAppStore } from '../stores/AppStore';
 
 const appStore = useAppStore();
-const hasUser = computed(() => appStore.hasUser)
-SetAPI('api.zenspace.cf');
+const hasUser = computed(() => appStore.hasUser);
+SetSocket('api.lightableapp.cf');
+SetAPI('api.lightableapp.cf');
 SetSecure(true);
 
 const setHasUser = (bool: boolean) => {
@@ -15,6 +17,7 @@ const setHasUser = (bool: boolean) => {
     appStore.load();
 }
 
+onBeforeMount(() => appStore.leftDrawer.show = false);
 </script>
 
 

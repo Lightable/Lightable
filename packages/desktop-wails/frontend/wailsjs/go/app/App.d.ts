@@ -6,11 +6,15 @@ export function ChangeTheme(arg1:string):void;
 
 export function DownloadUpdate(arg1:string):Promise<string>;
 
+export function GetColour():Promise<string>;
+
 export function GetConfig():Promise<mocks.AppConfig>;
 
 export function GetVersion():Promise<string>;
 
 export function HasUser(arg1:boolean):void;
+
+export function OnRouteChange(arg1:string,arg2:string):void;
 
 export function PingDelay():void;
 

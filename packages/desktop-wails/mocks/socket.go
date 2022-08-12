@@ -56,16 +56,27 @@ func NewPing() GenericSocketMessage {
 }
 
 /* <------------ Message Structs ------------> */
-
-type ClientReadyMessage struct {
-	T int
-	D ClientReadyPayload
+type ServerReadyMessage struct {
+	T int                `json:"t"`
+	D ServerReadyPayload `json:"d"`
 }
 
+type ServerReadyPayload struct {
+	Interval int `json:"interval"`
+}
+
+type ClientReadyMessage struct {
+	T int                `json:"t"`
+	D ClientReadyPayload `json:"d"`
+}
 type ClientReadyPayload struct {
-	Os      string
-	Browser string
-	Build   string
+	Auth       string                       `json:"auth"`
+	Properties ClientReadyPropertiesPayload `json:"properties"`
+}
+type ClientReadyPropertiesPayload struct {
+	Os      string `json:"os"`
+	Browser string `json:"browser"`
+	Build   string `json:"build"`
 }
 
 type GenericSocketMessage struct {

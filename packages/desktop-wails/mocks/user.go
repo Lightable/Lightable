@@ -17,6 +17,7 @@ type PublicUser struct {
 	Status *UserStatus `json:"status"`
 	Admin  bool        `json:"admin"`
 	Avatar *UserAvatar `json:"avatar"`
+	State  *int16      `json:"state"`
 }
 
 type UserStatus struct {

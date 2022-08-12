@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import { NButton, NIcon, NForm, NFormItem, NInput, FormInst, useMessage } from 'naive-ui';
 import { LogInOutline } from '@vicons/ionicons5';
 import { debug } from '../composable/Logger';
 import { LoginWithEmailAndPassword } from '../../wailsjs/go/client/HttpClient';
 import { SetUser } from '../../wailsjs/go/app/App';
 import { useRouter } from 'vue-router';
+import { useAppStore } from '../stores/AppStore';
 
+const appStore = useAppStore();
 const message = useMessage();
-
 const router = useRouter();
+
 
 const formValue = ref({
     email: '',
@@ -52,6 +54,7 @@ const onFormSubmit = async (e: MouseEvent) => {
     });
 }
 
+onBeforeMount(() => appStore.leftDrawer.show = false);
 </script>
 
 

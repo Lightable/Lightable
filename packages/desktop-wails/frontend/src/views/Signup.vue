@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import { NButton, NIcon, NForm, NFormItem, NInput, FormInst, NModal, useMessage } from 'naive-ui';
 import { debug } from '../composable/Logger';
 import { LogInOutline } from '@vicons/ionicons5';
 import { RegisterUser } from '../../wailsjs/go/client/HttpClient';
 import { HasUser } from '../../wailsjs/go/app/App';
 import { useRouter } from 'vue-router';
+import { useAppStore } from '../stores/AppStore';
+
+const appStore = useAppStore();
 const message = useMessage();
+
 
 const inputCodeModal = ref({
     show: false,
@@ -64,6 +68,7 @@ const onCodeSubmit = async () => {
     }
 }
 
+onBeforeMount(() => appStore.leftDrawer.show = false);
 </script>
 
 

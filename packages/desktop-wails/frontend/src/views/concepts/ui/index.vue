@@ -2,6 +2,7 @@
 import { useAppStore } from '../../../stores/AppStore';
 import { Chat } from '@vicons/carbon';
 import { RectangleLandscape20Regular as ChatInputIcon } from '@vicons/fluent';
+import { Reload } from '@vicons/ionicons5';
 import { useRouter } from 'vue-router';
 
 const appStore = useAppStore();
@@ -12,12 +13,20 @@ appStore.leftDrawer.components = [
     {
         icon: Chat, text: 'Message', color: '#fff', cb: () => {
             router.push('/concepts/ui/message')
-        }, disabled: (router.currentRoute.value.name == 'concepts-ui-message')
+        }, disabled: false
     },
     {
         icon: ChatInputIcon, text: 'Chat Input', color: '#fff', cb: () => {
             router.push('/concepts/ui/chat-input')
-        }, disabled: (router.currentRoute.value.name == 'concepts-ui-chat-input')
+        }, disabled: false
+    },
+    {
+        icon: Reload,
+        text: 'Loading',
+        cb: () => {
+            router.push('/concepts/ui/loading')
+        },
+        disabled: false
     }
 ];
 </script>

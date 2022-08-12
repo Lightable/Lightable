@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"red/mocks"
 	"strconv"
 	"time"
+
+	"golang.org/x/sys/windows/registry"
 
 	"github.com/rs/zerolog"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -21,6 +24,7 @@ type App struct {
 	Logger  *zerolog.Logger
 	Config  mocks.AppConfig
 	Update  mocks.Update
+	Colour string
 	Version string
 	Dir     string
 	start   time.Time
@@ -66,12 +70,13 @@ func WriteAppConfig(logger *zerolog.Logger, dir string, config mocks.AppConfig) 
 
 // Run on preinit of wails app to make sure files and config is in order.
 func (a *App) PreInit() {
+	a.GetColour()
 	file, err := ioutil.ReadFile(fmt.Sprintf("%v/.app", a.Dir))
 	wd, _ := os.Getwd()
-	a.Logger.Info().Str("working", wd).Msg("Running preinit on app...")
+	a.Logger.Info().Str("working", wd).Msg("APP || Running preinit on app...")
 	fmt.Printf("Working -> %v\n", wd)
 	if err != nil {
-		a.Logger.Error().Str("type", "FileNotFound").Msg(fmt.Sprintf("Something went wrong when trying to read `.app` config file.. Making a new one. (Error: %v)", err))
+		a.Logger.Error().Str("type", "FileNotFound").Msg(fmt.Sprintf("CONFIG || Something went wrong when trying to read `.app` config file.. Making a new one. (Error: %v)", err))
 		newAppConfig := mocks.AppConfig{Theme: "Dark", Users: &map[string]*mocks.PrivateUser{}}
 		WriteAppConfig(a.Logger, a.Dir, newAppConfig)
 		a.Config = newAppConfig
@@ -85,39 +90,54 @@ func (a *App) PreInit() {
 	a.Config = appConfig
 }
 
+
+func (a *App) GetColour() string {
+	k, err := registry.OpenKey(registry.CURRENT_USER, `SOFTWARE\Microsoft\Windows\DWM`, registry.QUERY_VALUE)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer k.Close()
+	fmt.Printf("Key is %v\n", k)
+	i, _, err := k.GetIntegerValue("ColorizationColor")
+	if err != nil {
+		log.Fatal(err)
+	}
+	a.Colour = fmt.Sprintf("#%v", strconv.FormatUint(i, 16)[2:])
+	return a.Colour
+}
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) Startup(ctx context.Context) {
 	a.Ctx = ctx
-	a.Logger.Info().Str("type", "Startup").Msg(fmt.Sprintf("Startup in: %v", time.Since(a.start)))
+	a.Logger.Info().Str("type", "Startup").Msg(fmt.Sprintf("RUNTIME || Startup in: %v", time.Since(a.start)))
 }
 
 // Shutdown log
 func (a *App) Shutdown(ctx context.Context) {
-	a.Logger.Info().Str("type", "Shutdown").Msg(fmt.Sprintf("Shutdown was called after app being active for: %v", time.Since(a.start)))
+	a.Logger.Info().Str("type", "Shutdown").Msg(fmt.Sprintf("RUNTIME || Shutdown was called after app being active for: %v", time.Since(a.start)))
 }
 
 // Get the current config on the process
 func (a *App) GetConfig() mocks.AppConfig {
-	a.Logger.Debug().Str("type", "GetConfig").Msg("A function asked for config")
+	a.Logger.Debug().Str("type", "GetConfig").Msg("CONFIG || Config requested")
 	return a.Config
 }
 
 // Change appconfig theme and then write the updated file
 func (a *App) ChangeTheme(theme string) {
-	a.Logger.Debug().Str("type", "ChangeTheme").Msg(fmt.Sprintf("Changing theme from: %s, to: %s", a.Config.Theme, theme))
+	a.Logger.Debug().Str("type", "ChangeTheme").Msg(fmt.Sprintf("CONFIG || Changing theme from: %s, to: %s", a.Config.Theme, theme))
 	a.Config.Theme = theme
 	WriteAppConfig(a.Logger, a.Dir, a.Config)
 }
 
 func (a *App) SetCurrentUser(user mocks.PrivateUser) {
-	a.Logger.Debug().Str("type", "SetCurrentUser").Msg(fmt.Sprintf("Current user was changed from: %v, to: %v", a.Config.LoggedInUser, user))
+	a.Logger.Debug().Str("type", "SetCurrentUser").Msg(fmt.Sprintf("CONFIG || Current user was changed from: %v, to: %v", a.Config.LoggedInUser, user))
 	a.Config.LoggedInUser = &user
 	WriteAppConfig(a.Logger, a.Dir, a.Config)
 }
 
 func (a *App) HasUser(statement bool) {
-	a.Logger.Debug().Str("type", "SetHasUser").Msg(fmt.Sprintf("Has user was changed from: %v, to: %v", a.Config.HasUser, statement))
+	a.Logger.Debug().Str("type", "SetHasUser").Msg(fmt.Sprintf("CONFIG || Has user was changed from: %v, to: %v", a.Config.HasUser, statement))
 	a.Config.HasUser = statement
 	WriteAppConfig(a.Logger, a.Dir, a.Config)
 }
@@ -125,12 +145,16 @@ func (a *App) HasUser(statement bool) {
 // Set a user in the map
 func (a *App) SetUser(id string, user mocks.PrivateUser) {
 	(*a.Config.Users)[id] = &user
+	a.SetCurrentUser(user)
 	WriteAppConfig(a.Logger, a.Dir, a.Config)
 }
-
+// JS Func
+func (a *App) OnRouteChange(before string, after string) {
+	a.Logger.Debug().Str("before", before).Str("after", after).Msg("JS || Route Change")
+}
 // Make an empty method to test ipc ms delay
 func (c *App) PingDelay() {
-	c.Logger.Debug().Str("type", "PingDelayRequest").Msg("Client requested ping delay from IPC")
+	c.Logger.Debug().Str("type", "PingDelayRequest").Msg("JS || Ping")
 	return
 }
 
@@ -141,7 +165,7 @@ func (a *App) GetVersion() string {
 
 // Restart via starting a new process, releasing to system, and then closing this process
 func (a *App) Restart() {
-	a.Logger.Debug().Str("type", "RestartRequest").Msg("Client requested application restart")
+	a.Logger.Debug().Str("type", "RestartRequest").Msg(fmt.Sprintf("RUNTIME || Application restart at %v", time.Now()))
 	procAttr := new(os.ProcAttr)
 	procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
 	proc, _ := os.StartProcess(os.Args[0], []string{"", ""}, procAttr)

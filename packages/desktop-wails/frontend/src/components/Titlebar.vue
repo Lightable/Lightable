@@ -158,6 +158,7 @@ const restartLightable = () => {
     align-items: center;
     flex-direction: row;
     height: 32px;
+    z-index: 2;
     position: absolute;
     top: 0;
     width: 100vw;

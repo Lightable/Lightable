@@ -6,12 +6,23 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Lightable Red</title>
     <link href="./src/style.scss" rel="stylesheet">
+    <script src="http://localhost:8098"></script>
 </head>
 
 <body>
-    <div id="app"/>
+    <div id="app" />
     <script src="./src/main.ts" type="module"></script>
-    <script src="http://localhost:8098" defer></script>
+    
+    <script>
+        console.defaultLog = console.log.bind(console);
+        console.logs = [];
+        console.log = function () {
+            // default &  console.log()
+            console.defaultLog.apply(console, arguments);
+            // new & array data
+            console.logs.push(Array.from(arguments));
+        }
+    </script>
 </body>
 
 </html>

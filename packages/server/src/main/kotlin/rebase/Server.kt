@@ -21,9 +21,6 @@ import io.swagger.v3.oas.models.info.Info
 import me.kosert.flowbus.EventsReceiver
 import me.kosert.flowbus.GlobalBus
 import me.kosert.flowbus.subscribe
-import okio.ByteString.Companion.encodeUtf8
-import okio.internal.commonAsUtf8ToByteArray
-import org.bson.json.JsonParseException
 import org.slf4j.LoggerFactory
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
@@ -47,7 +44,6 @@ import java.util.Timer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.imageio.ImageIO
-import kotlin.reflect.javaType
 
 val t = Terminal()
 
@@ -59,13 +55,14 @@ class Server(
     var dbpass: String = "rootpass",
     var batchInterval: Int,
     var nudeAPIGateway: String = "http://localhost:8089",
-    var session: CqlSession
+    var session: CqlSession,
+    var isProd: Boolean = false
 ) {
     val logger: org.slf4j.Logger = LoggerFactory.getLogger("Server")!!
     var totalRequests = 0
     var port = 8080
 
-    var isProd = false
+
     private val snowflake = Snowflake()
     private val dateFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("dd-MM-yyyy").withZone(ZoneId.systemDefault())
@@ -368,8 +365,7 @@ fun main(args: Array<String>) {
     val scyllaHost = System.getenv("SCYLLA_HOST") ?: "192.168.50.111"
     val connector = ScyllaConnector()
     connector.connect(scyllaHost, 9042, "datacenter1")
-    val server = Server(dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession())
-    server.isProd = prod
+    val server = Server(dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession(), isProd = prod)
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (!System.getenv("port").isNullOrBlank()) {
         server.port = System.getenv("port").toInt()

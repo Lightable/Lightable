@@ -2,7 +2,12 @@
 import { Light } from '@vicons/carbon';
 import { Search24Regular } from '@vicons/fluent';
 import { NButton, NIcon } from 'naive-ui';
-import DrawerComponent from './DrawerComponent.vue';
+import { computed } from 'vue';
+import { useAppStore } from '../../stores/AppStore';
+
+const appStore = useAppStore();
+
+const version = computed(() => appStore.version);
 </script>
 
 
@@ -30,8 +35,11 @@ import DrawerComponent from './DrawerComponent.vue';
                 <slot name="top" />
             </div>
             <div class="groups">
-                <slot name="groups"/>
+                <slot name="groups" />
             </div>
+        </div>
+        <div class="lower ns">
+            <span>{{ version }}</span>
         </div>
     </div>
 </template>
@@ -39,6 +47,10 @@ import DrawerComponent from './DrawerComponent.vue';
 
 <style lang="scss" scoped>
 .drawer-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+
     .header {
         display: flex;
         flex-direction: column;
@@ -96,6 +108,26 @@ import DrawerComponent from './DrawerComponent.vue';
             width: 100%;
             justify-content: center;
             align-items: center;
+        }
+
+        .groups {
+            flex-direction: column;
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+    }
+
+    .lower {
+        margin-top: auto;
+        margin-left: 5px;
+        color: var(--text-color-3);
+
+        span {
+            font-family: "Jetbrains Mono";
+            font-weight: lighter;
         }
     }
 }

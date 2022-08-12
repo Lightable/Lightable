@@ -7,8 +7,8 @@
   --lightable-amber: rgb(246, 248, 108);
   /* Alpha */
   --lightable-red: rgba(250, 94, 67, 0.637);
-  --lightable-dark-bg: #111111;
-  --lightable-light-bg: #ebebeb;
+  --lightable-dark-bg: rgb(16, 16, 20);
+  --lightable-light-bg: #fff;
 }
 
 html {
@@ -17,6 +17,7 @@ html {
   margin: 0;
   overflow: hidden;
 }
+
 // .n-button {
 //   background: rgb(var(--accent));
 // 	color: var(--accent-text);
@@ -53,18 +54,49 @@ body {
   font-weight: 400;
   src: local(""), url("assets/fonts/nunito-v16-latin-regular.woff2") format("woff2");
 }
+
 @font-face {
   font-family: "Gill Sans";
   font-style: normal;
   font-weight: 400;
   src: url("assets/fonts/Gill Sans/Gill Sans.otf");
 }
+
 @font-face {
   font-family: "Gill Sans Medium";
   font-style: normal;
   font-weight: 500;
   src: url("assets/fonts/Gill Sans/Gill Sans Medium.otf");
 }
+
+@font-face {
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 400;
+  src: url("assets/fonts/Open Sans/OpenSans-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Open Sans Light";
+  font-style: normal;
+  font-weight: 200;
+  src: url("assets/fonts/Open Sans/OpenSans-Light.ttf");
+}
+
+@font-face {
+  font-family: "Open Sans Medium";
+  font-style: normal;
+  font-weight: 500;
+  src: url("assets/fonts/Open Sans/OpenSans-Medium.ttf");
+}
+
+@font-face {
+  font-family: "Jetbrains Mono";
+  font-style: normal;
+  font-weight: 200;
+  src: url("assets/fonts/Jetbrains Mono/Jetbrains Mono.ttf");
+}
+
 #app {
   height: 100vh;
   text-align: left;

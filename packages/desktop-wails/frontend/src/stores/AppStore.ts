@@ -1,12 +1,15 @@
 import { defineStore } from "pinia";
-import { GetConfig, ChangeTheme, PingDelay, GetVersion } from '../../wailsjs/go/app/App'
+import { GetConfig, ChangeTheme, PingDelay, GetVersion, GetColour } from '../../wailsjs/go/app/App'
 import { GetSocketHistory } from '../../wailsjs/go/client/Client';
+import { mocks } from "../../wailsjs/go/models";
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { debug } from '../composable/Logger';
+import { GetRelations } from '../../wailsjs/go/client/RelationshipManager';
 export const useAppStore = defineStore('AppStore', {
     state: () => ({
         version: 'Unknown Version' as string,
         theme: 'Dark' as LightableTheme,
+        colour: '',
         hasUser: false as boolean,
 
         drawers: {
@@ -15,11 +18,13 @@ export const useAppStore = defineStore('AppStore', {
         leftDrawer: {
             show: false,
             components: [] as Array<LightableDrawerComponentPair>,
-            groups: [] as Array<LightableDrawerComponentPair>,
+            groups: [] as Array<LightableDrawerGroupComponent>,
         },
         history: {
             websocket: [] as Array<string>
-        }
+        },
+
+        relationships: new mocks.RelationshipStruct()
     }),
 
     actions: {
@@ -27,10 +32,14 @@ export const useAppStore = defineStore('AppStore', {
             let config = await GetConfig();
             let history = await GetSocketHistory();
             let version = await GetVersion();
+            let colour = await GetColour();
             this.theme = config.theme as LightableTheme;
             this.hasUser = config.hasUser;
             this.version = version;
-            debug('Theme', `Current theme is "${config.theme}"`);
+            let root = document.documentElement;
+            this.colour = colour;
+            root.style.setProperty("--windows-accent-colour", this.colour);
+            debug('Theme', `Current theme is "${config.theme} With accent colour "${this.colour}" `);
             if (history) {
                 this.history.websocket = history;
                 return
@@ -42,6 +51,9 @@ export const useAppStore = defineStore('AppStore', {
         async startRealtime() {
             EventsOn('ws:read:decode', async () => {
                 this.history.websocket = await GetSocketHistory() as Array<string>
+            });
+            EventsOn('ws:read:server|start', async () => {
+                this.relationships = await GetRelations();
             });
         },
         async changeTheme(theme: LightableTheme) {
@@ -58,11 +70,17 @@ export type LightableTheme = "Dark" | "Light"
 export interface AppConfig {
     theme: LightableTheme
 }
-
+export interface LightableDrawerGroupComponent {
+    name: string,
+    items: LightableDrawerComponentPair[]
+}
 export interface LightableDrawerComponentPair {
-    icon: any,
+    t: LightableDrawerType,
+    icon?: any,
     text: string,
-    cb: Function,
-    disabled: boolean,
+    cb?: Function,
+    path?: string
     color?: string | '#fff',
 }
+
+export type LightableDrawerType = "Function" | "Route"

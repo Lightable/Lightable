@@ -10,6 +10,10 @@ export function DownloadUpdate(arg1) {
   return window['go']['app']['App']['DownloadUpdate'](arg1);
 }
 
+export function GetColour() {
+  return window['go']['app']['App']['GetColour']();
+}
+
 export function GetConfig() {
   return window['go']['app']['App']['GetConfig']();
 }
@@ -20,6 +24,10 @@ export function GetVersion() {
 
 export function HasUser(arg1) {
   return window['go']['app']['App']['HasUser'](arg1);
+}
+
+export function OnRouteChange(arg1, arg2) {
+  return window['go']['app']['App']['OnRouteChange'](arg1, arg2);
 }
 
 export function PingDelay() {

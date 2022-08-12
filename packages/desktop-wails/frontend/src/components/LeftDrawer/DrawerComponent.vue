@@ -1,26 +1,43 @@
 <script setup lang="ts">
+import { PropType, computed } from 'vue';
 import { NIcon } from 'naive-ui';
+import { LightableDrawerComponentPair } from '../../stores/AppStore';
+import { useRouter } from 'vue-router';
 
 const props = defineProps({
-    icon: Object,
-    text: String,
-    cb: Function,
-    disabled: Boolean
+    pair: Object as PropType<LightableDrawerComponentPair>
 });
 
+const router = useRouter();
+
 const clickEvent = () => {
+    const route = router.currentRoute.value.fullPath;
+    const pair = props.pair!!;
+    switch (pair.t) {
+        case "Route": {
+            if (pair.path!! === route) return
+            router.push(pair.path!!);
+            break;
+        }
+        case "Function": {
+            if (pair.cb) pair.cb();
+        }
+    }
     // @ts-ignore
     props?.cb();
 }
+
 </script>
 
 <template>
-    <div class="drawer-component" :disabled="Boolean(props.disabled)" @click="clickEvent">
-        <NIcon :size="18">
-            <component :is="props.icon" />
+    <div class="drawer-component" :disabled="(pair.t !==  `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '') ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
+        <NIcon :size="18" v-if="pair.icon">
+            <component :is="pair.icon" />
         </NIcon>
+        <slot name="icon" v-if="!pair.icon" />
+
         <div class="content">
-            {{ props.text }}
+            {{ pair.text }}
         </div>
     </div>
 </template>
@@ -46,11 +63,12 @@ const clickEvent = () => {
 
     &[disabled='true'] {
         opacity: var(--opacity-disabled);
+        cursor: not-allowed;
     }
 
     &:hover {
         &[disabled='false'] {
-            background-color: #2080f0;
+            background-color: var(--windows-accent-colour);
 
             .content {
                 filter: rgb(44, 44, 44);

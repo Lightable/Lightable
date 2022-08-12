@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"red/backend/app"
@@ -104,7 +106,7 @@ func (h *HttpClient) RegisterUser(username string, email string, password string
 
 func (h *HttpClient) LoginWithToken(token string) (*user.PrivateUser, error) {
 	u := h.CreateURL("/user/@me")
-	req, err := h.CreateURLWithAuthorization(u, token)
+	req, err := h.CreateGetRequestWithAuthorization(u, token)
 	if err != nil {
 		return nil, err
 	}
@@ -151,6 +153,43 @@ func (h *HttpClient) LoginWithEmailAndPassword(email string, password string) (*
 	return nil, fmt.Errorf("%v (%v)", string(body), resp.StatusCode)
 }
 
+func (h *HttpClient) AddFriend(name string) (*user.PublicUser, error) {
+	u := h.CreateURL(fmt.Sprintf("/user/@me/relationships/%s", name))
+	post, err := h.CreatePostRequestWithAuthorization(u)
+	if err != nil {
+		h.Client.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Something went wrong when trying to create post request for add friend")
+		return nil, err
+	}
+	resp, err := h.Http.Do(post)
+	if err != nil {
+		h.Client.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Something went wrong when trying to run post request for add friend")
+		return nil, err
+	}
+	defer dclose(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		h.Client.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Something went wrong when serializing body in addFriend")
+		return nil, err
+	}
+	code := resp.StatusCode
+	if code == 201 {
+		pubUser := &user.PublicUser{}
+		jsonErr := json.Unmarshal(body, pubUser)
+		if jsonErr != nil {
+			return nil, jsonErr
+		}
+		return pubUser, nil
+	} else if code != 201 {
+		failImpl := &GenericFail{}
+		jsonErr := json.Unmarshal(body, failImpl)
+		if jsonErr != nil {
+			return nil, jsonErr
+		}
+		return nil, fmt.Errorf("%s (%s)", failImpl.Message, failImpl.Code)
+	}
+	return nil, nil
+}
+
 func (h *HttpClient) RegisterLoginWithClient(u *user.PrivateUser) {
 	h.Client.CurrentUser = u
 }
@@ -165,12 +204,20 @@ func (h *HttpClient) CreateURL(path string) url.URL {
 	return u
 }
 
-func (h *HttpClient) CreateURLWithAuthorization(url url.URL, token string) (*http.Request, error) {
+func (h *HttpClient) CreateGetRequestWithAuthorization(url url.URL, token string) (*http.Request, error) {
 	req, err := http.NewRequest("GET", url.String(), nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", token)
+	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
+	return req, nil
+}
+func (h *HttpClient) CreatePostRequestWithAuthorization(url url.URL) (*http.Request, error) {
+	req, err := http.NewRequest("POST", url.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
 	return req, nil
 }
 
@@ -182,4 +229,15 @@ type HttpResponse struct {
 
 type UserRegister struct {
 	Token string `json:"token"`
+}
+
+type GenericFail struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+func dclose(c io.Closer) {
+    if err := c.Close(); err != nil {
+        log.Fatal(err)
+    }
 }

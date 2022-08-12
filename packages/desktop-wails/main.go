@@ -27,6 +27,7 @@ func main() {
 	app := app.NewApp(logger, currentVersion)
 	app.PreInit()
 	client := client.NewClient(&app.Ctx, logger, &app.Config, app)
+	client.CurrentUser = app.Config.LoggedInUser
 	logger.Info().Msg(fmt.Sprintf("Preinit took approx %v", time.Since(start)))
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -49,6 +50,7 @@ func main() {
 			app,
 			client,
 			client.Http,
+			client.RelationshipManager,
 		},
 	})
 
@@ -85,5 +87,6 @@ func newRollingFile(dir string, file string) io.Writer {
 	return &lumberjack.Logger{
 		Filename: path.Join(dir, file),
 		MaxSize:  15,
+		MaxAge: 1,
 	}
 }

@@ -30,7 +30,19 @@ appStore.startRealtime();
                 <div class="lightable-drawer" v-if="leftDrawer.show">
                   <LeftDrawer>
                     <template #top>
-                      <DrawerComponent :icon="item.icon" :text="item.text" v-for="(item, index) in leftDrawer.components" :cb="item.cb" :disabled="item.disabled" v-bind:key="index" />
+                      <DrawerComponent :pair="item" v-for="(item, index) in leftDrawer.components" v-bind:key="index" />
+                    </template>
+                    <template #groups>
+                      <div class="group" v-for="(group, index) in leftDrawer.groups" v-bind:key="index">
+                        <div class="header ns">
+                          <span>{{ group.name }}</span>
+                        </div>
+                        <div class="group-contents" :id="`group-${group.name}`">
+                          <div class="group-item" v-for="(gitem, gid) in group.items" v-bind:key="gid" :id="`group-item-${gitem.text}`">
+                            <DrawerComponent :pair="gitem" :style="{ width: '88%' }" />
+                          </div>
+                        </div>
+                      </div>
                     </template>
                   </LeftDrawer>
                 </div>
@@ -83,6 +95,27 @@ appStore.startRealtime();
         width: 100%;
         height: calc(100% - 32px);
       }
+    }
+  }
+}
+
+.group {
+  width: 100%;
+
+  .header {
+    margin-left: 10px;
+  }
+
+  .group-contents {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 8px;
+
+    .group-item {
+      width: 100%;
     }
   }
 }

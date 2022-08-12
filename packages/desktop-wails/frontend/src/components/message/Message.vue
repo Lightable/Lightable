@@ -43,12 +43,12 @@ const props = defineProps({
     <!-- Message -->
     <div class="message" v-else>
         <div class="inner-message">
-            <div class="avatar">
-                <NAvatar round :size="48" :src="author.getAvatar()" class="message-avatar" />
+            <div class="avatar" v-if="author">
+                <NAvatar round :size="48" :src="author.avatar" class="message-avatar" v-if="author.avatar"/>
             </div>
             <div class="container">
                 <div class="name ns">
-                    {{ author.self ? 'You' : author.name }}
+                    {{ author ? (author.self ? 'You' : author.name) : 'Unknown' }}
                 </div>
                 <div class="content">
                     {{ content }}

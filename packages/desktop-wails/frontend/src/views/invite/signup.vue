@@ -1,16 +1,20 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { NForm, NFormItem, NInput, NButton, NIcon, FormInst, useMessage } from 'naive-ui';
 import { PersonAdd } from '@vicons/ionicons5';
 import { useConfettiStore } from '../../stores/ConfettiStore';
 import { RegisterEmail } from '../../../wailsjs/go/client/HttpClient';
-import { debug } from '../../composable/Logger'
+import { debug } from '../../composable/Logger';
+import { useAppStore } from '../../stores/AppStore';
+
+const appStore = useAppStore();
 const confetti = useConfettiStore();
 const message = useMessage();
 const loading = ref(false);
 const formValue = ref({ email: '' });
 const router = useRouter();
+
 const formRules = {
     email: {
         required: true,
@@ -18,9 +22,9 @@ const formRules = {
         trigger: 'blur'
     }
 }
+
 const requestRef = ref(null) as any;
 const formRef = ref<FormInst | null>(null);
-
 const onFormSubmit = (e: MouseEvent) => {
     e.preventDefault();
     formRef.value?.validate(async (errors) => {
@@ -51,6 +55,8 @@ const onFormSubmit = (e: MouseEvent) => {
         }
     })
 }
+
+onBeforeMount(() => appStore.leftDrawer.show = false);
 </script>
 
 <template>
