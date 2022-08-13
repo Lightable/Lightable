@@ -1,0 +1,57 @@
+version: "3"
+services:
+  zenspace:
+    image: ghcr.io/brys0/zenspace
+    networks:
+      - db
+      - zenspacedb
+    depends_on:
+       - zenspacedb
+    volumes:
+       - {{CDN_STORAGE}}
+    ports:
+      - 8081:8081
+      - 1098:1098
+    environment:
+      - port=8081
+      - batchint=10
+      - prod=true
+      - dbhost=db
+      - dbport=27017
+      - dbuser=mongoadmin
+      - dbpass=mongoadmin
+      - napi={{NUDITY_DETECTION_API}}
+      - SCYLLA_HOST=zenspacedb
+    restart: always
+  db:
+    image: mongo:latest
+    networks:
+      - db
+    ports:
+      - 27017:27017
+    volumes:
+      - ~/mongo:/data/db
+    restart: always
+  zenspacedb:
+     image: scylladb/scylla
+     container_name: scylla-node1
+     command: --smp 4 --memory 4G --api-address 0.0.0.0 --prometheus-address 0.0.0.0
+     privileged: true
+     networks:
+       - zenspacedb
+     ports:
+       -  9042:9042
+       -  9438:9100
+       -  9439:9180
+       -  9440:10000
+     deploy:
+       resources:
+         limits:
+           memory: 1G
+     container_name: zenspacedb
+     volumes:
+       - {{SCYLLA_STORAGE}}
+     restart: always
+networks:
+   db:
+   zenspacedb:
