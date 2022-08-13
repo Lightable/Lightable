@@ -1,3 +1,7 @@
+<p align="center">
+<img src="https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable-Logo.png?raw=true" height="256" align="center">
+</p>
+
 <h1 align="center">Lightable</h1>
 
 ## Who is lightable
