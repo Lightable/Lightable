@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, computed } from 'vue';
+import { PropType } from 'vue';
 import { NIcon } from 'naive-ui';
 import { LightableDrawerComponentPair } from '../../stores/AppStore';
 import { useRouter } from 'vue-router';

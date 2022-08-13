@@ -33,6 +33,7 @@ const props = defineProps({
     width: 100%;
     justify-content: center;
     align-items: center;
+    border-radius: 8px;
     transition: background-color 150ms ease-in-out;
     cursor: pointer;
 

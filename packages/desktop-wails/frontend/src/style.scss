@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Rubik:wght@400;500&family=Titillium+Web:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&family=Titillium+Web:wght@400;600;700&display=swap');
 
 :root {
   /* Stable */
@@ -96,7 +96,11 @@ body {
   font-weight: 200;
   src: url("assets/fonts/Jetbrains Mono/Jetbrains Mono.ttf");
 }
-
+@font-face {
+  font-family: "InterVariable";
+  src: url("assets/fonts/Inter-Variable.ttf") format("truetype-variations");
+  font-weight: 1 999; 
+}
 #app {
   height: 100vh;
   text-align: left;

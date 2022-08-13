@@ -63,6 +63,9 @@ const addFriendModal = ref({
             let req = await RequestFriend(modal.friend);
             modal.loading = false;
             toast.success(`Got it! We'll let ${req.name} know about your potential friendship ASAP`);
+            GetRelations().then(r => {
+                appStore.relationships = r;
+            });
             return
         } catch (e) {
             modal.loading = false;
@@ -98,11 +101,16 @@ appStore.leftDrawer.components = [
         icon: Workspace,
         path: ""
     },
+    {
+        t: "Function",
+        text: 'Add Friend',
+        icon: PersonAdd,
+        cb: () => {
+            addFriendModal.value.show = true;
+        }
+    }
 ]
 
-onMounted(() => {
-    GetRelations().then(r => console.log(r));
-})
 </script>
 
 
@@ -142,6 +150,7 @@ onMounted(() => {
 .view {
     height: 100%;
     width: 100%;
+    max-height: 100%;
 }
 
 .header {

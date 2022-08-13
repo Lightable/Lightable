@@ -59,7 +59,7 @@ func (rm *RelationshipManager) RequestFriend(name string) (*mocks.PublicUser, er
 		rm.c.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Could not convert string to int64")
 		return nil, fmt.Errorf("could not convert string to int64 (%v)", err)
 	}
-	rm.Pending[intID] = *pubUser
+	rm.Requests[intID] = *pubUser
 	return pubUser, nil
 }
 func (rm *RelationshipManager) AcceptFriend(name string) (*mocks.PublicUser, error) {
