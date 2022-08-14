@@ -15,8 +15,8 @@ This is a monorepo of all things lightable
 * [FAQ](https://github.com/brys0/Lightable#faq)
 * [Getting an invite](https://github.com/Lightable#Getting-an-invite)
 * [Becoming an administrator](https://github.com/Lightable#Becoming-an-administrator)
-  - [Guidelines](https://github.com/Lightable#Guidelines)
-* [Just because](https://github.com/Lightable#Just-because...)
+  - [Guidelines](https://github.com/brys0/Lightable#guidelines)
+* [Just because](https://github.com/brys0/Lightable#just-because)
 * [💖Inspirations💖](https://github.com/brys0/Lightable#Inspirations)
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
 
