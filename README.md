@@ -14,6 +14,9 @@ This is a monorepo of all things lightable
 * [Why](https://github.com/brys0/Lightable#Why-is-lightable)
 * [FAQ](https://github.com/brys0/Lightable#faq)
 * [Getting an invite](https://github.com/Lightable#Getting-an-invite)
+* [Becoming an administrator](https://github.com/Lightable#Becoming-an-administrator)
+  - [Guidelines](https://github.com/Lightable#Guidelines)
+* [Just because](https://github.com/Lightable#Just-because...)
 * [💖Inspirations💖](https://github.com/brys0/Lightable#Inspirations)
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
 
@@ -70,7 +73,46 @@ You can file an issue in the issues, or if you feel comfortable, you can try and
 
 [Guide](https://github.com/brys0/Lightable/wiki/Development)
 
+## Getting an invite 
 
+Hey! Glad you're interested in trying out lightable while it's in its closed alpha stage
+
+Here are some steps to receive an invite code:
+
+* Sign up (for an invite) on the lightable desktop app
+* Wait (If I don't respond in a week or-so I deeply apologize) 
+* Receive a code through the email address you used. (You'll receive it directly from me!)
+* Sign up again, set your name, email, password. 
+* You'll see a modal asking for an invite code. Input your code, and have some fun!
+
+## Becoming an administrator
+
+Think you're cool enough to be an admin? Awesome! 
+Here are the steps to be **that** cool 
+
+1. Email me 
+    - With your revelant information. Way to contact, name, etc.
+    - Why you want to be an admin
+    - How you would be a good fit
+    - How you can help this project grow
+    - Something about yourself, have some fun with it!
+2. Wait
+3. Don't be disappointed if I reject the request. No hard feelings. I will provide a reason, and the time until you can re-apply
+4. If you get accepted, grats! Happy for you :)
+
+### Guidelines
+
+* Don't be stupid (Revoking people's, invite codes without a reason is VERY stupid)
+* Don't be malcious (Don't troll, take it seriously)
+* Don't leak peoples info. (Thats really scummy)
+* Don't leak your own info 
+* Don't use your "role" for solicitating something (if anything like this EVER happens, consider yourself removed from this platform for life)
+* Be smart, if you have a question. ASK. before taking action (If someone is doing something dumb, use your best judgement. If it's another Admin, shoot me a message, and I'll be sure to take action when I can)
+* Help others out. Administration is not limited to controlling, if someone has a question respectfully, and diligently respond
+
+## Just because...
+
+Just because lightable is completely open-source, doesn't mean (project server) is free from moderation. If you feel the absolute undying want to ruin others day. Do it alone on your own self-hosted server. 
 ## Inspirations
 
 <a href="https://hyalus.app/" target="_blank">
