@@ -65,7 +65,7 @@ You can file an issue in the issues, or if you feel comfortable, you can try and
 
 > How do I develop lightable?
 
-...
+[Guide](https://github.com/brys0/Lightable/wiki/Development)
 
 
 ## Inspirations
