@@ -27,7 +27,7 @@ At this moment, Lightable is entirely written by one person.
 
 ## What is lightable?
 
-Open source chat client for your mates to have a bit of faff
+Open source chat client for your mates to have a bit of a faff
 
 ### Client `/packages/desktop` `/packages/desktop-wails` `/packages/web`
 
@@ -114,6 +114,15 @@ Here are the steps to be **that** cool
 ## Just because...
 
 Just because lightable is completely open-source, doesn't mean (project server) is free from moderation. If you feel the absolute undying want to ruin others day. Do it alone on your own self-hosted server. 
+
+## Preview
+![Home Page](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_eH4nN3zgTK.png?raw=true)
+![Home Page (With Prev User)](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_HAiitHwuzn.png?raw=true)
+![Coming Soon Concept](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_e8R25vJF8m.png?raw=true)
+![Early Access Window](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_058Ky6HKv7.png?raw=true)
+![0.0.5 ALpha Main Page](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_jmzHaS6Ke9.png?raw=true)
+
+
 ## Inspirations
 
 <a href="https://hyalus.app/" target="_blank">
