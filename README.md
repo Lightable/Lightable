@@ -118,6 +118,7 @@ Just because lightable is completely open-source, doesn't mean (project server) 
 ## Preview
 ![Home Page](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_eH4nN3zgTK.png?raw=true)
 ![Home Page (With Prev User)](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_HAiitHwuzn.png?raw=true)
+![Coming Soon Concept](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_e8R25vJF8m.png?raw=true)
 ![Early Access Window](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_058Ky6HKv7.png?raw=true)
 ![0.0.5 ALpha Main Page](https://github.com/brys0/Lightable/blob/pre-alpha/assets/Lightable_Red-dev_jmzHaS6Ke9.png?raw=true)
 
