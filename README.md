@@ -4,6 +4,14 @@
 
 <h1 align="center">Lightable</h1>
 
+#### Table of contents
+* [Who](https://github.com/brys0/Lightable#who-is-lightable#Who-is-lightable)
+* [What](https://github.com/brys0/Lightable#What-is-lightable)
+* [When](https://github.com/brys0/Lightable#When-is-lightable)
+* [Where](https://github.com/brys0/Lightable#Where-is-lightable)
+* [Why](https://github.com/brys0/Lightable#Why-is-lightable)
+* [FAQ](https://github.com/brys0/Lightable#faq)
+* [💖Inspirations💖](https://github.com/brys0/Lightable#Inspirations)
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
 
 ## Who is lightable?
