@@ -62,7 +62,7 @@ Being inspired by many Chat apps that have been created I wanted to take my own 
 
 > I want to run my own servers, how do I do that?
 
-... 
+[Guide](https://github.com/brys0/Lightable/wiki/Selfhost)
 
 > I have an issue or bug with my use of this software
 
