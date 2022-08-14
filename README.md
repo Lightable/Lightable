@@ -22,7 +22,7 @@ At this moment, Lightable is entirely written by one person.
 
 Open source chat client for your mates to have a bit of faff
 
-### Client `/packages/desktop` `/packages/desktop-wails`
+### Client `/packages/desktop` `/packages/desktop-wails` `/packages/web`
 
 UI Framework: VueJS
 
