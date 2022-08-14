@@ -40,7 +40,7 @@ data class User constructor(
     @BsonIgnore @JsonIgnore var test: Boolean = false,
     @BsonProperty("created") @JsonProperty var created: Instant = Instant.now(),
     @BsonProperty("profileOptions") @JsonIgnore var profileOptions: MutableMap<String, Boolean>? = mutableMapOf(Pair("ShowStatus", false), Pair("IsPublic", false)),
-    @BsonProperty("analytics") var analytics: UserAnalytics? = null
+    @field:BsonProperty(useDiscriminator = true) @BsonProperty("analytics") var analytics: UserAnalytics = UserAnalytics(0)
 ) : BucketImpl {
     @BsonIgnore
     @JsonIgnore
@@ -236,7 +236,7 @@ data class Status constructor(@BsonProperty("icon") var icon: Icon, @BsonPropert
 data class Icon(override val cdn: String, override val animated: Boolean, @JsonIgnore override val id: Long) : ImageImpl {
     @JsonProperty("id") val identifier = id.toString()
 }
-data class UserAnalytics constructor(@BsonProperty("logins") var logins: Int)
+data class UserAnalytics @BsonCreator constructor(@BsonProperty("logins") var logins: Int)
 data class Friends constructor(
     @BsonProperty("relationships") @JsonProperty("relationships") var friends: ArrayList<Long> = arrayListOf(),
     // Other people's request show up as "Pending" for you
