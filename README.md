@@ -27,7 +27,7 @@ At this moment, Lightable is entirely written by one person.
 
 ## What is lightable?
 
-Open source chat client for your mates to have a bit of faff
+Open source chat client for your mates to have a bit of a faff
 
 ### Client `/packages/desktop` `/packages/desktop-wails` `/packages/web`
 
