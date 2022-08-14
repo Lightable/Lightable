@@ -17,6 +17,7 @@ This is a monorepo of all things lightable
 * [Becoming an administrator](https://github.com/brys0/Lightable#becoming-an-administrator)
   - [Guidelines](https://github.com/brys0/Lightable#guidelines)
 * [Just because](https://github.com/brys0/Lightable#just-because)
+* [Preview]()
 * [💖Inspirations💖](https://github.com/brys0/Lightable#Inspirations)
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
 
