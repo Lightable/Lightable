@@ -135,6 +135,9 @@ class UserController(
 
     fun getSelfUser(ctx: Context) {
         requireAuth(userCache, ctx).run {
+            if (this != null) {
+                this.analytics?.logins = this.analytics?.logins?.plus(1)!!
+            }
             this?.let { it.toPrivate().let { it1 -> ctx.status(200).json(it1) } }
         }
     }
@@ -167,6 +170,8 @@ class UserController(
                 //                        user.save()
                 //                    }
                 //                }
+                user.analytics?.logins = user.analytics?.logins?.plus(1)!!
+                user.save()
                 ctx.status(200).json(user.toPrivate())
                 return
             } else {

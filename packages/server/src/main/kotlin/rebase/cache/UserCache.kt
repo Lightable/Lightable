@@ -10,6 +10,7 @@ import rebase.Snowflake
 import rebase.interfaces.cache.IUserCache
 import rebase.schema.ChattyRelease
 import rebase.schema.User
+import rebase.schema.UserAnalytics
 import java.io.ByteArrayOutputStream
 import java.util.Timer
 import java.util.concurrent.ExecutorService
@@ -81,6 +82,7 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
             user.cache = this
             println("Found existing user: ${user.name} ${user.identifier} With Friends = ${user.relationships.friends}")
             user.avatar?.idJSON = user.avatar?.identifier.toString()
+            if (user.analytics == null) user.analytics = UserAnalytics(0)
             FileController().createUserDir(user.identifier)
             users[user.identifier] = user
         }

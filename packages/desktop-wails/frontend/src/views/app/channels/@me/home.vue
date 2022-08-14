@@ -34,12 +34,13 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
         <div class="stats ns">
             <div class="stat">
                 <div class="header">
-                    <span class="header">Messages</span>
+                    <span class="header">Logins</span>
                 </div>
                 <span class="value">
                     200
                 </span>
             </div>
+
             <div class="stat">
                 <div class="header">
                     <span class="header">Friends</span>
@@ -48,14 +49,22 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
                     2
                 </span>
             </div>
-            <div class="stat">
+            <!-- <div class="stat">
                 <div class="header">
                     <span class="header">Voice</span>
                 </div>
                 <span class="value">
                     200<span class="define">hours</span>
                 </span>
-            </div>
+            </div> -->
+            <!-- <div class="stat">
+                <div class="header">
+                    <span class="header">Messages</span>
+                </div>
+                <span class="value">
+                    200
+                </span>
+            </div> -->
         </div>
         <div class="scroll-container">
             <div class="grid-relations">

@@ -44,7 +44,7 @@ const onFormSubmit = async (e: MouseEvent) => {
                 loading.value = true;
                 let request = await LoginWithEmailAndPassword(formData.email, formData.password);
                 SetUser(request.id, request);
-                router.push('/concepts/soon');
+                router.push('/app');
             } catch (e: any) {
                 loading.value = false;
                 message.error(e, { duration: 5000 });

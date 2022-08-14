@@ -39,7 +39,8 @@ data class User constructor(
     @field:BsonProperty(useDiscriminator = true) @BsonProperty("avatar") var avatar: Avatar? = null,
     @BsonIgnore @JsonIgnore var test: Boolean = false,
     @BsonProperty("created") @JsonProperty var created: Instant = Instant.now(),
-    @BsonProperty("profileOptions") @JsonIgnore var profileOptions: MutableMap<String, Boolean>? = mutableMapOf(Pair("ShowStatus", false), Pair("IsPublic", false))
+    @BsonProperty("profileOptions") @JsonIgnore var profileOptions: MutableMap<String, Boolean>? = mutableMapOf(Pair("ShowStatus", false), Pair("IsPublic", false)),
+    @BsonProperty("analytics") var analytics: UserAnalytics? = null
 ) : BucketImpl {
     @BsonIgnore
     @JsonIgnore
@@ -180,6 +181,7 @@ data class User constructor(
         if (other.admin != this.admin) return false
         if (other.avatar != this.avatar) return false
         if (other.created != this.created) return false
+        if (other.analytics != this.analytics) return false
         return true
     }
 
@@ -197,6 +199,7 @@ data class User constructor(
         this.avatar?.identifier = user.avatar?.identifier!!
         this.avatar?.animated = user.avatar?.animated == true
         this.created = user.created
+        this.analytics = user.analytics
         this.save(false)
     }
     init {
@@ -214,6 +217,7 @@ data class PrivateUser(@JsonIgnore private val user: User) {
     val avatar = user.avatar
     val enabled = user.enabled
     val profileOptions = user.profileOptions
+    val analytics = user.analytics
 }
 
 data class PublicUser(@JsonIgnore private val user: User) {
@@ -232,7 +236,7 @@ data class Status constructor(@BsonProperty("icon") var icon: Icon, @BsonPropert
 data class Icon(override val cdn: String, override val animated: Boolean, @JsonIgnore override val id: Long) : ImageImpl {
     @JsonProperty("id") val identifier = id.toString()
 }
-
+data class UserAnalytics constructor(@BsonProperty("logins") var logins: Int)
 data class Friends constructor(
     @BsonProperty("relationships") @JsonProperty("relationships") var friends: ArrayList<Long> = arrayListOf(),
     // Other people's request show up as "Pending" for you
