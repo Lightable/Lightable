@@ -4,6 +4,8 @@
 
 <h1 align="center">Lightable</h1>
 
+This is a monorepo of all things lightable
+
 #### Table of contents
 * [Who](https://github.com/brys0/Lightable#who-is-lightable#Who-is-lightable)
 * [What](https://github.com/brys0/Lightable#What-is-lightable)
