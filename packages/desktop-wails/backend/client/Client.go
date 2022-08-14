@@ -49,6 +49,9 @@ func (c *Client) SetSocket(socket string) {
 	c.Api = socket
 }
 
+func (c *Client) GetUser() *mocks.PrivateUser {
+	return c.CurrentUser
+}
 /* Socket */
 func (c *Client) DialSocket() (*string, error) {
 	start := time.Now()
@@ -102,6 +105,7 @@ func (c *Client) DialSocket() (*string, error) {
 
 func (c *Client) ReadAndRespond(m []byte) {
 	decoded := DecodeMessage(m)
+	fmt.Printf("Decoded message: %v\n", string(decoded))
 	tParse := mocks.GenericSocketMessage{}
 	err := json.Unmarshal(decoded, &tParse)
 	if err != nil {
@@ -168,7 +172,7 @@ func (c *Client) ReadAndRespond(m []byte) {
 	}
 	c.SocketHistory = append(c.SocketHistory, string(decoded))
 
-	fmt.Printf("Decoded message: %v\n", string(decoded))
+
 	runtime.EventsEmit(*c.Ctx, "ws:read:decode", string(decoded))
 }
 

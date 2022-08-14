@@ -5,7 +5,7 @@ import { PersonAdd, Home, Chatbubbles } from '@vicons/ionicons5';
 import Loading from '../../components/loading/Loading.vue';
 import { LoadingStates } from '../../composable/LoadingData';
 import Overlay from '../../components/Overlay.vue';
-import { DialSocket, LoginToSocket } from '../../../wailsjs/go/client/Client';
+import { DialSocket, LoginToSocket, GetUser } from '../../../wailsjs/go/client/Client';
 import { NModal, NInput, NButton, NIcon, useMessage } from 'naive-ui';
 import { GetRelations, RequestFriend } from '../../../wailsjs/go/client/RelationshipManager';
 import { Workspace } from '@vicons/carbon';
@@ -13,6 +13,11 @@ import { GroupFilled } from '@vicons/material';
 const appStore = useAppStore();
 const toast = useMessage();
 const loadingSteps = ref([
+    {
+        finished: false,
+        name: 'Get user',
+        state: LoadingStates.PENDING
+    },
     {
         finished: false,
         name: 'Connect to socket',
@@ -25,32 +30,41 @@ const loadingSteps = ref([
     },
 ]);
 const complete = ref(false);
-DialSocket().then((msg) => {
+
+GetUser().then((user) => {
+    appStore.user = user;
     loadingSteps.value[0] = {
         finished: true,
-        name: `Connect to socket (${msg})`,
+        name: `Get user`,
         state: LoadingStates.SUCCESS
     }
-    // @ts-ignore
-    LoginToSocket().then(() => {
+    DialSocket().then((msg) => {
         loadingSteps.value[1] = {
             finished: true,
-            name: `Login to socket`,
+            name: `Connect to socket (${msg})`,
             state: LoadingStates.SUCCESS
         }
-        loadingSteps.value[2] = {
+        // @ts-ignore
+        LoginToSocket().then(() => {
+            loadingSteps.value[2] = {
+                finished: true,
+                name: `Login to socket`,
+                state: LoadingStates.SUCCESS
+            }
+            loadingSteps.value[3] = {
+                finished: true,
+                name: 'App finished',
+                state: LoadingStates.FAILED
+            }
+            complete.value = true;
+        });
+    }).catch((msg) => {
+        loadingSteps.value[0] = {
             finished: true,
-            name: 'App finished',
+            name: `Connect to socket ${msg}`,
             state: LoadingStates.FAILED
         }
-        complete.value = true;
     });
-}).catch((msg) => {
-    loadingSteps.value[0] = {
-        finished: true,
-        name: `Connect to socket ${msg}`,
-        state: LoadingStates.FAILED
-    }
 });
 const addFriendModal = ref({
     show: false,

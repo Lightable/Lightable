@@ -61,8 +61,6 @@ const version = computed(() => appStore.version);
         height: 45px;
         padding-top: 1px;
         padding-left: 8px;
-        font-family: Inter;
-
         .icon {
             height: 26px;
             width: 26px;

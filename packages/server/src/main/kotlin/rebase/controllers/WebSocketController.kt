@@ -11,22 +11,27 @@ import io.javalin.websocket.WsCloseContext
 import io.javalin.websocket.WsConnectContext
 import io.javalin.websocket.WsContext
 import io.javalin.websocket.WsMessageContext
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.kosert.flowbus.EventsReceiver
 import me.kosert.flowbus.GlobalBus
 import me.kosert.flowbus.subscribe
 import org.slf4j.Logger
 import rebase.cache.UserCache
 import rebase.compression.CompressionUtil
+import rebase.events.EventBus
+import rebase.interfaces.GenericUser
 import rebase.messages.Message
 import rebase.schema.*
 import java.nio.ByteBuffer
 
-class WebSocketController(private val logger: Logger, private val userCache: UserCache, private val isProd: Boolean) {
+@OptIn(DelicateCoroutinesApi::class)
+class WebSocketController(private val eventBus: EventBus, val logger: Logger, private val userCache: UserCache, private val isProd: Boolean) {
     private val rawConnections = mutableMapOf<String, SessionWithCompression>()
     private val connections = mutableMapOf<String, ChattySession>()
     private val jsonWrap: ObjectMapper = jacksonObjectMapper().findAndRegisterModules()
     private val compressionEngine = CompressionUtil
-    private val events = EventsReceiver()
     fun connection(handler: WsConnectContext) {
         val compressionType = handler.queryParam("compression") ?: "none"
         println(green(underline("WS >> Opened Connection << WS")))
@@ -160,51 +165,33 @@ class WebSocketController(private val logger: Logger, private val userCache: Use
         }
     }
 
-    private fun send(session: WsContext, type: String, obj: Any? = null, jsonStr: String? = null) {
-        val json = jsonStr ?: jsonWrap.writeValueAsString(obj!!)
-        when (type) {
-            "none" -> session.send(json)
-            "zlib" -> session.send(ByteBuffer.wrap(compressionEngine.compress(json)))
-        }
-    }
-
-    init {
-        events.subscribe<FriendUpdatePayload> { payload ->
+    @Suppress("UNCHECKED_CAST")
+    private suspend fun startRealtime() {
+        eventBus.subscribe<FriendUpdatePayload> { payload ->
             logger.info("Update Payload -> ${payload.id} ${payload.name} = ${payload.value}")
-            connections.values.forEach { v -> println(v.user.identifier) }
-            val friends = connections.values.find { u -> u.user.identifier == payload.id }!!.user.getFriends()
-            for (friend in friends.friends) {
-                val friendSession = connections.values.find { f -> f.user.identifier == friend.id }
-                if (friendSession != null) {
-                    send(friendSession.ws.session, friendSession.ws.type, jsonStr = payload.toJSON())
+            val self = payload.self
+            oneToMany(payload.toJSON(), self.getFriends().allAsOne() as Collection<GenericUser>)
+            return@subscribe
+        }
+        eventBus.subscribe<SelfUpdatePayload> { payload ->
+            getSelfSocket(payload.self).let {
+                if (it != null) {
+                    send(it.ws.session, it.ws.type, data = payload.toJSON())
                 }
             }
-            GlobalBus.dropAll()
             return@subscribe
         }
-        events.subscribe<SelfUpdatePayload> { payload ->
-            logger.info("Self Update -> ${payload.self.id} ${payload.name} = ${payload.value}")
-            val selfSocket = connections.values.find { u -> u.user.identifier == payload.self.id }
-            if (selfSocket != null) {
-                send(selfSocket.ws.session, selfSocket.ws.type, jsonStr = payload.toJSON())
-            }
-            GlobalBus.dropAll()
-            return@subscribe
-        }
-        events.subscribe<ClientTyping> { payload ->
+
+        eventBus.subscribe<ClientTyping> { payload ->
             logger.info("Client Typing -> To = ${payload.to.user.identifier} From = ${payload.self.user.identifier}")
             payload.t = SocketMessageType.ServerTyping.ordinal
             send(payload.to.ws.session, payload.to.ws.type, payload)
             payload.t = SocketMessageType.ServerSelfTyping.ordinal
             send(payload.self.ws.session, payload.self.ws.type, payload)
-            GlobalBus.dropAll()
             return@subscribe
         }
 
-        // Relationships
-
-        // External pending
-        events.subscribe<ServerPending> { payload ->
+        eventBus.subscribe<ServerPending> { payload ->
             logger.info("New Pending Friend -> To = ${payload.friend.id} From = ${payload.self.id}")
             val friendSocket = connections.values.find { u -> u.user.identifier == payload.friend.id }
             if (friendSocket != null) {
@@ -213,6 +200,88 @@ class WebSocketController(private val logger: Logger, private val userCache: Use
             GlobalBus.dropAll()
             return@subscribe
         }
+    }
+
+    /**
+     * Get sockets based on a [Collection] of [GenericUser]
+     * @param users Collection of [GenericUser]
+     * @author Brys
+     * @since 0.0.5-ALPHA
+     * @see GenericUser
+     * @see ChattySession
+     * @see Collection
+     * @return A [List] of [ChattySession]s 
+     */
+    private fun getSockets(users: Collection<GenericUser>): List<ChattySession> {
+        val sockets = mutableListOf<ChattySession>()
+        for (user in users) {
+            connections.values.find { u -> u.user.identifier == user.identifier }?.let { sockets.add(it) }
+        }
+        return sockets.toList()
+    }
+
+    /*
+     * Broadcast to many based on collection of users
+     *
+     *                  ->      User1
+     *                  ->      User2
+     *  Client          ->      User3
+     *                  ->      User4
+     *                  ->      User5
+     *
+    */
+
+    /**
+     * Broadcast to many sockets
+     *
+     * This function takes a collection of generic users and attempts to get every socket to send your given payload
+     * @param payload The payload you wish to broadcast
+     * @param users A collection of generic users
+     * @author Brys
+     * @since 0.0.5-ALPHA
+     * @see GenericUser
+     * @see getSockets
+     */
+    private fun oneToMany(payload: Any, users: Collection<GenericUser>) {
+        val sockets = getSockets(users)
+        for (socket in sockets) {
+            send(socket.ws.session, socket.ws.type, payload)
+        }
+    }
+
+    /**
+     * Get self socket based on generic user
+     * @see GenericUser
+     * @see ChattySession
+     * @author Brys
+     * @since 0.0.5-ALPHA
+     * @return The [ChattySession] or nothing
+     */
+    private fun getSelfSocket(self: GenericUser): ChattySession? {
+        return connections.values.find { u -> u.user.identifier == self.identifier }
+    }
+    private fun send(session: WsContext, type: String, data: Any? = null) {
+        var json = ""
+        json = if (data is String) {
+            data
+        } else {
+            jsonWrap.writeValueAsString(data)
+        }
+        when (type) {
+            "none" -> session.send(json)
+            "zlib" -> session.send(ByteBuffer.wrap(compressionEngine.compress(json)))
+        }
+    }
+
+    init {
+       GlobalScope.launch { startRealtime() }
+
+
+
+        // Relationships
+
+        // External pending
+
 
         // Self Friend Request
         events.subscribe<ServerSelfPending> { payload ->
@@ -300,7 +369,7 @@ data class ReadyPayload(@JsonIgnore val heartbeat: Int) {
 }
 
 data class FriendUpdatePayload(
-    @JsonIgnore val self: PublicUser,
+    @JsonIgnore val self: User,
     val id: Long,
     val name: String,
     val value: Any,
@@ -318,7 +387,7 @@ data class FriendUpdatePayload(
     }
 }
 data class SelfUpdatePayload(
-    @JsonIgnore val self: PublicUser,
+    @JsonIgnore val self: User,
     val name: String,
     val value: Any,
     val t: Int = SocketMessageType.ServerSelfUpdate.ordinal
@@ -434,7 +503,12 @@ object DisabledUser {
     val t = SocketMessageType.ServerSelfDisabledUser.ordinal
     val d = null
 }
-
+interface WebsocketPayload {
+    val t: SocketMessageType
+    var d: Any
+    fun toSelf(): Any
+    fun toServer(): Any
+}
 data class Device(val ip: String, val browser: String, val build: String, val os: String)
 enum class SocketMessageType {
     ClientStart,

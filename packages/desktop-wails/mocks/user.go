@@ -9,6 +9,7 @@ type PrivateUser struct {
 	Admin          bool            `json:"admin"`
 	Avatar         *UserAvatar     `json:"avatar"`
 	ProfileOptions map[string]bool `json:"profileOptions"`
+	Analytics      *UserAnalytics  `json:"analytics"`
 }
 
 type PublicUser struct {
@@ -20,6 +21,9 @@ type PublicUser struct {
 	State  *int16      `json:"state"`
 }
 
+type UserAnalytics struct {
+	Logins int `json:"logins"`
+}
 type UserStatus struct {
 	Icon Icon   `json:"icon"`
 	Text string `json:"text"`

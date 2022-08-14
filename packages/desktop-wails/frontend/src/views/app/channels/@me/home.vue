@@ -8,8 +8,11 @@ import { Chatbox, CheckmarkCircle as Checkmark, CloseCircle as Close } from '@vi
 import { mocks } from '../../../../../wailsjs/go/models';
 import { PersonFilled } from '@vicons/material';
 import { PendingRound, ArrowCircleRightFilled as ArrowRight } from '@vicons/material';
+
 const appStore = useAppStore();
 const loadingStates = ref(new Map()) as Ref<Map<string, boolean>>;
+
+
 GetRelations().then(async (r) => {
     appStore.relationships = r;
     r.pending.forEach(p => loadingStates.value.set(p.id, false));
@@ -17,7 +20,7 @@ GetRelations().then(async (r) => {
 });
 
 const relations = computed(() => appStore.relationships);
-console.log(relations)
+const self = computed(() => appStore.user);
 const cancelRequest = (id: string) => {
 
 }
@@ -37,7 +40,7 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
                     <span class="header">Logins</span>
                 </div>
                 <span class="value">
-                    200
+                    {{self?.analytics?.logins}}
                 </span>
             </div>
 
@@ -45,8 +48,8 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
                 <div class="header">
                     <span class="header">Friends</span>
                 </div>
-                <span class="value">
-                    2
+                <span class="value" v-if="relations.friends">
+                    {{relations.friends.length == 0 ? '0 :c' : relations.friends.length}}
                 </span>
             </div>
             <!-- <div class="stat">

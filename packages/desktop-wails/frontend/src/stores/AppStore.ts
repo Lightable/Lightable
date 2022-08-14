@@ -11,7 +11,7 @@ export const useAppStore = defineStore('AppStore', {
         theme: 'Dark' as LightableTheme,
         colour: '',
         hasUser: false as boolean,
-
+        user: null as mocks.PrivateUser | null,
         drawers: {
             websocket: false
         },
@@ -56,6 +56,7 @@ export const useAppStore = defineStore('AppStore', {
                 this.relationships = await GetRelations();
             });
             EventsOn('ws:read:user|status', async (_) => {
+                console.log('status update');
                 this.relationships = await GetRelations();
             });
         },

@@ -13,6 +13,7 @@ import rebase.Utils
 import rebase.auth.StandardToken
 import rebase.controllers.*
 import rebase.interfaces.BucketImpl
+import rebase.interfaces.GenericUser
 import rebase.interfaces.Image.ImageImpl
 import rebase.interfaces.cache.IUserCache
 import java.time.Instant
@@ -21,7 +22,7 @@ data class User constructor(
     @JsonIgnore @BsonIgnore override var cache: IUserCache? = null,
     @JsonIgnore @BsonIgnore override val jackson: ObjectMapper = jacksonObjectMapper(),
     @BsonIgnore @JsonIgnore var connections: ArrayList<WebSocketSession> = ArrayList(),
-    @JsonIgnore @BsonProperty("identifier") var identifier: Long = 0,
+    @JsonIgnore @BsonProperty("identifier") override var identifier: Long = 0,
     @BsonProperty("name") var name: String = "Test Account",
     @BsonProperty("email") var email: String = "TestAccount@example.com",
     @BsonProperty("salt") var salt: String = Utils.getNextSalt(),
@@ -41,7 +42,7 @@ data class User constructor(
     @BsonProperty("created") @JsonProperty var created: Instant = Instant.now(),
     @BsonProperty("profileOptions") @JsonIgnore var profileOptions: MutableMap<String, Boolean>? = mutableMapOf(Pair("ShowStatus", false), Pair("IsPublic", false)),
     @field:BsonProperty(useDiscriminator = true) @BsonProperty("analytics") var analytics: UserAnalytics = UserAnalytics(0)
-) : BucketImpl {
+) : BucketImpl, GenericUser {
     @BsonIgnore
     @JsonIgnore
     val login: UserController.UserLogin = UserController.UserLogin(email, password)
@@ -257,6 +258,14 @@ data class FriendsPublic @BsonCreator constructor(
         val requestsEmpty = requests.isEmpty()
         if (friendEmpty && pendingEmpty && requestsEmpty) return true
         return false
+    }
+
+    fun allAsOne(): MutableList<PublicUser> {
+        val arr = mutableListOf<PublicUser>()
+        friends.forEach { arr.add(it) }
+        pending.forEach { arr.add(it) }
+        requests.forEach { arr.add(it) }
+        return arr
     }
 }
 data class Avatar constructor(

@@ -82,6 +82,7 @@ func (rm *RelationshipManager) GetRelations() *mocks.RelationshipStruct {
 		Pending:  maps.Values(rm.Pending),
 		Requests: maps.Values(rm.Requests),
 		Friends:  maps.Values(rm.Friends),
+		Empty: len(rm.Pending) == 0 && len(rm.Requests) == 0 && len(rm.Friends) == 0,
 	}
 }
 

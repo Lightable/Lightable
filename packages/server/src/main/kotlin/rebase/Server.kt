@@ -18,8 +18,10 @@ import io.javalin.plugin.openapi.dsl.documented
 import io.javalin.plugin.openapi.ui.ReDocOptions
 import io.javalin.plugin.openapi.ui.SwaggerOptions
 import io.swagger.v3.oas.models.info.Info
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.kosert.flowbus.EventsReceiver
-import me.kosert.flowbus.GlobalBus
 import me.kosert.flowbus.subscribe
 import org.slf4j.LoggerFactory
 import rebase.cache.DMChannelCache
@@ -29,6 +31,7 @@ import rebase.controllers.DeveloperController
 import rebase.controllers.InviteCodeController
 import rebase.controllers.WebSocketController
 import rebase.detection.NudeDetection
+import rebase.events.EventBus
 import rebase.generator.EmbedImageGenerator
 import rebase.messages.ScyllaConnector
 import java.awt.Color
@@ -49,6 +52,7 @@ val t = Terminal()
 
 @OptIn(ExperimentalStdlibApi::class)
 class Server(
+    val eventBus: EventBus,
     var dbhost: String = "localhost",
     var dbport: Int = 27017,
     var dbuser: String = "root",
@@ -73,6 +77,7 @@ class Server(
     private val db: RebaseMongoDatabase = RebaseMongoDatabase(dbuser, dbpass, dbhost, dbport)
     private val napi = NudeDetection(nudeAPIGateway)
     private val imageGen = EmbedImageGenerator()
+
     val javalin: Javalin = Javalin.create {
         it.showJavalinBanner = false
         it.enableCorsForAllOrigins()
@@ -117,8 +122,13 @@ class Server(
     private val inviteCodeController = InviteCodeController(db, userCache)
     private var serverOverloaded = false
     private var serverCPUUsage = 0L
-    private val events = EventsReceiver()
 
+    suspend fun startCollecting() {
+        eventBus.subscribe<GetCPUUsage.CPUUsageUpdate> {
+            this.serverOverloaded = it.usage > 75
+            this.serverCPUUsage = it.usage
+        }
+    }
     init {
         Thread.currentThread().name = "Server (Main)"
         Thread.setDefaultUncaughtExceptionHandler { thread, err ->
@@ -265,10 +275,6 @@ class Server(
                 }
             }
         }
-        events.subscribe<GetCPUUsage.CPUUsageUpdate> {
-            this.serverOverloaded = it.usage > 75
-            this.serverCPUUsage = it.usage
-        }
     }
 
     fun determineMethodColor(method: String): String {
@@ -318,6 +324,7 @@ class Server(
     }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 fun main(args: Array<String>) {
     println(Utils.BANNER)
     var dbhost: String = "localhost"
@@ -328,6 +335,7 @@ fun main(args: Array<String>) {
     var nudeAPIGateway = System.getenv("napi")
     var prod = false
     val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+    val eventBus = EventBus()
     println("Working -> ${File("./storage").absolutePath}")
 
     File("./releases").mkdir()
@@ -358,7 +366,7 @@ fun main(args: Array<String>) {
     val scyllaHost = System.getenv("SCYLLA_HOST") ?: "192.168.50.111"
     val connector = ScyllaConnector()
     connector.connect(scyllaHost, 9042, "datacenter1")
-    val server = Server(dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession(), isProd = prod)
+    val server = Server(eventBus, dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession(), isProd = prod)
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (!System.getenv("port").isNullOrBlank()) {
         server.port = System.getenv("port").toInt()
@@ -378,14 +386,20 @@ fun main(args: Array<String>) {
     }
     println("${t.colors.brightRed.invoke("---->>")} Logs ${t.colors.brightBlue.invoke("<<----\n")}")
     server.javalin.start(server.port)
-    Timer().scheduleAtFixedRate(GetCPUUsage(), 0, 2000)
+    Timer().scheduleAtFixedRate(GetCPUUsage(eventBus), 0, 2000)
+    GlobalScope.launch {
+        server.startCollecting()
+    }
 }
 
 
-class GetCPUUsage() : java.util.TimerTask() {
+class GetCPUUsage(val eventBus: EventBus) : java.util.TimerTask() {
+    @OptIn(DelicateCoroutinesApi::class)
     override fun run() {
         val osBean: OperatingSystemMXBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
-        GlobalBus.post(CPUUsageUpdate((osBean.processCpuLoad * 100).toLong()))
+        GlobalScope.launch {
+            eventBus.post(CPUUsageUpdate((osBean.processCpuLoad * 100).toLong()))
+        }
     }
 
     data class CPUUsageUpdate(val usage: Long)
