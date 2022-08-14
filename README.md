@@ -60,3 +60,29 @@ You can file an issue in the issues, or if you feel comfortable, you can try and
 ...
 
 
+## Inspirations
+
+<a href="https://hyalus.app" target="_blank">
+  <p>
+    <img src="https://raw.githubusercontent.com/atriplex-co/hyalus/master/packages/client-web/src/assets/images/icon-circle.png" height="16">
+    Hyalus
+  </p>
+</a>
+<a href="https://spacedrive.com" target="_blank">
+  <p>
+    <img src="https://www.spacedrive.com/assets/logo.55968170.png" height="16">
+    Spacedrive 
+  </p>
+</a>
+
+<a href="https://dribbble.com/shots/13944513-Team-Chat-App-VisualExploration" target="_blank">
+  <p>
+    <img src="https://cdn.dribbble.com/users/1750819/avatars/small/7d8b1659d63025758603ef1b9f71c721.jpg?1639583578" height="16">
+    This dribble post
+  </p>
+</a>
+
+<p>
+  💖 And many others 💖
+</p>
+
