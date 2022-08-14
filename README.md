@@ -6,7 +6,7 @@
 
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
 
-## Who is lightable
+## Who is lightable?
 
 At this moment, Lightable is entirely written by one person.
 
