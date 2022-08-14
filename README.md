@@ -13,6 +13,7 @@ This is a monorepo of all things lightable
 * [Where](https://github.com/brys0/Lightable#Where-is-lightable)
 * [Why](https://github.com/brys0/Lightable#Why-is-lightable)
 * [FAQ](https://github.com/brys0/Lightable#faq)
+* [Getting an invite](https://github.com/Lightable#Getting-an-invite)
 * [💖Inspirations💖](https://github.com/brys0/Lightable#Inspirations)
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
 
