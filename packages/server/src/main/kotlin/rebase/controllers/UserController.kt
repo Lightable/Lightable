@@ -16,6 +16,8 @@ import rebase.*
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
 import rebase.detection.NudeDetection
+import rebase.events.EventBus
+import rebase.interfaces.EventController
 import rebase.interfaces.FailImpl
 import rebase.interfaces.cache.IUserCache
 import rebase.messages.DMDao
@@ -27,14 +29,14 @@ import kotlin.system.measureTimeMillis
 class UserController(
     val userCache: UserCache,
     val dmCache: DMChannelCache,
-    val inviteDB: MongoCollection<InviteCode>,
+    override val eventBus: EventBus,
+    private val inviteDB: MongoCollection<InviteCode>,
     val cqlSession: CqlSession,
     val snowflake: Snowflake,
-    val executor: ExecutorService,
-    val isProd: Boolean,
-    val fileController: FileController,
-    val napi: NudeDetection
-) {
+    private val isProd: Boolean,
+    private val fileController: FileController,
+    private val napi: NudeDetection,
+): EventController {
     @OpenApi(
         path = "/user",
         method = HttpMethod.POST,
@@ -198,6 +200,7 @@ class UserController(
         val user = requireAuth(userCache, ctx)
         val updatedUser = ctx.bodyAsClass<UpdateUserPatch>()
         if (user != null) {
+            val oldUser = user.copy()
             if (updatedUser.name != null && NewUser.validateUsername(updatedUser.name, userCache, ctx)) user.name =
                 updatedUser.name
             if (updatedUser.status != null) user.status = updatedUser.status
@@ -211,11 +214,9 @@ class UserController(
                     }
                 }
             }
-
+            eventBus.postGlobal(UserUpdateEvent(user, user.differenceOfUpdatedUser(oldUser)))
             user.save()
             ctx.status(200).json(user.toPrivate())
-            GlobalBus.post(FriendUpdatePayload(user.toPublic(), user.identifier, "user", user.toPublic()))
-            GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
             return
         }
     }
@@ -239,23 +240,7 @@ class UserController(
                             fileController.addAvatar(napi, user.identifier, image.identifier, file, "png")
                             user.avatar = image
                             user.save()
-                            GlobalBus.post(
-                                FriendUpdatePayload(
-                                    user.toPublic(),
-                                    user.toPublic().id,
-                                    "user",
-                                    user.toPublic()
-                                )
-                            )
-                            GlobalBus.post(SelfUpdatePayload(user.toPublic(), "self", user.toPublic()))
-                            GlobalBus.post(
-                                FriendUpdatePayload(
-                                    user.toPublic(),
-                                    user.identifier,
-                                    "user",
-                                    user.toPublic()
-                                )
-                            )
+                            eventBus.postGlobal(UserUpdateEvent(user, mutableMapOf(Pair("id", user.identifier.toString()), Pair("avatar", user.avatar))))
                             ctx.json(201).json(user.toPublic())
                             return
                         } catch (e: InvalidAvatarException) {
@@ -461,6 +446,7 @@ class UserController(
                         )
                         dmChannel.dao!!.init()
                         println("Ran dao")
+                        eventBus.postGlobal(AcceptFriendRequestEvent(user, friend))
                         ctx.status(201).json(userCache.users[friend.identifier]?.toPublic()!!)
                         dmCache.saveOrReplaceChannel(dmChannel)
                         return
@@ -470,6 +456,7 @@ class UserController(
                     }
                 }
                 user.addRequest(friend.identifier)
+                eventBus.postGlobal(PendingFriendEvent(user, friend))
                 ctx.status(201).json(friend.toPublic()).run {
                     user.save()
                     friend.save()
@@ -552,47 +539,13 @@ class UserController(
             if (user != null) {
                 if (user.relationships.pending.contains(pendingUser.toLong())) {
                     user.removePendingFriend(pendingUser.toLong())
+                    eventBus.postGlobal(RemoveFriendRequestEvent(user, userCache.users.values.find { u -> u.identifier == pendingUser.toLong()}!!))
                     ctx.status(204)
                 } else {
                     ctx.status(403).json(UserDataFail("$pendingUser isn't pending with you"))
                 }
             }
         }
-
-        val addPendingRelationshipDoc =
-            document()
-                .operation {
-                    it.description("Add Pending Relationship")
-                    it.operationId("acceptPendingRelationship")
-                    it.summary("Add Pending Relationship")
-                    it.addTagsItem("Self")
-                    it.addTagsItem("Relationship")
-                }
-                .result("201", oneOf(documentedContent<PublicUser>("json", false)))
-                .result("403", oneOf(documentedContent<UserDataFail>("json", false)))
-                .header<String>("Authorization")
-
-        fun acceptPendingRelationship(ctx: Context) {
-            val user = requireAuth(userCache, ctx)
-            val pendingUser = ctx.pathParam("id")
-            if (user != null) {
-                if (user.acceptRequest(pendingUser.toLong())) {
-                    val dmChannelID = snowflake.nextId()
-                    val dmChannel = DMChannel(
-                        dmCache,
-                        identifier = dmChannelID,
-                        users = mutableListOf(user.identifier, pendingUser.toLong()),
-                        dao = DMDao("dm_${dmChannelID}", cqlSession)
-                    )
-                    dmChannel.dao!!.init()
-                    ctx.status(201).json(userCache.users[pendingUser.toLong()]?.toPublic()!!)
-                    dmCache.saveOrReplaceChannel(dmChannel)
-                } else {
-                    ctx.status(403).json(UserDataFail("$pendingUser isn't pending with you"))
-                }
-            }
-        }
-
         val removeRelationshipDoc =
             document()
                 .operation {

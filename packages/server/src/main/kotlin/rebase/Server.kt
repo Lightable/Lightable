@@ -114,10 +114,10 @@ class Server(
     }
     val userCache = UserCache(async, db, snowflake, this, fileController, batchInterval)
     val dmCache = DMChannelCache(async, db, session, snowflake, batchInterval)
-    private val websocketController = WebSocketController(logger, userCache, isProd)
+    private val websocketController = WebSocketController(eventBus, logger, userCache, isProd)
 
     private val developerController = DeveloperController(userCache)
-    val user = rebase.controllers.UserController(userCache, dmCache, db.getInviteCodeCollection(), session, snowflake, async, isProd, fileController, napi)
+    val user = rebase.controllers.UserController(userCache, dmCache, eventBus, db.getInviteCodeCollection(), session, snowflake, isProd, fileController, napi)
     private val cdnController = CDNController(userCache, fileController)
     private val inviteCodeController = InviteCodeController(db, userCache)
     private var serverOverloaded = false

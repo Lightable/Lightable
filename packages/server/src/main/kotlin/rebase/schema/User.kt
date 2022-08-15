@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import me.kosert.flowbus.GlobalBus
 import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import org.bson.codecs.pojo.annotations.BsonProperty
@@ -43,6 +42,10 @@ data class User constructor(
     @BsonProperty("profileOptions") @JsonIgnore var profileOptions: MutableMap<String, Boolean>? = mutableMapOf(Pair("ShowStatus", false), Pair("IsPublic", false)),
     @field:BsonProperty(useDiscriminator = true) @BsonProperty("analytics") var analytics: UserAnalytics = UserAnalytics(0)
 ) : BucketImpl, GenericUser {
+    /** Deep Copy **/
+
+    internal constructor(user: User) : this(user.cache, user.jackson, user.connections, user.identifier, user.name, user.email, user.salt, user.password, user.token, user.notice, user.relationships, user.state, user.status, user.admin, user.enabled, user.avatar, user.test, user.created, user.profileOptions, user.analytics)
+
     @BsonIgnore
     @JsonIgnore
     val login: UserController.UserLogin = UserController.UserLogin(email, password)
@@ -112,16 +115,12 @@ data class User constructor(
         val friend = this.cache?.users?.get(id)!!
         this.relationships.requests.add(id)
         friend.relationships.pending.add(this.identifier)
-        GlobalBus.post(ServerPending(this.toPublic(), friend.toPublic()))
-        GlobalBus.post(ServerSelfPending(this.toPublic(), friend.toPublic()))
     }
     @BsonIgnore
     fun removePendingFriend(id: Long) {
         this.relationships.pending.remove(id)
         val pendingFriend = this.cache?.users?.get(id)
         pendingFriend?.relationships?.requests?.remove(this.identifier)
-        GlobalBus.post(ServerRequestRemove(this.toPublic(), pendingFriend?.toPublic()!!))
-        GlobalBus.post(ServerSelfRequestRemove(this.toPublic(), pendingFriend.toPublic()))
     }
     @BsonIgnore
     fun acceptRequest(id: Long): Boolean {
@@ -133,8 +132,6 @@ data class User constructor(
             friend.relationships.requests.remove(this.identifier)
             friend.relationships.friends.add(this.identifier)
             this.relationships.friends.add(id)
-            GlobalBus.post(ServerRequestAccept(this.toPublic(), friend.toPublic()))
-            GlobalBus.post(ServerSelfRequestAccept(this.toPublic(), friend.toPublic()))
             friend.save()
             this.save()
             true
@@ -166,6 +163,27 @@ data class User constructor(
         return FriendsPublic(friendList, pendings, requests)
     }
 
+    /**
+     * Deep copies an entire user object to a new user object
+     **/
+    fun copy(): User {
+        return User(this)
+    }
+    fun differenceOfUpdatedUser(old: User): MutableMap<String, Any?> {
+        val differenceMap = mutableMapOf<String, Any?>()
+        differenceMap["id"] = this.identifier.toString()
+        if (old.name != this.name) differenceMap["name"] = this.name
+        if (old.email != this.email) differenceMap["email"] = this.email
+        if (old.enabled != this.enabled) differenceMap["enabled"] = this.enabled
+        if (old.notice != this.notice) differenceMap["notice"] = this.notice
+        if (old.relationships != this.relationships) differenceMap["relationships"] = this.relationships
+        if (old.state != this.state) differenceMap["state"] = this.state
+        if (old.status != this.status) differenceMap["status"] = this.status
+        if (old.admin != this.admin) differenceMap["admin"] = this.admin
+        if (old.avatar != this.avatar) differenceMap["avatar"] = this.avatar
+        if (old.analytics != this.analytics) differenceMap["analytics"] = this.analytics
+        return differenceMap
+    }
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (this === other) return true
@@ -206,6 +224,7 @@ data class User constructor(
     init {
         jackson.findAndRegisterModules()
     }
+
 }
 
 data class PrivateUser(@JsonIgnore private val user: User) {
@@ -221,15 +240,15 @@ data class PrivateUser(@JsonIgnore private val user: User) {
     val analytics = user.analytics
 }
 
-data class PublicUser(@JsonIgnore private val user: User) {
+data class PublicUser(@JsonIgnore private val user: User) : GenericUser {
     val name = user.name
-    @JsonIgnore val id = user.identifier
+    @JsonIgnore override var identifier = user.identifier
     val status = user.status
     val admin = user.admin
     val enabled = user.enabled
     val state = user.state
     val avatar = user.avatar
-    @JsonProperty("id") val identifier = id.toString()
+    @JsonProperty("id") val id = identifier.toString()
 }
 data class UserNotice constructor(@BsonProperty val text: String?, @BsonProperty val icon: Icon?)
 

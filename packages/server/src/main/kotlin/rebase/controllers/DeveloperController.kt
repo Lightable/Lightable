@@ -425,7 +425,7 @@ class DeveloperController(val userCache: UserCache) {
             )
             userCache.saveOrReplaceRelease(release)
             ctx.status(201).json(release)
-            GlobalBus.post(ServerUpdate(release))
+            GlobalBus.post(UpdateEvent(release))
         } else {
             ctx.status(403).json(UserController.UserDataFail("You are not an Admin"))
         }
