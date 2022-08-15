@@ -50,7 +50,7 @@ class EventBus {
     companion object {
         val logger: Logger = LoggerFactory.getLogger("Rebase -> EventBusFlow")
         private fun printlnDebug(obj: Any?) {
-            logger.info("(Flow ${if (obj != null) obj::class.java.name else "No payload"}): $obj")
+            logger.debug("(Flow ${if (obj != null) obj::class.java.name else "No payload"}): $obj")
         }
     }
  }
