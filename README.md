@@ -159,3 +159,5 @@ Just because lightable is completely open-source, doesn't mean (project server) 
   💖 And many others 💖
 </p>
 
+1.12.5-ALPHA
+
