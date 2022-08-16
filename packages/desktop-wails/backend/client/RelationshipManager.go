@@ -27,7 +27,7 @@ func NewRelationshipManager(h *HttpClient, c *Client) *RelationshipManager {
 	}
 }
 
-func (rm *RelationshipManager) FindRelation(pubUser *mocks.PublicUser) (*map[int64]mocks.PublicUser, *int64, error) {
+func (rm *RelationshipManager) FindRelations(pubUser *mocks.PublicUser) (*map[int64]mocks.PublicUser, *int64, error) {
 	intID, err := strconv.ParseInt(pubUser.Id, 10, 64)
 	if err != nil {
 		rm.c.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Could not convert string to int64")
@@ -47,7 +47,21 @@ func (rm *RelationshipManager) FindRelation(pubUser *mocks.PublicUser) (*map[int
 	}
 	return nil, nil, fmt.Errorf("Could not find user")
 } 
-
+func (rm *RelationshipManager) FindRelation(id int64) *mocks.PublicUser {
+	u, ok := rm.Pending[id]
+	if ok {
+		return &u
+	}
+	u, ok = rm.Requests[id]
+	if ok {
+		return &u
+	}
+	u, ok = rm.Friends[id]
+	if ok {
+		return &u
+	}
+	return nil
+}
 func (rm *RelationshipManager) RequestFriend(name string) (*mocks.PublicUser, error) {
 	httpC := rm.httpC
 	pubUser, err := httpC.AddFriend(name)

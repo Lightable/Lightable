@@ -20,7 +20,7 @@ import (
 //go:embed frontend/dist
 var assets embed.FS
 var start = time.Now()
-var currentVersion = "0.0.5-ALPHA"
+var currentVersion = "0.0.25-ALPHA"
 
 func main() {
 	logger := Configure()

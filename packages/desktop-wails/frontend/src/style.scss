@@ -123,3 +123,36 @@ body {
   backdrop-filter: blur(8px);
   border-radius: 8px;
 }
+span {
+  &.m-bold {
+      font-weight: bold;
+  }
+  
+}
+
+button {
+  &.m-link {
+    background-color: transparent;
+    padding: 0;
+    color: var(--info-color);
+    border: none;
+    cursor: pointer;
+    outline: none;
+    font-family: "Arial";
+    font-size: 16px;
+    word-break: break-all;
+    letter-spacing: 0px;
+    &:hover {
+      color: var(--info-color-hover);
+    }
+  }
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.1s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

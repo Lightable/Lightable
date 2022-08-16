@@ -34,7 +34,7 @@ const clickEvent = () => {
 </script>
 
 <template>
-    <div class="drawer-component" :disabled="(pair.t !== `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '') ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
+    <div class="drawer-component" :disabled="(pair.t !== `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '' || router.currentRoute.value.name === pair.name) ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
         <NIcon :size="18" v-if="pair.icon">
             <component :is="pair.icon" />
         </NIcon>

@@ -13,12 +13,13 @@ type PrivateUser struct {
 }
 
 type PublicUser struct {
-	Name   string      `json:"name"`
-	Id     string      `json:"id"`
-	Status *UserStatus `json:"status"`
-	Admin  bool        `json:"admin"`
-	Avatar *UserAvatar `json:"avatar"`
-	State  *int16      `json:"state"`
+	Name    string      `json:"name"`
+	Id      string      `json:"id"`
+	Status  *UserStatus `json:"status"`
+	Admin   bool        `json:"admin"`
+	Avatar  *UserAvatar `json:"avatar"`
+	State   *int16      `json:"state"`
+	Channel *Channel    `json:"channel"`
 }
 
 type UserAnalytics struct {

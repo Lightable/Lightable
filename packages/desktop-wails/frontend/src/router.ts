@@ -34,7 +34,7 @@ const router = createRouter({
             }
         },
         {
-            path: '/concepts',
+            path: '/concepts/soon',
             name: 'soon',
             component() {
                 return import('./views/concepts/ComingSoon.vue')
@@ -79,6 +79,13 @@ const router = createRouter({
                     name: 'app-home',
                     component() {
                         return import('./views/app/channels/@me/home.vue')
+                    }
+                },
+                {
+                    path: 'channel/dm/:id',
+                    name: 'channel-dm',
+                    component() {
+                        return import('./views/app/channels/[dm].vue')
                     }
                 }
             ],

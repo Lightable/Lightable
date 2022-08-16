@@ -5,18 +5,15 @@ import { AddCircleOutline as AddCircle, Heart, CloseOutline as Close, WarningOut
 import { ChatInputState } from '../../composable/ChatInput';
 import 'vfonts/Lato.css';
 import { mocks } from '../../../wailsjs/go/models.js';
-
 const attribution = ref(true);
 const contentToSend = ref('');
 let src: HTMLElement;
 const removeAttribution = () => {
     attribution.value = false;
 }
-
 onMounted(() => {
     src = document.getElementById('chat-input')!!
 });
-
 const onKey = (e: KeyboardEvent) => {
     let shiftMod = e.getModifierState('Shift');
     if (e.key == 'Enter' && shiftMod) {
@@ -27,7 +24,6 @@ const onKey = (e: KeyboardEvent) => {
         contentToSend.value = '';
     }
 }
-
 const backspaceTrigger = (e: KeyboardEvent) => {
     let lines = contentToSend.value.split('\n');
     let last = lines[lines.length - 1];
@@ -49,7 +45,6 @@ const onPaste = () => {
         src!!.style.height = src.scrollHeight + 'px';
     }, 1)
 }
-
 let props = defineProps({
     state: Number as PropType<ChatInputState>,
     message: String,
@@ -108,7 +103,6 @@ console.log(props);
         </div>
     </div>
 </template>
-
 <style lang="scss" scoped>
 .outer-chat {
     width: calc(100vw - 284px);
@@ -122,7 +116,6 @@ console.log(props);
     display: flex;
     flex-direction: column;
     transition: all 150ms ease;
-
     .states {
         display: flex;
         flex-direction: column;
@@ -130,7 +123,6 @@ console.log(props);
         align-items: flex-start;
         margin-bottom: 16px;
         gap: 8px;
-
         .state {
             display: flex;
             flex-direction: row;
@@ -140,18 +132,14 @@ console.log(props);
             color: var(--text-color-3);
         }
     }
-
     // min-height: 40px;
     // max-height: 400px;
-
     .chat-input {
         width: 100%;
         display: flex;
         // min-height: 40px;
         // max-height: 400px;
-
         .attachments {}
-
         .inner {
             display: inline-flex;
             flex-direction: row;
@@ -161,7 +149,6 @@ console.log(props);
             width: 100%;
             // min-height: 40px;
             // max-height: 400px;
-
             .input {
                 display: flex;
                 flex-direction: column;
@@ -187,20 +174,16 @@ console.log(props);
                 resize: none;
                 letter-spacing: 1px;
                 box-sizing: border-box;
-
                 &::-webkit-scrollbar {
                     display: none;
                 }
-
                 &:hover {
                     border: none;
                 }
-
                 &:empty:before {
                     content: attr(data-placeholder);
                 }
             }
-
             .actions {
                 display: flex;
                 flex-direction: row;

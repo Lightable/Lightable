@@ -7,7 +7,9 @@ export function AcceptFriend(arg1:string):Promise<mocks.PublicUser>;
 
 export function ClearRelations():void;
 
-export function FindRelation(arg1:mocks.PublicUser):Promise<map[int64]mocks.PublicUser>;
+export function FindRelation(arg1:number):Promise<mocks.PublicUser>;
+
+export function FindRelations(arg1:mocks.PublicUser):Promise<map[int64]mocks.PublicUser>;
 
 export function GetRelations():Promise<mocks.RelationshipStruct>;
 

@@ -14,6 +14,10 @@ export function FindRelation(arg1) {
   return window['go']['client']['RelationshipManager']['FindRelation'](arg1);
 }
 
+export function FindRelations(arg1) {
+  return window['go']['client']['RelationshipManager']['FindRelations'](arg1);
+}
+
 export function GetRelations() {
   return window['go']['client']['RelationshipManager']['GetRelations']();
 }

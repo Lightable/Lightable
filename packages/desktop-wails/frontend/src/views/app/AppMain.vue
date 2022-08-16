@@ -56,7 +56,13 @@ GetUser().then((user) => {
                 name: 'App finished',
                 state: LoadingStates.FAILED
             }
-            complete.value = true;
+            GetRelations().then((r) => {
+                appStore.relationships = r;
+                appStore.users.push(...r.friends)
+                appStore.users.push(...r.pending)
+                appStore.users.push(...r.requests)
+                complete.value = true;
+            });
         });
     }).catch((msg) => {
         loadingSteps.value[0] = {
@@ -99,7 +105,8 @@ appStore.leftDrawer.components = [
         t: "Route",
         text: 'Direct Messages',
         icon: Chatbubbles,
-        path: "/app/channels/@me/dm",
+        path: '/app/channel/dm/home',
+        name: "channel-dm",
     },
     // /app/channels/@me/groups
     {
@@ -154,7 +161,7 @@ appStore.leftDrawer.components = [
             </Overlay>
         </Transition>
         <div class="view">
-            <router-view />
+            <router-view v-if="complete" />
         </div>
     </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NInput, NSelect } from 'naive-ui';
-import ChatInput from '../../../../components/chatinput/ChatInput.vue';
+import ChatInput from '../../../../components/chat/ChatInput.vue';
 import { ChatInputState } from '../../../../composable/ChatInput';
 import { ref } from 'vue';
 

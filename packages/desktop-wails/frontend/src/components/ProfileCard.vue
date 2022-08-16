@@ -9,7 +9,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="outer">
+    <div class="outer" @click="$router.push({name: 'channel-dm', params: { id: friend?.id }})">
         <div class="friend-c ns">
             <StatusIndicator :user="friend">
                 <NAvatar round :size="38" :src="friend?.avatar?.id" />

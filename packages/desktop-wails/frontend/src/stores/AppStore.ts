@@ -23,7 +23,7 @@ export const useAppStore = defineStore('AppStore', {
         history: {
             websocket: [] as Array<string>
         },
-
+        users: [] as Array<mocks.PublicUser>,
         relationships: new mocks.RelationshipStruct()
     }),
 
@@ -83,7 +83,8 @@ export interface LightableDrawerComponentPair {
     icon?: any,
     text: string,
     cb?: Function,
-    path?: string
+    path?: string,
+    name?: string,
     color?: string | '#fff',
 }
 

@@ -157,7 +157,7 @@ func (c *Client) ReadAndRespond(m []byte) {
 			return
 		}
 		d := uData.D.User
-		m, id, err := c.RelationshipManager.FindRelation(&d)
+		m, id, err := c.RelationshipManager.FindRelations(&d)
 		if err != nil {
 			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to find user for update message")
 			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
