@@ -7,6 +7,7 @@
 This is a monorepo of all things lightable
 
 #### Table of contents
+* [Naming Scheme]()
 * [Who](https://github.com/brys0/Lightable#who-is-lightable#Who-is-lightable)
 * [What](https://github.com/brys0/Lightable#What-is-lightable)
 * [When](https://github.com/brys0/Lightable#When-is-lightable)
@@ -17,7 +18,7 @@ This is a monorepo of all things lightable
 * [Becoming an administrator](https://github.com/brys0/Lightable#becoming-an-administrator)
   - [Guidelines](https://github.com/brys0/Lightable#guidelines)
 * [Just because](https://github.com/brys0/Lightable#just-because)
-* [Preview]()
+* [Preview](https://github.com/brys0/Lightable#preview)
 * [💖Inspirations💖](https://github.com/brys0/Lightable#Inspirations)
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
 
