@@ -7,7 +7,7 @@
 This is a monorepo of all things lightable
 
 #### Table of contents
-* [Naming Scheme]()
+* [Naming Scheme](https://github.com/brys0/Lightable#naming-scheme)
 * [Who](https://github.com/brys0/Lightable#who-is-lightable#Who-is-lightable)
 * [What](https://github.com/brys0/Lightable#What-is-lightable)
 * [When](https://github.com/brys0/Lightable#When-is-lightable)
