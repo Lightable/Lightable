@@ -22,6 +22,13 @@ This is a monorepo of all things lightable
 * [💖Inspirations💖](https://github.com/brys0/Lightable#Inspirations)
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
 
+## Naming Scheme
+* Arc `CDN`                    /packages/arc (Coming Soon)
+* Lava `Real Time Voice/Media` /packages/lava (Documentation Soon)
+* Server `API Service`         /packages/server
+* Web `Web client`             /packages/web
+* Desktop `Desktop client`     /packages/desktop-wails /packages/desktop
+
 ## Who is lightable?
 
 At this moment, Lightable is entirely written by one person.
