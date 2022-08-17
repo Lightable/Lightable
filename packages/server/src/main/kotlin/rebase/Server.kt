@@ -26,10 +26,7 @@ import me.kosert.flowbus.subscribe
 import org.slf4j.LoggerFactory
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
-import rebase.controllers.CDNController
-import rebase.controllers.DeveloperController
-import rebase.controllers.InviteCodeController
-import rebase.controllers.WebSocketController
+import rebase.controllers.*
 import rebase.detection.NudeDetection
 import rebase.events.EventBus
 import rebase.generator.EmbedImageGenerator
@@ -53,6 +50,7 @@ val t = Terminal()
 @OptIn(ExperimentalStdlibApi::class)
 class Server(
     val eventBus: EventBus,
+    var internals: List<String>,
     var dbhost: String = "localhost",
     var dbport: Int = 27017,
     var dbuser: String = "root",
@@ -120,6 +118,7 @@ class Server(
     val user = rebase.controllers.UserController(userCache, dmCache, eventBus, db.getInviteCodeCollection(), session, snowflake, isProd, fileController, napi)
     private val cdnController = CDNController(userCache, fileController)
     private val inviteCodeController = InviteCodeController(db, userCache)
+    private val internalController = InternalsController(internals, userCache)
     private var serverOverloaded = false
     private var serverCPUUsage = 0L
 
@@ -169,6 +168,9 @@ class Server(
             return@exception
         }
         javalin.routes {
+            path("/internal") {
+                get("/users/all", internalController::getAllUsers)
+            }
             get("/experimental/image/generate") {
                 val type = it.queryParam("type")
                 var text = it.queryParam("text") ?: "No Text"
@@ -333,11 +335,13 @@ fun main(args: Array<String>) {
     var dbpass: String = "rootpass"
     var dbBatchUpdateInterval = System.getenv("batchint").toInt() ?: 30
     var nudeAPIGateway = System.getenv("napi")
+    // Mark Array of IPs allowed to use internal API's
+    var internals = System.getenv("internals").split(",")
     var prod = false
     val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
     val eventBus = EventBus()
     println("Working -> ${File("./storage").absolutePath}")
-
+    println("Internal IP's -> $internals")
     File("./releases").mkdir()
     File("./storage").mkdir()
     if (System.getenv("verbose").toBoolean()) {
@@ -366,7 +370,7 @@ fun main(args: Array<String>) {
     val scyllaHost = System.getenv("SCYLLA_HOST") ?: "192.168.50.111"
     val connector = ScyllaConnector()
     connector.connect(scyllaHost, 9042, "datacenter1")
-    val server = Server(eventBus, dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession(), isProd = prod)
+    val server = Server(eventBus, internals, dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession(), isProd = prod)
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (!System.getenv("port").isNullOrBlank()) {
         server.port = System.getenv("port").toInt()

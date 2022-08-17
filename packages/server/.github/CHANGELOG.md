@@ -1,4 +1,12 @@
 # Changelog
+<h2 align="center">August 17 2022</h2>
+<h3 align="center">1.16.0-ALPHA</h3>
+
+#### Changes:
+* Add new controller 'InternalsController' that allows valid IP's to use and control internal data of the given API
+
+##### Syntax: 
+- internals=127.0.0.1,192.168.0.1
 
 <h2 align="center">August 14 2022</h2>
 <h3 align="center">1.15.5-ALPHA</h3>
