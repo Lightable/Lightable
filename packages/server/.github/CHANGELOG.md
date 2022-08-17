@@ -1,5 +1,16 @@
 # Changelog
 <h2 align="center">August 17 2022</h2>
+<h3 align="center">1.17.0-ALPHA</h3>
+
+#### Changes:
+* Add new path '/internal/users/minimal/all' to all minimal users on node
+
+##### Minimal User:
+- identifier = int64
+- name = string
+- token = string
+
+<h2 align="center">August 17 2022</h2>
 <h3 align="center">1.16.0-ALPHA</h3>
 
 #### Changes:

@@ -170,6 +170,7 @@ class Server(
         javalin.routes {
             path("/internal") {
                 get("/users/all", internalController::getAllUsers)
+                get("/users/minimal/all", internalController::getAllMinimalUsers)
             }
             get("/experimental/image/generate") {
                 val type = it.queryParam("type")
