@@ -7,6 +7,7 @@
 This is a monorepo of all things lightable
 
 #### Table of contents
+* [Naming Scheme](https://github.com/brys0/Lightable#naming-scheme)
 * [Who](https://github.com/brys0/Lightable#who-is-lightable#Who-is-lightable)
 * [What](https://github.com/brys0/Lightable#What-is-lightable)
 * [When](https://github.com/brys0/Lightable#When-is-lightable)
@@ -17,9 +18,16 @@ This is a monorepo of all things lightable
 * [Becoming an administrator](https://github.com/brys0/Lightable#becoming-an-administrator)
   - [Guidelines](https://github.com/brys0/Lightable#guidelines)
 * [Just because](https://github.com/brys0/Lightable#just-because)
-* [Preview]()
+* [Preview](https://github.com/brys0/Lightable#preview)
 * [💖Inspirations💖](https://github.com/brys0/Lightable#Inspirations)
 ### [Wiki](https://github.com/brys0/Lightable/wiki)
+
+## Naming Scheme
+* Arc `CDN`                    /packages/arc (Coming Soon)
+* Lava `Real Time Voice/Media` /packages/lava (Documentation Soon)
+* Server `API Service`         /packages/server
+* Web `Web client`             /packages/web
+* Desktop `Desktop client`     /packages/desktop-wails /packages/desktop
 
 ## Who is lightable?
 
