@@ -4,7 +4,7 @@
 
 #### Changes:
 * Add new controller 'InternalsController' that allows valid IP's to use and control internal data of the given API
-
+* Add new path '/internal' with current GET route `/internal/users/all`
 ##### Syntax: 
 - internals=127.0.0.1,192.168.0.1
 
