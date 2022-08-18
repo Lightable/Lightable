@@ -37,7 +37,7 @@ onBeforeMount(() => appStore.leftDrawer.show = false);
     </div>
     <div class="home" v-else>
         <h2 class="h ns">Please Log In</h2>
-        <NButton size="large" tertiary type="info" style="--n-width: 248px" round @click="$router.push('/login')">
+        <NButton size="large" tertiary type="info" style="--n-width: 248px" id="login-btn" round @click="$router.push('/login')">
             Log In
         </NButton>
         <NButton class="subtext" text @click="setHasUser(false)">

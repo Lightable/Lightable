@@ -92,7 +92,13 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
         }
         logger.info("Creating test user account")
         val testID = snowflake.nextId()
-        users[testID] = User(test = true, identifier = snowflake.nextId())
+        val testID2 = snowflake.nextId()
+        val user1 = User(test = true, identifier = snowflake.nextId())
+        val user2 = User(test = true, identifier = testID2, name = "Test Account 2")
+        user1.relationships.friends.add(user2.identifier)
+        user2.relationships.friends.add(user1.identifier)
+        users[testID] = user1
+        users[testID2] = user2
         logger.info("Created test account -> ${users[testID]}")
         if (batchInterval >= 0) {
             Timer().scheduleAtFixedRate(UserUpdateBatch(), 5000, (batchInterval * 1000).toLong())

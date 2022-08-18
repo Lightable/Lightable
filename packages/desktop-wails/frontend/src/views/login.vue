@@ -44,7 +44,7 @@ const onFormSubmit = async (e: MouseEvent) => {
                 loading.value = true;
                 let request = await LoginWithEmailAndPassword(formData.email, formData.password);
                 SetUser(request.id, request);
-                router.push('/app');
+                router.push('/app/home');
             } catch (e: any) {
                 loading.value = false;
                 message.error(e, { duration: 5000 });
@@ -63,13 +63,13 @@ onBeforeMount(() => appStore.leftDrawer.show = false);
         <h2 class="title ns">Sign In</h2>
         <NForm class="form" :rules="formRules" :model="formValue" ref="formRef" size="large">
             <NFormItem label="Email" class="item" required size="large" path="email">
-                <NInput placeholder="Input Email" type="text" class="input" v-model:value="formValue.email" :loading="loading" />
+                <NInput placeholder="Input Email" type="text" id="login-email" class="input" v-model:value="formValue.email" :loading="loading" />
             </NFormItem>
             <NFormItem label="Password" class="item" required size="large" path="password">
-                <NInput placeholder="Input Password" type="password" class="input" v-model:value="formValue.password" :loading="loading" />
+                <NInput placeholder="Input Password" type="password" id="login-password" class="input" v-model:value="formValue.password" :loading="loading" />
             </NFormItem>
         </NForm>
-        <NButton size="large" tertiary type="primary" style="--n-width: 248px" round @click="onFormSubmit" :loading="loading">
+        <NButton size="large" tertiary type="primary" id="login-btn" style="--n-width: 248px" round @click="onFormSubmit" :loading="loading">
             <template #icon>
                 <NIcon>
                     <LogInOutline />

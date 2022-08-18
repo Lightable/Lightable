@@ -10,6 +10,7 @@ import (
 
 	"github.com/brys0/arc/cmd/rtcp"
 	"github.com/brys0/arc/cmd/rtp"
+	"github.com/brys0/arc/server/comm"
 	"github.com/gorilla/websocket"
 )
 
@@ -76,6 +77,8 @@ type TestMessageMeme struct {
 	Data rtcp.RTCPPacket
 }
 func StartServer() LavaWebSocketServer {
+	commClient := comm.NewCommunicationClient("http://192.168.50.111:8081")
+	commClient.GetAllMinimalUsers()
 	server := LavaWebSocketServer{
 		Clients:    make([]*LavaWebSocketConnection, 0),
 		Register:   make(chan *LavaWebSocketConnection),
