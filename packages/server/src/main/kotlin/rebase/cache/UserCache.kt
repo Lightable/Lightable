@@ -94,7 +94,7 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
         val testID = snowflake.nextId()
         val testID2 = snowflake.nextId()
         val user1 = User(test = true, identifier = snowflake.nextId())
-        val user2 = User(test = true, identifier = testID2, name = "Test Account 2")
+        val user2 = User(test = true, identifier = testID2, name = "Test Account 2", email = "TestAccount2@example.com")
         user1.relationships.friends.add(user2.identifier)
         user2.relationships.friends.add(user1.identifier)
         users[testID] = user1

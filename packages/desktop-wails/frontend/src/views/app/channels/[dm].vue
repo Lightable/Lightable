@@ -11,23 +11,13 @@ if (router.currentRoute.value.params.id === 'home') router.push('/concepts/soon'
 
 const id = computed(() => router.currentRoute.value.params.id as string);
 
-console.log(appStore);
-let dm = ref(appStore.relationships.friends.find(u => u.id == id.value)) as Ref<null | mocks.PublicUser | undefined>
-
-let channel = new mocks.Channel({
-    id: dm.value?.id,
-    type: 0,
-    owner: dm.value,
-    messages: new Array<mocks.Message>()
-});
-
-
+let dm = ref(appStore.users.find(u => u.id === id.value)) as Ref<null | mocks.PublicUser | undefined>
 </script>
 
 
 <template>
     <div class="dm">
-        <Chat :channel="channel" />
+        <Chat :channel="dm?.channel" />
     </div>
 </template>
 

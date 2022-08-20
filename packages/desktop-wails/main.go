@@ -23,6 +23,7 @@ var start = time.Now()
 var currentVersion = "0.0.25-ALPHA"
 
 func main() {
+	
 	logger := Configure()
 	app := app.NewApp(logger, currentVersion)
 	app.PreInit()
@@ -53,7 +54,6 @@ func main() {
 			client.RelationshipManager,
 		},
 	})
-
 	if err != nil {
 		println("Error:", err)
 	}

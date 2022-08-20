@@ -110,6 +110,20 @@ func (a *App) GetColour() string {
 func (a *App) Startup(ctx context.Context) {
 	a.Ctx = ctx
 	a.Logger.Info().Str("type", "Startup").Msg(fmt.Sprintf("RUNTIME || Startup in: %v", time.Since(a.start)))
+	defer func() {
+		if e := recover(); e != nil {
+			_, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+				Type: runtime.ErrorDialog,
+				Title: "Fatal Crash",
+				Message: fmt.Sprintf("Something broke internally\n%v", e),
+				Buttons: []string{"Close", "Close and report error"},
+			})
+			if err != nil {
+				os.Exit(1)
+			}
+			os.Exit(1)
+		}
+	}()
 }
 
 // Shutdown log

@@ -81,7 +81,7 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
                     </div>
                     <div class="scroll-container">
                         <div class="body">
-                            <div class="empty ns" v-if="relations.friends.length == 0">
+                            <div class="empty ns" v-if="relations.friends.length === 0">
                                 <h3>No friends. Sadge</h3>
                             </div>
                             <ProfileCard v-for="(friend, _) in relations.friends" v-bind:key="friend.id" :friend="friend" v-else>
@@ -107,14 +107,14 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
                     </div>
                     <div class="scroll-container">
                         <div class="body">
-                            <div class="empty ns" v-if="relations.pending.length == 0">
+                            <div class="empty ns" v-if="relations.pending.length === 0">
                                 <h3>You don't have any pending friends</h3>
                             </div>
                             <ProfileCard v-for="(pending, _) in relations.pending" v-bind:key="pending.id" :friend="pending" v-else>
                                 <template #default>
                                     <NTooltip trigger="hover">
                                         <template #trigger>
-                                            <NButton text type="error">
+                                            <NButton text type="error" @click.stop="">
                                                 <template #icon>
                                                     <NIcon :size="32">
                                                         <Close />
@@ -126,7 +126,7 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
                                     </NTooltip>
                                     <NTooltip trigger="hover">
                                         <template #trigger>
-                                            <NButton text type="success" @click="acceptFriend(pending)">
+                                            <NButton text type="success" @click.stop="acceptFriend(pending)">
                                                 <template #icon>
                                                     <NIcon :size="32">
                                                         <Checkmark />
@@ -150,11 +150,10 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
                     </div>
                     <div class="scroll-container">
                         <div class="body">
-                            <div class="empty ns" v-if="relations.requests.length == 0">
+                            <div class="empty ns" v-if="relations.requests.length === 0">
                                 <h3>You don't have any requests</h3>
                             </div>
-                            <ProfileCard v-for="(requests, _) in relations.requests" v-bind:key="requests.id" :friend="requests" v-else>
-                            </ProfileCard>
+                            <ProfileCard v-for="(requests, _) in relations.requests" v-bind:key="requests.id" :friend="requests" v-else/>
                         </div>
                     </div>
                 </div>

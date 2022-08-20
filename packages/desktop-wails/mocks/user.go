@@ -22,6 +22,18 @@ type PublicUser struct {
 	Channel *Channel    `json:"channel"`
 }
 
+func (u *PrivateUser) ToPublic() *PublicUser {
+	return &PublicUser{
+		Name:    u.Name,
+		Id:      u.Id,
+		Status:  u.Status,
+		Admin:   u.Admin,
+		Avatar:  u.Avatar,
+		State:   nil,
+		Channel: nil,
+	}
+}
+
 type UserAnalytics struct {
 	Logins int `json:"logins"`
 }

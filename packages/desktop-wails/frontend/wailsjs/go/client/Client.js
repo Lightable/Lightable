@@ -6,6 +6,14 @@ export function DialSocket() {
   return window['go']['client']['Client']['DialSocket']();
 }
 
+export function GetAvatar(arg1, arg2) {
+  return window['go']['client']['Client']['GetAvatar'](arg1, arg2);
+}
+
+export function GetHttpURL() {
+  return window['go']['client']['Client']['GetHttpURL']();
+}
+
 export function GetSocketHistory() {
   return window['go']['client']['Client']['GetSocketHistory']();
 }

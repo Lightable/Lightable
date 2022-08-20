@@ -56,20 +56,38 @@ export const useAppStore = defineStore('AppStore', {
                 this.relationships = await GetRelations();
             });
             EventsOn('ws:read:user|status', async (_) => {
-                console.log('status update');
                 this.relationships = await GetRelations();
             });
         },
         async changeTheme(theme: LightableTheme) {
             this.theme = theme;
             await ChangeTheme(theme);
+        },
+        getUserTypeRelation(us?: string): RelationshipStatus | undefined {
+            if (!us) return
+            let f = this.relationships.friends.find(u => u.id === us)
+            let p = this.relationships.pending.find(u => u.id === us)
+            let r = this.relationships.requests.find(u => u.id === us)
+            if (f) {
+                return RelationshipStatus.FRIEND
+            } else if (p) {
+                return RelationshipStatus.PENDING
+            } else if (r) {
+                return RelationshipStatus.REQUEST
+            }
+            return RelationshipStatus.UNKNOWN
         }
     }
 })
 
 
 export type LightableTheme = "Dark" | "Light"
-
+export enum RelationshipStatus {
+    UNKNOWN = 1,
+    REQUEST = 2,
+    PENDING = 3,
+    FRIEND = 4
+}
 
 export interface AppConfig {
     theme: LightableTheme

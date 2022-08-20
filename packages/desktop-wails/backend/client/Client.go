@@ -12,6 +12,7 @@ import (
 	"red/backend/app"
 	"red/mocks"
 	r "runtime"
+	"strconv"
 	"time"
 
 	"github.com/asaskevich/EventBus"
@@ -52,13 +53,16 @@ func (c *Client) SetSocket(socket string) {
 func (c *Client) GetUser() *mocks.PrivateUser {
 	return c.CurrentUser
 }
+
 /* Socket */
 func (c *Client) DialSocket() (*string, error) {
 	start := time.Now()
 	bus := EventBus.New()
-	if c.Connection != nil {
+	if c.Connection != nil && !c.Connection.Closed {
 		c.Logger.Info().Msg("Socket was already connected. Closing current and connecting a new one.")
-		c.Connection.Ws.Close()
+		defer func() {
+			c.Connection.Ws.Close()
+		}()
 		c.Connection = nil
 	}
 	if c.Api == "" {
@@ -91,7 +95,7 @@ func (c *Client) DialSocket() (*string, error) {
 		c.SocketTicker = time.NewTicker(30000 * time.Millisecond)
 		go func() {
 			for range c.SocketTicker.C {
-				if !c.Connection.Closed {
+				if !c.Connection.Closed || c.Connection != nil {
 					c.Connection.Ping()
 				}
 			}
@@ -172,10 +176,30 @@ func (c *Client) ReadAndRespond(m []byte) {
 	}
 	c.SocketHistory = append(c.SocketHistory, string(decoded))
 
-
 	runtime.EventsEmit(*c.Ctx, "ws:read:decode", string(decoded))
 }
 
+func (c *Client) GetAvatar(id string, size int) string {
+	parse, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	u := c.RelationshipManager.FindRelation(parse)
+	if u.Avatar != nil {
+		return c.GetHttpURL() + "/cdn/user/" + u.Id + "/avatars/avatar_" + u.Avatar.Id + "?size=" + fmt.Sprint(size)
+	}
+	return ""
+}
+
+func (c *Client) GetHttpURL() string {
+	url := url.URL{Host: c.Api}
+	if c.Http.Secure {
+		url.Scheme = "https"
+	} else {
+		url.Scheme = "http"
+	}
+	return url.String()
+}
 func (c *Client) LoginToSocket() {
 	fmt.Printf("Curr User %v", c.CurrentUser)
 	SendMessage(c, mocks.ClientReadyMessage{

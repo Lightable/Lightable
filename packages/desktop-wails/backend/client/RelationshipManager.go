@@ -117,6 +117,21 @@ func (rm *RelationshipManager) InternalAddRelation(Type string, u mocks.PublicUs
 	if err != nil {
 		return err
 	}
+	users := make([]int64, 0)
+	users = append(users, intID)
+	selfID, err := strconv.ParseInt(rm.c.CurrentUser.Id, 10, 64)
+	if err != nil {
+		return err
+	}
+	users = append(users, selfID)
+	users = append(users, selfID)
+	u.Channel = &mocks.Channel{
+		Id: u.Id,
+		Type: 0,
+		Users: users,
+		Owner: rm.c.CurrentUser.ToPublic(),
+		Messages: make([]mocks.Message, 0),
+	}
 	fmt.Printf("Adding internal %v\n", u)
 	switch Type {
 	case "pending":
