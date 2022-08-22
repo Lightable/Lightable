@@ -1,26 +1,47 @@
-export namespace client {
+export namespace mocks {
 	
-	export class HttpResponse {
-	    status: number;
-	    Json: string;
-	    Err: string;
+	export class Icon {
+	    cdn: string;
+	    animated: string;
+	    id: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new HttpResponse(source);
+	        return new Icon(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.status = source["status"];
-	        this.Json = source["Json"];
-	        this.Err = source["Err"];
+	        this.cdn = source["cdn"];
+	        this.animated = source["animated"];
+	        this.id = source["id"];
 	    }
 	}
-
-}
-
-export namespace mocks {
+	export class StandardToken {
+	    permissions: string[];
+	    token: string;
 	
+	    static createFrom(source: any = {}) {
+	        return new StandardToken(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.permissions = source["permissions"];
+	        this.token = source["token"];
+	    }
+	}
+	export class UserAnalytics {
+	    logins: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserAnalytics(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.logins = source["logins"];
+	    }
+	}
 	export class Message {
 	    content?: string;
 	    system: boolean;
@@ -97,25 +118,8 @@ export namespace mocks {
 	        this.id = source["id"];
 	    }
 	}
-	export class Icon {
-	    cdn: string;
-	    animated: string;
-	    id: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Icon(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.cdn = source["cdn"];
-	        this.animated = source["animated"];
-	        this.id = source["id"];
-	    }
-	}
 	export class UserStatus {
-	    // Go type: Icon
-	    icon: any;
+	    icon: Icon;
 	    text: string;
 	
 	    static createFrom(source: any = {}) {
@@ -124,7 +128,7 @@ export namespace mocks {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.icon = this.convertValues(source["icon"], null);
+	        this.icon = this.convertValues(source["icon"], Icon);
 	        this.text = source["text"];
 	    }
 	
@@ -149,14 +153,11 @@ export namespace mocks {
 	export class PublicUser {
 	    name: string;
 	    id: string;
-	    // Go type: UserStatus
-	    status?: any;
+	    status?: UserStatus;
 	    admin: boolean;
-	    // Go type: UserAvatar
-	    avatar?: any;
+	    avatar?: UserAvatar;
 	    state?: number;
-	    // Go type: Channel
-	    channel?: any;
+	    channel?: Channel;
 	
 	    static createFrom(source: any = {}) {
 	        return new PublicUser(source);
@@ -166,11 +167,11 @@ export namespace mocks {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.id = source["id"];
-	        this.status = this.convertValues(source["status"], null);
+	        this.status = this.convertValues(source["status"], UserStatus);
 	        this.admin = source["admin"];
-	        this.avatar = this.convertValues(source["avatar"], null);
+	        this.avatar = this.convertValues(source["avatar"], UserAvatar);
 	        this.state = source["state"];
-	        this.channel = this.convertValues(source["channel"], null);
+	        this.channel = this.convertValues(source["channel"], Channel);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -227,46 +228,16 @@ export namespace mocks {
 		    return a;
 		}
 	}
-	export class UserAnalytics {
-	    logins: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new UserAnalytics(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.logins = source["logins"];
-	    }
-	}
-	export class StandardToken {
-	    permissions: string[];
-	    token: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new StandardToken(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.permissions = source["permissions"];
-	        this.token = source["token"];
-	    }
-	}
 	export class PrivateUser {
 	    name: string;
 	    id: string;
 	    email: string;
-	    // Go type: UserStatus
-	    status?: any;
-	    // Go type: StandardToken
-	    token: any;
+	    status?: UserStatus;
+	    token: StandardToken;
 	    admin: boolean;
-	    // Go type: UserAvatar
-	    avatar?: any;
+	    avatar?: UserAvatar;
 	    profileOptions: {[key: string]: boolean};
-	    // Go type: UserAnalytics
-	    analytics?: any;
+	    analytics?: UserAnalytics;
 	
 	    static createFrom(source: any = {}) {
 	        return new PrivateUser(source);
@@ -277,12 +248,12 @@ export namespace mocks {
 	        this.name = source["name"];
 	        this.id = source["id"];
 	        this.email = source["email"];
-	        this.status = this.convertValues(source["status"], null);
-	        this.token = this.convertValues(source["token"], null);
+	        this.status = this.convertValues(source["status"], UserStatus);
+	        this.token = this.convertValues(source["token"], StandardToken);
 	        this.admin = source["admin"];
-	        this.avatar = this.convertValues(source["avatar"], null);
+	        this.avatar = this.convertValues(source["avatar"], UserAvatar);
 	        this.profileOptions = source["profileOptions"];
-	        this.analytics = this.convertValues(source["analytics"], null);
+	        this.analytics = this.convertValues(source["analytics"], UserAnalytics);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -338,6 +309,30 @@ export namespace mocks {
 		    }
 		    return a;
 		}
+	}
+	
+	
+	
+
+}
+
+export namespace client {
+	
+	export class HttpResponse {
+	    status: number;
+	    Json: string;
+	    Err: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HttpResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.Json = source["Json"];
+	        this.Err = source["Err"];
+	    }
 	}
 
 }

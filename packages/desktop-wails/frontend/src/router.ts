@@ -85,7 +85,7 @@ const router = createRouter({
                     path: 'channel/dm/:id',
                     name: 'channel-dm',
                     component() {
-                        return import('./views/app/channels/[dm].vue')
+                        return import('./views/app/channels/dm.vue')
                     }
                 }
             ],

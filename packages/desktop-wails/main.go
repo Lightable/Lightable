@@ -53,6 +53,9 @@ func main() {
 			client.Http,
 			client.RelationshipManager,
 		},
+		Experimental: &options.Experimental{
+			UseCSSDrag: true,
+		},
 	})
 	if err != nil {
 		println("Error:", err)

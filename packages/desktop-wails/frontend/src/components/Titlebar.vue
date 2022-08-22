@@ -8,6 +8,7 @@ import { useAppStore } from '../stores/AppStore';
 import { debug } from '../composable/Logger';
 import { DownloadUpdate, Restart } from '../../wailsjs/go/app/App';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
+import SettingsPickerDropdown from './settings/SettingsPickerDropdown.vue';
 const appStore = useAppStore();
 
 const downloadModal = ref({
@@ -17,7 +18,9 @@ const downloadModal = ref({
     url: null as string | null,
     finished: false
 });
-
+const settingsPickerDropdown = ref({
+    show: false
+});
 const theme = computed(() => appStore.theme);
 const leftDrawer = computed(() => appStore.leftDrawer);
 
@@ -27,8 +30,8 @@ const lightTheme = () => {
 const darkTheme = () => {
     appStore.changeTheme('Dark');
 }
-const updateWSDrawer = () => {
-    appStore.drawers.websocket = true;
+const updateSettingsPicker = () => {
+    settingsPickerDropdown.value.show = !settingsPickerDropdown.value.show;
 }
 const showDownload = () => {
     downloadModal.value.show = true;
@@ -55,6 +58,9 @@ const restartLightable = () => {
 </script>
 
 <template>
+<SettingsPickerDropdown v-if="settingsPickerDropdown.show">
+
+</SettingsPickerDropdown>
     <NModal v-model:show="downloadModal.show" preset="dialog" :closable="!downloadModal.finished">
         <template #header>
             {{ downloadModal.downloading ? 'Downloading exe...' : 'Input EXE URL' }}
@@ -70,7 +76,7 @@ const restartLightable = () => {
             <NButton type="warning" quaternary v-else @click="restartLightable">Restart</NButton>
         </template>
     </NModal>
-    <div class="titlebar" data-wails-drag>
+    <div class="titlebar" style="--wails-draggable: drag">
         <div class="titlebar-left" data-wails-no-drag v-if="!leftDrawer.show">
             <div class="item" id="go-back">
                 <NButton text type="success" @click="$router.back()" :disabled="$router.currentRoute.value.name == 'home'">
@@ -93,7 +99,7 @@ const restartLightable = () => {
                 </NButton>
             </div>
             <div class="item">
-                <NButton title="Settings" text style="padding: 0" type="info" @click="updateWSDrawer">
+                <NButton title="Settings" text style="padding: 0" type="info" @click="updateSettingsPicker">
                     <template #icon>
                         <NIcon>
                             <Settings32Regular />

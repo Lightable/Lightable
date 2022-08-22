@@ -5,8 +5,8 @@ import Titlebar from './components/Titlebar.vue';
 import LeftDrawer from './components/LeftDrawer/LeftDrawer.vue';
 import DrawerComponent from './components/LeftDrawer/DrawerComponent.vue';
 import { useAppStore } from './stores/AppStore';
-import DebugSocket from './components/debug/DebugSocket.vue';
 import ConfettiCanvasProvider from './components/confetti/ConfettiCanvasProvider.vue';
+import SettingsConfigProvider from './components/settings/SettingsConfigProvider.vue';
 const appStore = useAppStore();
 
 darkTheme.Button!!.common!!.errorColor = "#ED4245";
@@ -26,33 +26,34 @@ appStore.startRealtime();
           <NElement>
             <Titlebar />
             <NMessageProvider>
-              <div class="general-co">
-                <div class="lightable-drawer" v-if="leftDrawer.show">
-                  <LeftDrawer>
-                    <template #top>
-                      <DrawerComponent :pair="item" v-for="(item, index) in leftDrawer.components" v-bind:key="index" />
-                    </template>
-                    <template #groups>
-                      <div class="group" v-for="(group, index) in leftDrawer.groups" v-bind:key="index">
-                        <div class="header ns">
-                          <span>{{ group.name }}</span>
-                        </div>
-                        <div class="group-contents" :id="`group-${group.name}`">
-                          <div class="group-item" v-for="(gitem, gid) in group.items" v-bind:key="gid" :id="`group-item-${gitem.text}`">
-                            <DrawerComponent :pair="gitem" :style="{ width: '88%' }" />
+              <SettingsConfigProvider>
+                <div class="general-co">
+                  <div class="lightable-drawer" v-if="leftDrawer.show">
+                    <LeftDrawer>
+                      <template #top>
+                        <DrawerComponent :pair="item" v-for="(item, index) in leftDrawer.components" v-bind:key="index" />
+                      </template>
+                      <template #groups>
+                        <div class="group" v-for="(group, index) in leftDrawer.groups" v-bind:key="index">
+                          <div class="header ns">
+                            <span>{{ group.name }}</span>
+                          </div>
+                          <div class="group-contents" :id="`group-${group.name}`">
+                            <div class="group-item" v-for="(gitem, gid) in group.items" v-bind:key="gid" :id="`group-item-${gitem.text}`">
+                              <DrawerComponent :pair="gitem" :style="{ width: '88%' }" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </template>
-                  </LeftDrawer>
-                </div>
-                <div class="page" :style="{ 'background': ($router.currentRoute.value.name == 'login' || $router.currentRoute.value.name == 'home' || $router.currentRoute.value.name == 'invitesignup' || $router.currentRoute.value.name == 'signup') ? 'transparent' : `${theme == 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
-                  <div class="content">
-                    <router-view />
+                      </template>
+                    </LeftDrawer>
+                  </div>
+                  <div class="page" :style="{ 'background': ($router.currentRoute.value.name == 'login' || $router.currentRoute.value.name == 'home' || $router.currentRoute.value.name == 'invitesignup' || $router.currentRoute.value.name == 'signup') ? 'transparent' : `${theme == 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
+                    <div class="content">
+                      <router-view />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <DebugSocket />
+              </SettingsConfigProvider>
             </NMessageProvider>
           </NElement>
         </NDialogProvider>

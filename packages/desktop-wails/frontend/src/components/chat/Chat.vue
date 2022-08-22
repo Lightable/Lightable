@@ -21,6 +21,7 @@ const getUser = (id: string) => {
 
 const user = computed(() => getUser(props.channel!!.id))
 const status = computed(() => appStore.getUserTypeRelation(props.channel?.id))
+
 onMounted(async () => {
     if (props.channel) {
         avatar.value = await GetAvatar(props.channel?.id, 64)
@@ -41,7 +42,7 @@ onMounted(async () => {
                     <span>Loading Messages...</span>
                 </div> -->
                 <div class="errors ns">
-                    <NAlert id="request" title="Can't send messages to this user" type="error" v-if="!status || typeof status === 'number'">
+                    <NAlert id="request" title="Can't send messages to this user" type="error" v-if="!status || typeof status === 'number' && status != RelationshipStatus.FRIEND">
                         <span class="error" v-if="status === RelationshipStatus.REQUEST">This user has yet to accept your friend request</span>
                         <span class="error" v-if="status === RelationshipStatus.PENDING">You still need to accept this user's friend request!</span>
                         <span class="error" v-if="status === RelationshipStatus.UNKNOWN">We're not sure who, or what you're trying to message :/</span>

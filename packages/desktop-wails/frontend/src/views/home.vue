@@ -8,8 +8,8 @@ import { useAppStore } from '../stores/AppStore';
 
 const appStore = useAppStore();
 const hasUser = computed(() => appStore.hasUser);
-SetSocket('api.lightableapp.cf');
-SetAPI('api.lightableapp.cf');
+SetSocket('api.lightable.app');
+SetAPI('api.lightable.app');
 SetSecure(true);
 
 const setHasUser = (bool: boolean) => {

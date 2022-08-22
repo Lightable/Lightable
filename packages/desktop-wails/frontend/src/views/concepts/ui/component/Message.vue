@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import {Ref} from 'vue';
 import Message from '../../../../components/message/Message.vue';
 import { NInputGroup, NInput } from 'naive-ui';
 import { ref } from 'vue';
-
+import {mocks} from '../../../../../wailsjs/go/models'
 let content = ref('Welcome to lightable');
 
 let user = ref({
     name: 'You',
     avatar: undefined as undefined | string
-});
+}) as Ref<mocks.PublicUser>;
 </script>
 
 <template>
@@ -24,7 +25,7 @@ let user = ref({
             <div class="card user">
                 <h4>User</h4>
                 <NInputGroup>
-                    <NInput placeholder="Avatar" type="text" @update-value="(v: string) => user.avatar = v" :default-value="user.avatar"/>
+                    <NInput placeholder="Avatar" type="text" @update-value="(v: string) => (user.avatar as any) = v" :default-value="(user.avatar as any)"/>
                     <NInput placeholder="Name" type="text" @update-value="(v: string) => user.name = v" :default-value="user.name"/>
                 </NInputGroup>
             </div>

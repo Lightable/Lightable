@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { PropType, ref, computed } from 'vue';
+import { PropType, ref, computed, Ref } from 'vue';
 import { NAvatar, NImage, NImageGroup, NButton, NIcon, NTooltip } from 'naive-ui';
 import { mocks } from '../../../wailsjs/go/models';
 import { parseMarkdown } from '../../composable/Markdown';
-import {ReplyFilled as Reply, EditFilled as Edit, DeleteFilled as TrashCan} from '@vicons/material';
-import ImageAttachment from './ImageAttachment.vue';
+import { ReplyFilled as Reply, EditFilled as Edit, DeleteFilled as TrashCan } from '@vicons/material';
 import { useAppStore } from '../../stores/AppStore';
-
+import { GetAvatar } from '../../../wailsjs/go/client/Client';
 const appStore = useAppStore();
 const props = defineProps({
     // @ts-ignore
@@ -19,6 +18,7 @@ const props = defineProps({
 });
 
 const self = computed(() => appStore.user);
+const avatar = ref() as Ref<string>
 const displayActions = ref(false);
 const actionOnMouseOver = () => {
     displayActions.value = true;
@@ -26,6 +26,12 @@ const actionOnMouseOver = () => {
 const actionOnMouseLeave = () => {
     displayActions.value = false;
 }
+if (props.author && props.author.avatar) {
+        GetAvatar(props.author.id, 64).then(a => {
+            avatar.value = a;
+        });
+}
+
 </script>
 
 <template>
@@ -33,7 +39,7 @@ const actionOnMouseLeave = () => {
     <div class="message" v-if="isPreview">
         <div class="inner-message">
             <div class="avatar">
-                <NAvatar round src="http://192.168.50.111:8096/Users/4c03beee9f14424a97b2c2f8f1fecbfa/Images/Primary?tag=40936718fb72aa506a79c70af63e1c90&quality=90" class="message-avatar" lazy/>
+                <NAvatar round src="http://192.168.50.111:8096/Users/4c03beee9f14424a97b2c2f8f1fecbfa/Images/Primary?tag=40936718fb72aa506a79c70af63e1c90&quality=90" class="message-avatar" lazy />
             </div>
             <div class="container">
                 <div class="name ns">
@@ -58,11 +64,11 @@ const actionOnMouseLeave = () => {
     <div class="message" v-else>
         <div class="inner-message" @mouseover="actionOnMouseOver" @mouseleave="actionOnMouseLeave">
             <div class="avatar" v-if="author">
-                <NAvatar round :src="author.avatar" class="message-avatar" v-if="author.avatar" lazy/>
+                <NAvatar round :src="avatar" class="message-avatar" v-if="author.avatar" lazy />
             </div>
             <div class="container">
                 <div class="name ns">
-                    <span>{{ author ? (author.self ? 'You' : author.name) : 'Unknown' }}</span>
+                    <span>{{ author ? (author == self ? 'You' : author.name) : 'Unknown' }}</span>
                     <Transition name="fade">
                         <div class="actions" v-if="displayActions">
                             <NTooltip trigger="hover">
