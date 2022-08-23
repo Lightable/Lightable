@@ -15,6 +15,9 @@ export const useAppStore = defineStore('AppStore', {
         drawers: {
             websocket: false
         },
+        settings: {
+            currentDrawer: '',
+        },
         leftDrawer: {
             show: false,
             components: [] as Array<LightableDrawerComponentPair>,
@@ -24,7 +27,10 @@ export const useAppStore = defineStore('AppStore', {
             websocket: [] as Array<string>
         },
         users: [] as Array<mocks.PublicUser>,
-        relationships: new mocks.RelationshipStruct()
+        relationships: new mocks.RelationshipStruct(),
+        search: {
+            show: false
+        }
     }),
 
     actions: {

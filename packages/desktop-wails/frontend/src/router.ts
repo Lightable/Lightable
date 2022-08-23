@@ -64,6 +64,13 @@ const router = createRouter({
                     component() {
                         return import('./views/concepts/ui/component/Loading.vue');
                     }
+                },
+                {
+                    path: 'search',
+                    name: 'concepts-ui-search',
+                    component() {
+                        return import('./views/concepts/ui/component/Search.vue');
+                    }
                 }
             ],
             component() {

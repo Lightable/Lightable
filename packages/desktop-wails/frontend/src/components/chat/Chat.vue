@@ -15,11 +15,11 @@ const props = defineProps({
 });
 
 const avatar = ref() as Ref<string | undefined>
-const getUser = (id: string) => {
+const getUser = (id: string | undefined): mocks.PublicUser | undefined => {
     return appStore.users.find(u => u.id === id)
 }
 
-const user = computed(() => getUser(props.channel!!.id))
+const user = computed(() => getUser(props.channel?.id))
 const status = computed(() => appStore.getUserTypeRelation(props.channel?.id))
 
 onMounted(async () => {
@@ -31,7 +31,7 @@ onMounted(async () => {
 
 <template>
     <div class="chat">
-        <ChatHeader :title="(channel?.owner) ? channel?.owner?.name : 'Unknown'">
+        <ChatHeader :title="(user) ? user?.name : 'Unknown'">
             <template #icon>
                 <NAvatar round :src="avatar" />
             </template>
@@ -49,7 +49,7 @@ onMounted(async () => {
                         <span class="error" v-else-if="!status">How did you get here? How did we allow you to get here? We'll never know 🤫</span>
                     </NAlert>
                 </div>
-                <Message v-for="(item, _) in channel.messages" v-if="channel?.messages" :author="getUser(item.author)" :content="item.content" />
+                <Message v-for="(item, _) in channel.messages" v-if="channel?.messages" :author="getUser(item?.author)" :content="item.content" />
                 <!-- <Message :is-preview="true" />
                 <Message :is-preview="true" />
                 <Message :is-preview="true" />

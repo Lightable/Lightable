@@ -59,7 +59,7 @@ const onCodeSubmit = async () => {
         return
     } else {
         let json = JSON.parse(userRegister.Json);
-        console.log(json);
+        (json);
         if (userRegister.status == 403) {
             message.error(json.bad);
             return

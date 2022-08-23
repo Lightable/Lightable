@@ -8,22 +8,11 @@ const currentPane = computed(() => settingsStore.openPane);
 </script>
 
 <template>
-    <div class="active-pane" v-if="currentPane === 'None'">
-        <NDrawer placement="right" :show="false" :show-mask="false">
-            <NDrawerContent title="Settings">
+    <div class="active-pane">
+        <NDrawer placement="right" :show="true" :show-mask="true" v-if="currentPane === 'Customization'">
+            <NDrawerContent title="Customize">
                 <div class="body">
-                    <section class="section">
-                        <span class="header ns">Customization</span>
-                        <NButton type="info" tertiary size="large">
-                            Customize
-                        </NButton>
-                    </section>
-                    <section class="section">
-                        <span class="header ns">Debug</span>
-                        <NButton type="primary" tertiary size="large">
-                            Debug
-                        </NButton>
-                    </section>
+                 
                 </div>
             </NDrawerContent>
         </NDrawer>

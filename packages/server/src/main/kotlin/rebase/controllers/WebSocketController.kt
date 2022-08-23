@@ -23,6 +23,7 @@ import rebase.interfaces.GenericUser
 import rebase.messages.Message
 import rebase.schema.*
 import java.nio.ByteBuffer
+import java.time.Instant
 
 @OptIn(DelicateCoroutinesApi::class)
 class WebSocketController(
@@ -139,12 +140,15 @@ class WebSocketController(
 
     fun close(handler: WsCloseContext) {
         val connection = connections[handler.sessionId] ?: return
-        val friends =  getSockets(connection.user.getFriends().allAsOne())
+
+        val friends = getSockets(connection.user.getFriends().allAsOne())
             for (friend in friends) {
                 send(friend.ws.session, friend.ws.type, FriendUpdatePayload(connection.user, connection.user.identifier, "state", UserState.OFFLINE))
             }
             connections.remove(handler.sessionId)
             rawConnections.remove(handler.sessionId)
+            connection.user.analytics.activeTime = connection.user.analytics.activeTime?.plus((Instant.now().toEpochMilli() - connection.start) / 1000)
+            connection.user.save()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -433,7 +437,8 @@ data class SocketSession(
     val ws: SessionWithCompression,
     var authenticated: Boolean = false,
     var user: User,
-    var session: SessionProperties
+    var session: SessionProperties,
+    var start: Long = Instant.now().toEpochMilli()
 )
 
 data class SessionProperties(

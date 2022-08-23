@@ -7,6 +7,7 @@ export const useSettingsStore = defineStore('settingsStore', {
     actions: {
         setLivePane(pane: SettingsPane) {
             this.openPane = pane;
+            console.log(pane);
         }
     }
 })

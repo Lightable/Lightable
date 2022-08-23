@@ -58,9 +58,9 @@ const restartLightable = () => {
 </script>
 
 <template>
-<SettingsPickerDropdown v-if="settingsPickerDropdown.show">
+    <SettingsPickerDropdown v-if="settingsPickerDropdown.show" @close="updateSettingsPicker">
 
-</SettingsPickerDropdown>
+    </SettingsPickerDropdown>
     <NModal v-model:show="downloadModal.show" preset="dialog" :closable="!downloadModal.finished">
         <template #header>
             {{ downloadModal.downloading ? 'Downloading exe...' : 'Input EXE URL' }}
@@ -76,13 +76,13 @@ const restartLightable = () => {
             <NButton type="warning" quaternary v-else @click="restartLightable">Restart</NButton>
         </template>
     </NModal>
-    <div class="titlebar" style="--wails-draggable: drag">
+    <div class="titlebar" style="--wails-draggable: drag" :with-drawer="leftDrawer.show">
         <div class="titlebar-left" data-wails-no-drag v-if="!leftDrawer.show">
             <div class="item" id="go-back">
                 <NButton text type="success" @click="$router.back()" :disabled="$router.currentRoute.value.name == 'home'">
                     <template #icon>
                         <NIcon>
-                            <ChevronBack/>
+                            <ChevronBack />
                         </NIcon>
                     </template>
                 </NButton>
@@ -167,14 +167,22 @@ const restartLightable = () => {
     z-index: 2;
     position: absolute;
     top: 0;
-    width: 100vw;
+    width: calc(100vw - 250px);
+
+    &[with-drawer='true'] {
+        margin-left: 250px;
+    }
+
     .titlebar-left {
         margin-right: auto;
+
         #go-back {
             padding: 0 8px;
         }
     }
-    .titlebar-right, .titlebar-left {
+
+    .titlebar-right,
+    .titlebar-left {
         display: flex;
         flex-direction: row;
         align-items: center;

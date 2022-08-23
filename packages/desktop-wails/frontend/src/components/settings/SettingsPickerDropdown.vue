@@ -2,14 +2,38 @@
 import { NButton, NIcon, NTooltip } from 'naive-ui';
 import { ColorPalette as ColorPalette } from '@vicons/ionicons5';
 import { Person28Filled as Person, PlugDisconnected24Filled as Plug, Bug24Filled as Debug } from '@vicons/fluent';
+import { useSettingsStore, SettingsPane } from '../../stores/SettingsStore';
+
+
+const settingsStore = useSettingsStore();
+let timer: any;
+
+const emits = defineEmits(['close'])
+const onLeaveMouse = () => {
+    timer = setTimeout(() => {
+        console.log('Should close')
+        emits('close');
+    }, 5000)
+}
+
+const onEnterMouse = () => {
+    if (timer) {
+        clearTimeout(timer);
+    }
+}
+
+const setCurrentPane = (pane: SettingsPane) => {
+    settingsStore.setLivePane(pane)
+    emits('close');
+}
 </script>
 
 <template>
-    <div class="settings dropdown">
+    <div class="settings dropdown" @mouseleave="onLeaveMouse" @mouseover="onEnterMouse">
         <section class="pane-pick">
             <NTooltip trigger="hover" placement="left">
                 <template #trigger>
-                    <NButton text type="info">
+                    <NButton text type="info" @click="setCurrentPane('Customization')">
                         <template #icon>
                             <NIcon :size="32">
                                 <ColorPalette />
@@ -83,6 +107,7 @@ import { Person28Filled as Person, PlugDisconnected24Filled as Plug, Bug24Filled
     padding-bottom: 4px;
     backdrop-filter: blur(20px);
     z-index: 5;
+
     .pane-pick {
         margin: 10px;
     }

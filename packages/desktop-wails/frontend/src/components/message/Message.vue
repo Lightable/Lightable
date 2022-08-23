@@ -121,18 +121,7 @@ if (props.author && props.author.avatar) {
 </template>
 
 <style lang="scss" scoped>
-kbd {
-    background-color: var(--modal-color);
-    border-radius: 3px;
-    border: 1px solid var(--body-color);
-    color: var(--text-color-3);
-    display: inline-block;
-    font-size: .85em;
-    font-weight: 700;
-    line-height: 1;
-    padding: 2px 4px;
-    white-space: nowrap;
-}
+
 
 .link {
     color: var(--info-color);

@@ -12,7 +12,7 @@ const avatar = ref() as Ref<string | undefined>
 const getAvatar = async (user: string) => {
     return await GetAvatar(user, 64) as string | undefined
 }
-
+(props.friend?.id)
 onMounted(async () => {
     avatar.value = await getAvatar(props.friend!!.id)
 })

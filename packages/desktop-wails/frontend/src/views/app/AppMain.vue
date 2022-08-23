@@ -12,6 +12,8 @@ import { Workspace } from '@vicons/carbon';
 import { GroupFilled } from '@vicons/material';
 const appStore = useAppStore();
 const toast = useMessage();
+
+appStore.users = [];
 const loadingSteps = ref([
     {
         finished: false,
@@ -94,6 +96,7 @@ const addFriendModal = ref({
     }
 });
 appStore.leftDrawer.show = true;
+
 appStore.leftDrawer.components = [
     {
         t: "Route",
@@ -103,7 +106,7 @@ appStore.leftDrawer.components = [
     },
     {
         t: "Route",
-        text: 'Direct Messages',
+        text: 'Messages',
         icon: Chatbubbles,
         path: '/app/channel/dm/home',
         name: "channel-dm",
@@ -131,7 +134,6 @@ appStore.leftDrawer.components = [
         }
     }
 ]
-
 </script>
 
 

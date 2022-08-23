@@ -95,7 +95,7 @@ func (c *Client) DialSocket() (*string, error) {
 		c.SocketTicker = time.NewTicker(30000 * time.Millisecond)
 		go func() {
 			for range c.SocketTicker.C {
-				if !c.Connection.Closed || c.Connection != nil {
+				if c.Connection != nil && !c.Connection.Closed {
 					c.Connection.Ping()
 				}
 			}

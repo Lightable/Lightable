@@ -1,13 +1,35 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue';
+import { NButton, NIcon, NInput } from 'naive-ui';
 import { Light } from '@vicons/carbon';
 import { Search24Regular } from '@vicons/fluent';
-import { NButton, NIcon } from 'naive-ui';
-import { computed } from 'vue';
 import { useAppStore } from '../../stores/AppStore';
-
+import { useClickOutside } from '../../composable/click-outside'
+import SearchGlobal from '../search/SearchGlobal.vue'
 const appStore = useAppStore();
 
 const version = computed(() => appStore.version);
+const search = ref({
+    searching: false,
+    term: ''
+});
+const container = ref(null);
+
+const onSearchClick = () => {
+    appStore.search.show = true;
+}
+
+useClickOutside(container, () => {
+    search.value.searching = false;
+})
+
+document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'f' && ev.ctrlKey && !appStore.search.show) {
+        ev.preventDefault();
+        appStore.search.show = true;
+        return
+    }
+})
 </script>
 
 
@@ -20,8 +42,9 @@ const version = computed(() => appStore.version);
             <span class="title">
                 Lightable
             </span>
-            <div class="search-container">
-                <NButton text type="info" size="large">
+            <div class="search-container" @click="onSearchClick" ref="container">
+                <input type="text" placeholder="Search..." class="search-input" :searching="search.searching" />
+                <NButton text type="info" size="large" class="search-btn" v-if="!search.searching">
                     <template #icon>
                         <NIcon>
                             <Search24Regular />
@@ -61,6 +84,7 @@ const version = computed(() => appStore.version);
         height: 45px;
         padding-top: 1px;
         padding-left: 8px;
+
         .icon {
             height: 26px;
             width: 26px;
@@ -73,22 +97,37 @@ const version = computed(() => appStore.version);
         }
 
         .search-container {
-            height: 24px;
-            width: 24px;
+            height: 25px;
+            width: 120px;
             margin-left: auto;
             margin-right: 12px;
-            background-color: rgba(41, 41, 41, 0.548);
-            border-radius: 50%;
+            background-color: rgba(41, 41, 41, 0.411);
+            border-radius: .5rem;
             display: flex;
-            justify-content: center;
+            justify-content: space-evenly;
             align-items: center;
-            padding: 4px;
 
-            .search-icon {
-                height: 24px;
-                width: 24px;
-                font-size: 18px;
+            .search-input {
+                all: unset;
+                font-size: 12px;
+                line-height: inherit;
+                height: 20px;
+                width: 90px;
+                padding-left: 5px;
+                color: var(--text-color-2);
+
+                &[searching='true'] {
+                    width: 111px;
+                }
             }
+
+            .search-btn {}
+
+            // .search-icon {
+            //     height: 24px;
+            //     width: 24px;
+            //     font-size: 18px;
+            // }
         }
 
     }

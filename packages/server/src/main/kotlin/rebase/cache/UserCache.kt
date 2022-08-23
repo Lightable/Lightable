@@ -30,7 +30,9 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
         users[user.identifier] = user
         if (saveToDB) {
             executor.submit {
-                if (userColl.findOne(User::email eq user.email) == null) {
+                if (userColl.countDocuments() == 0L) {
+                    userColl.insertOne(user)
+                } else if (userColl.findOne(User::email eq user.email) == null) {
                     userColl.insertOne(user)
                 } else {
                     userColl.findOneAndReplace(User::email eq user.email, user)
@@ -78,12 +80,14 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
     }
     init {
         logger.info("Initialized")
-        userColl.find().forEach { user ->
-            user.cache = this
-            println("Found existing user: ${user.name} ${user.identifier} With Friends = ${user.relationships.friends}")
-            user.avatar?.idJSON = user.avatar?.identifier.toString()
-            FileController().createUserDir(user.identifier)
-            users[user.identifier] = user
+        if (userColl.countDocuments() != 0L) {
+            userColl.find().forEach { user ->
+                user.cache = this
+                println("Found existing user: ${user.name} ${user.identifier} With Friends = ${user.relationships.friends}")
+                user.avatar?.idJSON = user.avatar?.identifier.toString()
+                FileController().createUserDir(user.identifier)
+                users[user.identifier] = user
+            }
         }
         releaseColl.find().forEach { release ->
             releases[release.tag] = release
@@ -108,16 +112,18 @@ class UserCache(private val executor: ExecutorService, val db: RebaseMongoDataba
     inner class UserUpdateBatch : java.util.TimerTask() {
         override fun run() {
             logger.info("Batch get is running... (${batchInterval}s)")
-            userColl.find().forEach { user ->
-                val existing = users[user.identifier]
-                if (existing == null) {
-                    user.cache = this@UserCache
-                    logger.info("Found existing user (${user.identifier}) on DB that isn't on this API instance... Creating it now")
-                    user.avatar?.idJSON = user.avatar?.identifier.toString()
-                    FileController().createUserDir(user.identifier)
-                    users[user.identifier] = user
-                } else if (existing != user) {
-                    existing.replace(user)
+            if (userColl.countDocuments() != 0L) {
+                userColl.find().forEach { user ->
+                    val existing = users[user.identifier]
+                    if (existing == null) {
+                        user.cache = this@UserCache
+                        logger.info("Found existing user (${user.identifier}) on DB that isn't on this API instance... Creating it now")
+                        user.avatar?.idJSON = user.avatar?.identifier.toString()
+                        FileController().createUserDir(user.identifier)
+                        users[user.identifier] = user
+                    } else if (existing != user) {
+                        existing.replace(user)
+                    }
                 }
             }
         }

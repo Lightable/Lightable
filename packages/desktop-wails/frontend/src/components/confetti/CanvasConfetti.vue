@@ -9,7 +9,7 @@ const props = defineProps({
 });
 const confettiStore = useConfettiStore()
 onMounted(() => {
-    console.log(`[ConfettiFactory -> Create]: ${props.id}`);
+    (`[ConfettiFactory -> Create]: ${props.id}`);
     const instance = confetti.create(document.getElementById(props.id!!) as HTMLCanvasElement, {
         useWorker: false,
         resize: true

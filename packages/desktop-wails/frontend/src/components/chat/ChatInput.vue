@@ -52,7 +52,7 @@ let props = defineProps({
     recipient: Object as PropType<mocks.PrivateUser>,
     isPreview: Boolean
 });
-console.log(props);
+(props);
 </script>
 
 

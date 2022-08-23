@@ -24,7 +24,7 @@ const props = defineProps({
     width: fit-content;
 
     .avatar {
-        display: block;
+        display: flex;
         position: relative;
         width: auto;
         height: auto;
@@ -36,7 +36,7 @@ const props = defineProps({
         border-radius: 50%;
 
         border: rgb(16, 16, 20) 3px solid;
-        bottom: 5%;
+        bottom: -3px;
         right: -10%;
         position: absolute;
 

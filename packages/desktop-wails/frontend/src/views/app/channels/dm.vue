@@ -12,6 +12,8 @@ if (router.currentRoute.value.params.id === 'home') router.push('/concepts/soon'
 const id = computed(() => router.currentRoute.value.params.id as string);
 
 let dm = ref(appStore.users.find(u => u.id === id.value)) as Ref<null | mocks.PublicUser | undefined>
+
+(dm);
 </script>
 
 

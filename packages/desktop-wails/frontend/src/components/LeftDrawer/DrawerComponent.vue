@@ -34,7 +34,7 @@ const clickEvent = () => {
 </script>
 
 <template>
-    <div class="drawer-component" :disabled="(pair.t !== `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '' || router.currentRoute.value.name === pair.name) ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
+    <div :class="`drawer-component ${(pair.t !== `Function` && $router.currentRoute.value.fullPath === pair.path) ? 'active-path' : ''}`" :disabled="(pair.t !== `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '' || router.currentRoute.value.name === pair.name) ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
         <NIcon :size="18" v-if="pair.icon">
             <component :is="pair.icon" />
         </NIcon>
@@ -68,6 +68,10 @@ const clickEvent = () => {
     &[disabled='true'] {
         opacity: var(--opacity-disabled);
         cursor: not-allowed;
+    }
+
+    &.active-path {
+        background-color: rgba(255, 255, 255, 0.082)
     }
 
     &:hover {
