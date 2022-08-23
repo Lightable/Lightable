@@ -93,7 +93,7 @@ class WebSocketController(
                 send(
                     session.session,
                     session.type,
-                    ServerReadyPayload(user.toPublic(), user.getFriends(), MetaInfoPayload(isProd))
+                    ServerReadyPayload(user.toPrivate(), user.getFriends(), MetaInfoPayload(isProd))
                 )
                 user.state = UserState.ONLINE.ordinal
                 user.save()
@@ -408,7 +408,7 @@ data class TypingEvent(
 }
 
 data class ServerReadyPayload(
-    @JsonIgnore val userRaw: PublicUser,
+    @JsonIgnore val userRaw: PrivateUser,
     @JsonIgnore val relationshipsRaw: FriendsPublic,
     @JsonIgnore val metaRaw: MetaInfoPayload
 ) {

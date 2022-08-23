@@ -167,9 +167,10 @@ const restartLightable = () => {
     z-index: 2;
     position: absolute;
     top: 0;
-    width: calc(100vw - 250px);
-
+    width: 100vw;
+    
     &[with-drawer='true'] {
+        width: calc(100vw - 250px);
         margin-left: 250px;
     }
 

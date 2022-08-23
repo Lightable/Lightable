@@ -36,9 +36,10 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
 
 
 <template>
+{{self?.analytics}}
     <div class="user-home">
         <StatisticsHeader />
-        <GeneralStats />
+        <GeneralStats :analytics="self?.analytics"/>
         <FriendStats />
     </div>
 </template>

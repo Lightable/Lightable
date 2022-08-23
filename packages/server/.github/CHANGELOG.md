@@ -1,4 +1,19 @@
 # Changelog
+<h2 align="center">August 23 2022</h2>
+<h3 align="center">1.18.0-ALPHA</h3>
+
+#### Changes:
+* Add simplified user analytics
+
+<h2 align="center">August 17 2022</h2>
+<h3 align="center">1.16.0-ALPHA</h3>
+
+#### Changes:
+* Add new controller 'InternalsController' that allows valid IP's to use and control internal data of the given API
+* Add new path '/internal' with current GET route `/internal/users/all`
+##### Syntax: 
+- internals=127.0.0.1,192.168.0.1
+
 <h2 align="center">August 17 2022</h2>
 <h3 align="center">1.17.0-ALPHA</h3>
 

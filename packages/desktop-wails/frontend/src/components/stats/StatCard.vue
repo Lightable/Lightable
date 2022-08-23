@@ -12,7 +12,7 @@ const props = defineProps({
         <slot />
         <span class="stat-header">{{ title }}</span>
         <div class="divider" />
-        <span class="stat-data">{{ data }}</span>
+        <span class="stat-data">{{(data !== 'undefined' || !data) ? data : '?' }}</span>
     </div>
 </template>
 

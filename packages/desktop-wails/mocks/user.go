@@ -35,7 +35,9 @@ func (u *PrivateUser) ToPublic() *PublicUser {
 }
 
 type UserAnalytics struct {
-	Logins int `json:"logins"`
+	Messages   int64 `json:"messages"`
+	CallTime   int64 `json:"callTime"`
+	ActiveTime int64 `json:"activeTime"`
 }
 type UserStatus struct {
 	Icon Icon   `json:"icon"`
