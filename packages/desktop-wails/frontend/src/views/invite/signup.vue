@@ -57,6 +57,8 @@ const onFormSubmit = (e: MouseEvent) => {
 }
 
 onBeforeMount(() => appStore.leftDrawer.show = false);
+
+appStore.setTitle('Invite • Signup')
 </script>
 
 <template>

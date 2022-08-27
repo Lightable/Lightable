@@ -9,6 +9,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+	p "path/filepath"
+	"red/backend"
 	"red/backend/app"
 	"red/mocks"
 	r "runtime"
@@ -42,12 +45,22 @@ func NewClient(ctx *context.Context, logger *zerolog.Logger, config *mocks.AppCo
 		Ctx:    ctx,
 	}
 	client.Http = CreateHTTP(&client, a)
+	if config.Responder != nil {
+		client.Http.Api = config.Responder.API
+		client.Api = config.Responder.Gateway
+		client.Http.Secure = config.Responder.Secure
+	}
 	client.RelationshipManager = NewRelationshipManager(client.Http, &client)
 	return &client
 }
 
 func (c *Client) SetSocket(socket string) {
 	c.Api = socket
+	if c.Config.Responder != nil {
+		config := *c.Config
+		config.Responder.Gateway = socket
+		c.Http.App.SaveConfig()
+	}
 }
 
 func (c *Client) GetUser() *mocks.PrivateUser {
@@ -60,9 +73,7 @@ func (c *Client) DialSocket() (*string, error) {
 	bus := EventBus.New()
 	if c.Connection != nil && !c.Connection.Closed {
 		c.Logger.Info().Msg("Socket was already connected. Closing current and connecting a new one.")
-		defer func() {
-			c.Connection.Ws.Close()
-		}()
+		c.Connection.GracefulClose()
 		c.Connection = nil
 	}
 	if c.Api == "" {
@@ -137,6 +148,7 @@ func (c *Client) ReadAndRespond(m []byte) {
 			return
 		}
 		d := cData.D
+		c.CurrentUser = &d.User
 		c.RelationshipManager.ClearRelations()
 		if !d.Relationships.Empty {
 			relation := d.Relationships
@@ -190,7 +202,35 @@ func (c *Client) GetAvatar(id string, size int) string {
 	}
 	return ""
 }
-
+func (c *Client) GetSelfAvatar(size int) string {
+	if c.CurrentUser.Avatar != nil {
+		return c.GetHttpURL() + "/cdn/user/" + c.CurrentUser.Id + "/avatars/avatar_" + c.CurrentUser.Avatar.Id + "?size=" + fmt.Sprint(size)
+	}
+	return ""
+}
+func (c *Client) OpenAvatarPickDialog() *string {
+	c.Logger.Info().Msg("Opened avatar picker")
+	path, err := runtime.OpenFileDialog(*c.Ctx, runtime.OpenDialogOptions{
+		Title: "Select your avatar",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "Avatar Formats",
+				Pattern: "*.jpg;*.jpeg;*.png;*.webp;*.gif",
+			},
+		},
+	})
+	if err != nil {
+		c.Logger.Err(err)
+		return nil 
+	}
+	if path == "" {
+		return nil
+	}
+	wd, _ := os.Getwd()
+	basePath := p.Base(path)
+	backend.CopyFile(path, wd + "/" + basePath)
+	return &basePath
+}
 func (c *Client) GetHttpURL() string {
 	url := url.URL{Host: c.Api}
 	if c.Http.Secure {

@@ -14,6 +14,10 @@ export function GetHttpURL() {
   return window['go']['client']['Client']['GetHttpURL']();
 }
 
+export function GetSelfAvatar(arg1) {
+  return window['go']['client']['Client']['GetSelfAvatar'](arg1);
+}
+
 export function GetSocketHistory() {
   return window['go']['client']['Client']['GetSocketHistory']();
 }
@@ -24,6 +28,10 @@ export function GetUser() {
 
 export function LoginToSocket() {
   return window['go']['client']['Client']['LoginToSocket']();
+}
+
+export function OpenAvatarPickDialog() {
+  return window['go']['client']['Client']['OpenAvatarPickDialog']();
 }
 
 export function ReadAndRespond(arg1) {

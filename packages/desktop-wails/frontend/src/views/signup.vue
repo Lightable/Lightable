@@ -72,6 +72,7 @@ const onCodeSubmit = async () => {
 }
 
 onBeforeMount(() => appStore.leftDrawer.show = false);
+appStore.setTitle('Signup')
 </script>
 
 

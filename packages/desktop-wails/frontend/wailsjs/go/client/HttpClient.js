@@ -14,6 +14,10 @@ export function CreatePostRequestWithAuthorization(arg1) {
   return window['go']['client']['HttpClient']['CreatePostRequestWithAuthorization'](arg1);
 }
 
+export function CreatePostRequestWithBodyAndAuthorization(arg1, arg2) {
+  return window['go']['client']['HttpClient']['CreatePostRequestWithBodyAndAuthorization'](arg1, arg2);
+}
+
 export function CreateURL(arg1) {
   return window['go']['client']['HttpClient']['CreateURL'](arg1);
 }
@@ -44,4 +48,8 @@ export function SetAPI(arg1) {
 
 export function SetSecure(arg1) {
   return window['go']['client']['HttpClient']['SetSecure'](arg1);
+}
+
+export function UploadAvatar(arg1) {
+  return window['go']['client']['HttpClient']['UploadAvatar'](arg1);
 }

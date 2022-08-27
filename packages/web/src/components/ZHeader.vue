@@ -25,7 +25,7 @@ const setTheme = appStore.setTheme
             <Icon :size="32" color="var(--text-color-1)">
                <ChatBoxIcon height="32" width="32" />
             </Icon>
-            <span class="ztext">ZenSpace</span>
+            <span class="ztext">Lightable</span>
          </Element>
          <Element type="div" class="theme-select">
             <ButtonGroup>

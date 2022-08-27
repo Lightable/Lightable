@@ -55,6 +55,8 @@ const onFormSubmit = async (e: MouseEvent) => {
 }
 
 onBeforeMount(() => appStore.leftDrawer.show = false);
+
+appStore.setTitle('Login')
 </script>
 
 

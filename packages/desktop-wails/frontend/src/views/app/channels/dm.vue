@@ -13,7 +13,7 @@ const id = computed(() => router.currentRoute.value.params.id as string);
 
 let dm = ref(appStore.users.find(u => u.id === id.value)) as Ref<null | mocks.PublicUser | undefined>
 
-(dm);
+appStore.setTitle(`Direct • ${dm.value?.name}`);
 </script>
 
 

@@ -15,4 +15,6 @@ export function GetRelations():Promise<mocks.RelationshipStruct>;
 
 export function InternalAddRelation(arg1:string,arg2:mocks.PublicUser):Promise<Error>;
 
+export function RemoveFriend(arg1:string):void;
+
 export function RequestFriend(arg1:string):Promise<mocks.PublicUser>;

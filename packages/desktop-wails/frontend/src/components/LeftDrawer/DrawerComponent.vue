@@ -16,6 +16,7 @@ const clickEvent = () => {
     switch (pair.t) {
         case "Route": {
             if (pair.path!! === route) return
+            if (router.currentRoute.value.fullPath === pair.path!!) return
             router.push(pair.path!!);
             break;
         }

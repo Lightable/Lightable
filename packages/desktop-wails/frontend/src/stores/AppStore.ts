@@ -2,18 +2,20 @@ import { defineStore } from "pinia";
 import { GetConfig, ChangeTheme, PingDelay, GetVersion, GetColour } from '../../wailsjs/go/app/App'
 import { GetSocketHistory } from '../../wailsjs/go/client/Client';
 import { mocks } from "../../wailsjs/go/models";
-import { EventsOn } from '../../wailsjs/runtime/runtime';
+import { EventsOn, WindowSetTitle } from '../../wailsjs/runtime/runtime';
 import { debug } from '../composable/Logger';
 import { GetRelations } from '../../wailsjs/go/client/RelationshipManager';
 export const useAppStore = defineStore('AppStore', {
     state: () => ({
         version: 'Unknown Version' as string,
+        shouldShowOnboardModal: false,
         theme: 'Dark' as LightableTheme,
         colour: '',
         hasUser: false as boolean,
         user: null as mocks.PrivateUser | null,
+        avatar: null as string | null,
         drawers: {
-            websocket: false
+            websocket: true
         },
         settings: {
             currentDrawer: '',
@@ -42,6 +44,7 @@ export const useAppStore = defineStore('AppStore', {
             this.theme = config.theme as LightableTheme;
             this.hasUser = config.hasUser;
             this.version = version;
+            if (!config.responder) this.shouldShowOnboardModal = true;
             let root = document.documentElement;
             this.colour = colour;
             root.style.setProperty("--windows-accent-colour", this.colour);
@@ -58,8 +61,9 @@ export const useAppStore = defineStore('AppStore', {
             EventsOn('ws:read:decode', async () => {
                 this.history.websocket = await GetSocketHistory() as Array<string>
             });
-            EventsOn('ws:read:server|start', async () => {
+            EventsOn('ws:read:server|start', async (d) => {
                 this.relationships = await GetRelations();
+                this.user = d.user;
             });
             EventsOn('ws:read:user|status', async (_) => {
                 this.relationships = await GetRelations();
@@ -82,6 +86,9 @@ export const useAppStore = defineStore('AppStore', {
                 return RelationshipStatus.REQUEST
             }
             return RelationshipStatus.UNKNOWN
+        },
+        setTitle(name: string) {
+            WindowSetTitle(`Lightable｜${name}`);
         }
     }
 })

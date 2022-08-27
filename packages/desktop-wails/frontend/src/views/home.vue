@@ -18,6 +18,8 @@ const setHasUser = (bool: boolean) => {
 }
 
 onBeforeMount(() => appStore.leftDrawer.show = false);
+
+appStore.setTitle('Home');
 </script>
 
 

@@ -4,26 +4,58 @@ import (
 	"embed"
 	"fmt"
 	"io"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"path"
 	"red/backend/app"
 	"red/backend/client"
+	"runtime/debug"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
-	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 //go:embed frontend/dist
 var assets embed.FS
 var start = time.Now()
-var currentVersion = "0.0.25-ALPHA"
+var currentVersion = "0.0.29-ALPHA"
+
+type FileLoader struct {
+	http.Handler
+}
+
+func NewFileLoader() *FileLoader {
+	return &FileLoader{}
+}
+
+func (h *FileLoader) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	var err error
+	if req.Method == "POST" {
+		body, _ := io.ReadAll(req.Body)
+		fmt.Printf("Got body: %v\n", string(body))
+	}
+	requestedFilename := strings.TrimPrefix(req.URL.Path, "/")
+	println("Requesting file:", requestedFilename)
+	wd, _ := os.Getwd()
+	fileData, err := os.ReadFile(wd + "/" + requestedFilename)
+	if err != nil {
+		res.WriteHeader(http.StatusBadRequest)
+		res.Write([]byte(fmt.Sprintf("Could not load file %s", requestedFilename)))
+	}
+
+	res.Write(fileData)
+}
 
 func main() {
-	
+	debug.SetGCPercent(80)
+	go func() {
+        fmt.Println(http.ListenAndServe("localhost:6060", nil))
+    }()
 	logger := Configure()
 	app := app.NewApp(logger, currentVersion)
 	app.PreInit()
@@ -32,27 +64,24 @@ func main() {
 	logger.Info().Msg(fmt.Sprintf("Preinit took approx %v", time.Since(start)))
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:      "Lightable Red",
-		Width:      1220,
-		Height:     700,
-		MinWidth:   940,
-		MinHeight:  500,
-		Frameless:  true,
-		Assets:     assets,
-		OnStartup:  app.Startup,
-		OnShutdown: app.Shutdown,
-		Windows: &windows.Options{
-			WebviewIsTransparent: true,
-			WindowIsTranslucent:  true,
-			TranslucencyType:     windows.TabbedWindow,
-		},
-		DisableResize: false,
+		Title:            "Lightable Red",
+		Width:            1220,
+		Height:           700,
+		MinWidth:         940,
+		MinHeight:        500,
+		Frameless:        false,
+		Assets:           assets,
+		OnStartup:        app.Startup,
+		OnShutdown:       app.Shutdown,
+		BackgroundColour: options.NewRGB(16, 16, 20),
+		DisableResize:    false,
 		Bind: []interface{}{
 			app,
 			client,
 			client.Http,
 			client.RelationshipManager,
 		},
+		AssetsHandler: NewFileLoader(),
 		Experimental: &options.Experimental{
 			UseCSSDrag: true,
 		},
@@ -60,6 +89,7 @@ func main() {
 	if err != nil {
 		println("Error:", err)
 	}
+	
 }
 
 func Configure() *zerolog.Logger {
@@ -90,6 +120,6 @@ func newRollingFile(dir string, file string) io.Writer {
 	return &lumberjack.Logger{
 		Filename: path.Join(dir, file),
 		MaxSize:  15,
-		MaxAge: 1,
+		MaxAge:   1,
 	}
 }

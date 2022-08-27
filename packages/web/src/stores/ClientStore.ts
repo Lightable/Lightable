@@ -14,7 +14,7 @@ export const useClientStore = defineStore('clientStore', {
     actions: {
         async login(email: string, pass: string) {
             let app = useAppStore();
-            let res = await fetch('https://api.lightableapp.cf/user/@me/login', {
+            let res = await fetch('https://api.lightable.app/user/@me/login', {
                 method: 'POST',
                 body: JSON.stringify({
                     email,

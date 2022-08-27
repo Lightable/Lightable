@@ -12,7 +12,7 @@ const currentPane = computed(() => settingsStore.openPane);
         <NDrawer placement="right" :show="true" :show-mask="true" v-if="currentPane === 'Customization'">
             <NDrawerContent title="Customize">
                 <div class="body">
-                 
+                    
                 </div>
             </NDrawerContent>
         </NDrawer>

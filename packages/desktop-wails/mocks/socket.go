@@ -46,7 +46,13 @@ func (c *Connection) Write(mt int, payload []byte) error {
 	}
 	return c.Ws.WriteMessage(mt, payload)
 }
-
+func (c *Connection) GracefulClose() {
+	println("Attempting graceful close")
+	c.Write(websocket.CloseMessage, []byte{})
+	for {
+		if c.Closed { break }
+	}
+}
 func (c *Connection) Ping() {
 	c.Ws.WriteMessage(websocket.TextMessage, []byte("{\"t\": 2}"))
 }
@@ -96,7 +102,7 @@ type UserStatusUpdatePayload struct {
 	User PublicUser `json:"user"`
 }
 type ServerStartPayload struct {
-	User          PublicUser                 `json:"user"`
+	User          PrivateUser                 `json:"user"`
 	Status        UserStatus                 `json:"status"`
 	Admin         bool                       `json:"admin"`
 	Enabled       bool                       `json:"enabled"`

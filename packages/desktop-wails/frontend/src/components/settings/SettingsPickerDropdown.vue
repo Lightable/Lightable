@@ -3,6 +3,7 @@ import { NButton, NIcon, NTooltip } from 'naive-ui';
 import { ColorPalette as ColorPalette } from '@vicons/ionicons5';
 import { Person28Filled as Person, PlugDisconnected24Filled as Plug, Bug24Filled as Debug } from '@vicons/fluent';
 import { useSettingsStore, SettingsPane } from '../../stores/SettingsStore';
+import { onMounted } from 'vue';
 
 
 const settingsStore = useSettingsStore();
@@ -11,7 +12,6 @@ let timer: any;
 const emits = defineEmits(['close'])
 const onLeaveMouse = () => {
     timer = setTimeout(() => {
-        console.log('Should close')
         emits('close');
     }, 5000)
 }
@@ -26,6 +26,12 @@ const setCurrentPane = (pane: SettingsPane) => {
     settingsStore.setLivePane(pane)
     emits('close');
 }
+
+onMounted(() => {
+    timer = setTimeout(() => {
+        emits('close');
+    }, 5000)
+})
 </script>
 
 <template>

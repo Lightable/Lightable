@@ -2,5 +2,10 @@ import { createPinia } from 'pinia';
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
+import clickoutside from './composable/useclickoutside';
+import mousemoveoutside from './composable/movemouseoutside';
 
-createApp(App).use(router).use(createPinia()).mount('#app')
+const app = createApp(App).use(router).use(createPinia()).directive('click-outside', clickoutside).directive('mouse-move-outside', mousemoveoutside)
+
+
+app.mount('#app')

@@ -11,6 +11,8 @@ export function CreateGetRequestWithAuthorization(arg1:url.URL,arg2:string):Prom
 
 export function CreatePostRequestWithAuthorization(arg1:url.URL):Promise<http.Request>;
 
+export function CreatePostRequestWithBodyAndAuthorization(arg1:url.URL,arg2:client.PassThru):Promise<http.Request>;
+
 export function CreateURL(arg1:string):Promise<url.URL>;
 
 export function LoginWithEmailAndPassword(arg1:string,arg2:string):Promise<mocks.PrivateUser>;
@@ -26,3 +28,5 @@ export function RegisterUser(arg1:string,arg2:string,arg3:string,arg4:string):Pr
 export function SetAPI(arg1:string):void;
 
 export function SetSecure(arg1:boolean):void;
+
+export function UploadAvatar(arg1:string):Promise<mocks.PublicUser>;

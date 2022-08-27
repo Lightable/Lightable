@@ -26,6 +26,10 @@ export function InternalAddRelation(arg1, arg2) {
   return window['go']['client']['RelationshipManager']['InternalAddRelation'](arg1, arg2);
 }
 
+export function RemoveFriend(arg1) {
+  return window['go']['client']['RelationshipManager']['RemoveFriend'](arg1);
+}
+
 export function RequestFriend(arg1) {
   return window['go']['client']['RelationshipManager']['RequestFriend'](arg1);
 }

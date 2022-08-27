@@ -90,7 +90,9 @@ func (rm *RelationshipManager) AcceptFriend(name string) (*mocks.PublicUser, err
 	rm.Friends[intID] = *pubUser
 	return pubUser, nil
 }
-
+func (rm *RelationshipManager) RemoveFriend(id string) {
+	
+}
 func (rm *RelationshipManager) GetRelations() *mocks.RelationshipStruct {
 	return &mocks.RelationshipStruct{
 		Pending:  maps.Values(rm.Pending),

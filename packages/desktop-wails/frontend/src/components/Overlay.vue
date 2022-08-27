@@ -1,7 +1,7 @@
 <template>
-    <div class="overlay" @click="$emit('overlay-click')">
-        <slot />
-    </div>
+        <div class="overlay" @click="$emit('overlay-click')">
+            <slot />
+        </div>
 </template>
 
 
@@ -22,4 +22,7 @@
     bottom: 0;
     background-color: rgba(22, 22, 22, 0.589);
 }
+
+
+
 </style>

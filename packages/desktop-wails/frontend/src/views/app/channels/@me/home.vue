@@ -32,15 +32,16 @@ const acceptFriend = async (pend: mocks.PublicUser) => {
     await RequestFriend(pend.name)
     loadingStates.value.set(pend.id, false);
 }
+
+appStore.setTitle('Stats')
 </script>
 
 
 <template>
-{{self?.analytics}}
     <div class="user-home">
         <StatisticsHeader />
         <GeneralStats :analytics="self?.analytics"/>
-        <FriendStats />
+        <FriendStats :friends="relations.friends.length"/>
     </div>
 </template>
 

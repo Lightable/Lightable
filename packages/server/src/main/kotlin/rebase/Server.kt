@@ -222,6 +222,7 @@ class Server(
                 path("/releases") {
                     get(cdnController::getReleases)
                     get("{release}", cdnController::getRelease)
+                    get("/app/{file}", cdnController::getApp)
                 }
                 path("/user") {
                     get("/{user}/avatars/avatar_{avatar}", cdnController::getUserAvatar)

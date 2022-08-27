@@ -9,7 +9,8 @@ import { DialSocket, LoginToSocket, GetUser } from '../../../wailsjs/go/client/C
 import { NModal, NInput, NButton, NIcon, useMessage } from 'naive-ui';
 import { GetRelations, RequestFriend } from '../../../wailsjs/go/client/RelationshipManager';
 import { Workspace } from '@vicons/carbon';
-import { GroupFilled } from '@vicons/material';
+import { GroupFilled, PersonRound as Friends } from '@vicons/material';
+import { Cog } from '@vicons/ionicons5';
 const appStore = useAppStore();
 const toast = useMessage();
 
@@ -40,7 +41,9 @@ GetUser().then((user) => {
         name: `Get user`,
         state: LoadingStates.SUCCESS
     }
+    appStore.setTitle('Loaded • User');
     DialSocket().then((msg) => {
+        appStore.setTitle('Loaded • Socket • Connect');
         loadingSteps.value[1] = {
             finished: true,
             name: `Connect to socket (${msg})`,
@@ -48,6 +51,7 @@ GetUser().then((user) => {
         }
         // @ts-ignore
         LoginToSocket().then(() => {
+            appStore.setTitle('Loaded • Socket • Login');
             loadingSteps.value[2] = {
                 finished: true,
                 name: `Login to socket`,
@@ -64,9 +68,11 @@ GetUser().then((user) => {
                 appStore.users.push(...r.pending)
                 appStore.users.push(...r.requests)
                 complete.value = true;
+                appStore.setTitle('Home');
             });
         });
     }).catch((msg) => {
+        appStore.setTitle('Loading • Socket • Failed');
         loadingSteps.value[0] = {
             finished: true,
             name: `Connect to socket ${msg}`,
@@ -126,14 +132,27 @@ appStore.leftDrawer.components = [
         path: ""
     },
     {
+        t: "Route",
+        text: 'Friends',
+        path: '/app/friends',
+        icon: Friends
+    },
+    {
         t: "Function",
         text: 'Add Friend',
         icon: PersonAdd,
         cb: () => {
             addFriendModal.value.show = true;
         }
-    }
+    },
+    {
+        t: "Route",
+        text: 'Settings',
+        path: '/app/settings',
+        icon: Cog
+    },
 ]
+
 </script>
 
 

@@ -2,16 +2,25 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"net/url"
+	"os"
 	"red/backend/app"
 	user "red/mocks"
+	gr "runtime"
+	"runtime/debug"
+	"strings"
 	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type HttpClient struct {
@@ -21,7 +30,29 @@ type HttpClient struct {
 	Secure bool
 	Api    string
 }
+type PassThru struct {
+    io.Reader
+	ctx context.Context
+    total    int64 // Total # of bytes transferred
+    length   int64 // Expected length
+    progress float64
+}
+func (pt *PassThru) Read(p []byte) (int, error) {
+    n, err := pt.Reader.Read(p)
+    if n > 0 {
+        pt.total += int64(n)
+        percentage := float64(pt.total) / float64(pt.length) * float64(100)
+        if percentage-pt.progress > 2 {
+            pt.progress = percentage
+			runtime.EventsEmit(pt.ctx, "upload:progress", pt.progress)
+        }
+		if pt.total == pt.length {
+			runtime.EventsEmit(pt.ctx, "upload:finished", pt.length)
+		}
+    }
 
+    return n, err
+}
 func CreateHTTP(client *Client, app *app.App) *HttpClient {
 	return &HttpClient{Client: client, App: app, Http: http.Client{Timeout: time.Duration(25) * time.Second}}
 }
@@ -30,10 +61,18 @@ func CreateHTTP(client *Client, app *app.App) *HttpClient {
 
 func (h *HttpClient) SetAPI(api string) {
 	h.Api = api
+	if h.App.Config.Responder != nil {
+		h.App.Config.Responder.API = api
+		h.App.SaveConfig()
+	}
 }
 
 func (h *HttpClient) SetSecure(secure bool) {
 	h.Secure = secure
+	if h.App.Config.Responder != nil {
+		h.App.Config.Responder.Secure = secure
+		h.App.SaveConfig()
+	}
 }
 
 /* Commands */
@@ -190,6 +229,69 @@ func (h *HttpClient) AddFriend(name string) (*user.PublicUser, error) {
 	return nil, nil
 }
 
+func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
+	fmt.Println(file)
+	u := h.CreateURL("/user/@me/avatar")
+    b := &bytes.Buffer{}
+	writer := multipart.NewWriter(b)
+	fw, err := CreateFormImageFile(writer, "avatar", "avatar")
+	if err != nil {
+		return nil, err
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+	f, err := os.Open(wd + "/" + file)
+	if err != nil {
+		return nil, err
+	}
+	by, _ := io.ReadAll(f)
+	fw.Write(by)
+	writer.Close()
+	byytes := b.Bytes()
+	passT := &PassThru{Reader: bytes.NewReader(byytes),  ctx: h.App.Ctx, length: int64(len(byytes))}
+	post, err := h.CreatePostRequestWithBodyAndAuthorization(u, passT)
+	post.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%v", writer.Boundary()))
+	if err != nil {
+		return nil, err
+	}
+	resp, err := h.Http.Do(post)
+	if err != nil {
+		return nil, err
+	}
+	defer dclose(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		h.Client.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Something went wrong when serializing body in set avatar")
+		return nil, err
+	}
+	
+	// Free memory (GC is extremely aggresive)
+	gr.GC()
+	debug.FreeOSMemory() // Free more memory 
+	code := resp.StatusCode
+	if code == 200 || code == 201 {
+		pubUser := &user.PublicUser{}
+		jsonErr := json.Unmarshal(body, pubUser)
+		if jsonErr != nil {
+			return nil, jsonErr
+		}
+	    h.Client.CurrentUser.Avatar = pubUser.Avatar
+		os.Remove(wd + "/" + file)
+		return pubUser, nil
+	} else {
+		failImpl := &GenericFail{}
+		jsonErr := json.Unmarshal(body, failImpl)
+		if jsonErr != nil {
+			return nil, jsonErr
+		}
+		os.Remove(wd + "/" + file)
+		return nil, fmt.Errorf("%s (%s)", failImpl.Message, failImpl.Code)
+	}
+}
+
 func (h *HttpClient) RegisterLoginWithClient(u *user.PrivateUser) {
 	h.Client.CurrentUser = u
 }
@@ -220,7 +322,14 @@ func (h *HttpClient) CreatePostRequestWithAuthorization(url url.URL) (*http.Requ
 	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
 	return req, nil
 }
-
+func (h *HttpClient) CreatePostRequestWithBodyAndAuthorization(url url.URL, body *PassThru) (*http.Request, error) {
+	req, err := http.NewRequest("POST", url.String(), body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
+	return req, nil
+}
 type HttpResponse struct {
 	Status int    `json:"status"`
 	Json   string `json:"Json"`
@@ -240,4 +349,17 @@ func dclose(c io.Closer) {
     if err := c.Close(); err != nil {
         log.Fatal(err)
     }
+}
+func CreateFormImageFile(w *multipart.Writer, fieldname, filename string) (io.Writer, error) {
+	h := make(textproto.MIMEHeader)
+	h.Set("Content-Disposition",
+		fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+			escapeQuotes(fieldname), escapeQuotes(filename)))
+	h.Set("Content-Type", "image/png")
+	return w.CreatePart(h)
+}
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+
+func escapeQuotes(s string) string {
+	return quoteEscaper.Replace(s)
 }

@@ -8,11 +8,15 @@ export function GetAvatar(arg1:string,arg2:number):Promise<string>;
 
 export function GetHttpURL():Promise<string>;
 
+export function GetSelfAvatar(arg1:number):Promise<string>;
+
 export function GetSocketHistory():Promise<Array<string>>;
 
 export function GetUser():Promise<mocks.PrivateUser>;
 
 export function LoginToSocket():void;
+
+export function OpenAvatarPickDialog():Promise<any>;
 
 export function ReadAndRespond(arg1:Array<number>):void;
 

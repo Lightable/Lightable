@@ -31,5 +31,10 @@ const props = defineProps({
         background-color: rgba(255, 255, 255, 0.068);
         border-radius: .25rem;
     }
+    .actions {
+        display: flex;
+        flex-direction: row;
+        gap: 22px;
+    }
 }
 </style>

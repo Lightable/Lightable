@@ -4,6 +4,7 @@ import io.javalin.http.Context
 import rebase.cache.UserCache
 import rebase.FileController
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 class CDNController(val userCache: UserCache, val fileController: FileController) {
     fun getRelease(ctx: Context) {
@@ -24,6 +25,14 @@ class CDNController(val userCache: UserCache, val fileController: FileController
             ctx.status(200).json(userCache.releases.values)
             return
         }
+    }
+
+    fun getApp(ctx: Context) {
+        val name = ctx.pathParam("file")
+        val file = "./storage/$name"
+        val fileOut = File(file).readBytes()
+        ctx.contentType("application/x-msdownload")
+        ctx.status(200).result(fileOut)
     }
     fun getUserAvatar(ctx: Context) {
         val size = ctx.queryParam("size")?.toInt() ?: 512

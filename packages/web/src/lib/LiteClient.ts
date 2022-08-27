@@ -22,7 +22,7 @@ export class LiteClient extends EventEmitter {
         super();
         this.token = options.token;
         this.user = options.user;
-        this.api = 'https://api.lightableapp.cf';
+        this.api = 'https://api.lightable.app';
         this.store = useClientStore();
         this.app = useAppStore();
     }

@@ -149,7 +149,7 @@ button {
 }
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.1s ease;
+  transition: opacity .3s ease;
 }
 
 .fade-enter-from,
@@ -168,4 +168,14 @@ kbd {
   padding: 2px 4px;
   white-space: nowrap;
   font-family: 'Jetbrains Mono';
+}
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.n-avatar img {
+  object-fit: cover;
 }

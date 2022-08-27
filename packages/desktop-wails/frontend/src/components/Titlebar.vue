@@ -88,7 +88,7 @@ const restartLightable = () => {
                 </NButton>
             </div>
         </div>
-        <div class="titlebar-right" data-wails-no-drag>
+        <!-- <div class="titlebar-right" data-wails-no-drag>
             <div class="item">
                 <NButton title="Download" text style="padding: 0" @click="showDownload">
                     <template #icon>
@@ -152,7 +152,7 @@ const restartLightable = () => {
                     </template>
                 </NButton>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -170,7 +170,6 @@ const restartLightable = () => {
     width: 100vw;
     
     &[with-drawer='true'] {
-        width: calc(100vw - 250px);
         margin-left: 250px;
     }
 

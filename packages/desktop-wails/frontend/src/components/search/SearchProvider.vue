@@ -8,8 +8,23 @@ const props = defineProps({
 </script>
 
 <template>
-    <Overlay v-if="show">
-        <SearchGlobal />
-    </Overlay>
+    <Transition name="overlay-fade">
+        <Overlay v-if="show">
+            <SearchGlobal />
+        </Overlay>
+    </Transition>
     <slot />
 </template>
+
+
+<style lang="scss" scoped>
+.overlay-fade-enter-active,
+.overlay-fade-leave-active {
+  transition: opacity .4s ease;
+}
+.overlay-fade-enter-from,
+.overlay-fade-leave-to {
+  opacity: 0;
+}
+
+</style>

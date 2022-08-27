@@ -1,26 +1,35 @@
-export namespace client {
+export namespace mocks {
 	
-	export class HttpResponse {
-	    status: number;
-	    Json: string;
-	    Err: string;
+	export class Icon {
+	    cdn: string;
+	    animated: string;
+	    id: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new HttpResponse(source);
+	        return new Icon(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.status = source["status"];
-	        this.Json = source["Json"];
-	        this.Err = source["Err"];
+	        this.cdn = source["cdn"];
+	        this.animated = source["animated"];
+	        this.id = source["id"];
 	    }
 	}
-
-}
-
-export namespace mocks {
+	export class StandardToken {
+	    permissions: string[];
+	    token: string;
 	
+	    static createFrom(source: any = {}) {
+	        return new StandardToken(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.permissions = source["permissions"];
+	        this.token = source["token"];
+	    }
+	}
 	export class Message {
 	    content?: string;
 	    system: boolean;
@@ -93,22 +102,6 @@ export namespace mocks {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.animated = source["animated"];
-	        this.id = source["id"];
-	    }
-	}
-	export class Icon {
-	    cdn: string;
-	    animated: string;
-	    id: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Icon(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.cdn = source["cdn"];
 	        this.animated = source["animated"];
 	        this.id = source["id"];
 	    }
@@ -223,6 +216,8 @@ export namespace mocks {
 		    return a;
 		}
 	}
+	
+	
 	export class UserAnalytics {
 	    messages: number;
 	    callTime: number;
@@ -239,20 +234,8 @@ export namespace mocks {
 	        this.activeTime = source["activeTime"];
 	    }
 	}
-	export class StandardToken {
-	    permissions: string[];
-	    token: string;
 	
-	    static createFrom(source: any = {}) {
-	        return new StandardToken(source);
-	    }
 	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.permissions = source["permissions"];
-	        this.token = source["token"];
-	    }
-	}
 	export class PrivateUser {
 	    name: string;
 	    id: string;
@@ -299,8 +282,25 @@ export namespace mocks {
 		    return a;
 		}
 	}
+	export class AppResponderConfig {
+	    gateway: string;
+	    api: string;
+	    secure: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new AppResponderConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.gateway = source["gateway"];
+	        this.api = source["api"];
+	        this.secure = source["secure"];
+	    }
+	}
 	export class AppConfig {
 	    theme: string;
+	    responder?: AppResponderConfig;
 	    currentUser?: PrivateUser;
 	    hasUser: boolean;
 	    users?: {[key: string]: PrivateUser};
@@ -312,6 +312,7 @@ export namespace mocks {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.theme = source["theme"];
+	        this.responder = this.convertValues(source["responder"], AppResponderConfig);
 	        this.currentUser = this.convertValues(source["currentUser"], PrivateUser);
 	        this.hasUser = source["hasUser"];
 	        this.users = source["users"];
@@ -336,12 +337,53 @@ export namespace mocks {
 		}
 	}
 	
+
+}
+
+export namespace app {
+	
+	export class CustomMemoryStats {
+	    totalAlloc: number;
+	    alloc: number;
+	    sysAlloc: number;
+	    heapSpace: number;
+	    gcTotal: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomMemoryStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.totalAlloc = source["totalAlloc"];
+	        this.alloc = source["alloc"];
+	        this.sysAlloc = source["sysAlloc"];
+	        this.heapSpace = source["heapSpace"];
+	        this.gcTotal = source["gcTotal"];
+	    }
+	}
+
+}
+
+export namespace client {
 	
 	
+	export class HttpResponse {
+	    status: number;
+	    Json: string;
+	    Err: string;
 	
+	    static createFrom(source: any = {}) {
+	        return new HttpResponse(source);
+	    }
 	
-	
-	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.Json = source["Json"];
+	        this.Err = source["Err"];
+	    }
+	}
 
 }
 

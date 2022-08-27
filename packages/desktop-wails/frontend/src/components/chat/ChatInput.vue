@@ -105,7 +105,7 @@ let props = defineProps({
 </template>
 <style lang="scss" scoped>
 .outer-chat {
-    width: calc(100vw - 284px);
+    width: calc(100% - 32px);
     padding-bottom: 16px;
     padding-top: 16px;
     padding-right: 16px;

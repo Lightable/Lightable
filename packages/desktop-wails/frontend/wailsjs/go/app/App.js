@@ -6,8 +6,16 @@ export function ChangeTheme(arg1) {
   return window['go']['app']['App']['ChangeTheme'](arg1);
 }
 
+export function CreateResponder() {
+  return window['go']['app']['App']['CreateResponder']();
+}
+
 export function DownloadUpdate(arg1) {
   return window['go']['app']['App']['DownloadUpdate'](arg1);
+}
+
+export function ForceGC() {
+  return window['go']['app']['App']['ForceGC']();
 }
 
 export function GetColour() {
@@ -16,6 +24,10 @@ export function GetColour() {
 
 export function GetConfig() {
   return window['go']['app']['App']['GetConfig']();
+}
+
+export function GetMemoryStats() {
+  return window['go']['app']['App']['GetMemoryStats']();
 }
 
 export function GetVersion() {
@@ -40,6 +52,10 @@ export function PreInit() {
 
 export function Restart() {
   return window['go']['app']['App']['Restart']();
+}
+
+export function SaveConfig() {
+  return window['go']['app']['App']['SaveConfig']();
 }
 
 export function SetCurrentUser(arg1) {

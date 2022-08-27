@@ -5,7 +5,8 @@ import { Light } from '@vicons/carbon';
 import { Search24Regular } from '@vicons/fluent';
 import { useAppStore } from '../../stores/AppStore';
 import { useClickOutside } from '../../composable/click-outside'
-import SearchGlobal from '../search/SearchGlobal.vue'
+import SearchGlobal from '../search/SearchGlobal.vue';
+import { ChevronForward, ChevronBack } from '@vicons/ionicons5';
 const appStore = useAppStore();
 
 const version = computed(() => appStore.version);
@@ -13,7 +14,14 @@ const search = ref({
     searching: false,
     term: ''
 });
+const collapsed = ref({
+    show: false,
+    pos: { y: 0 },
+    showChevron: false
+});
 const container = ref(null);
+
+let intervalDelayChevron: any;
 
 const onSearchClick = () => {
     appStore.search.show = true;
@@ -30,49 +38,106 @@ document.addEventListener('keydown', (ev) => {
         return
     }
 })
+
+const trackCollapseMouseOver = () => {
+    if (intervalDelayChevron) clearInterval(intervalDelayChevron);
+    collapsed.value.showChevron = true;
+}
+
+const trackCollapseMouseLeave = () => {
+    intervalDelayChevron = setInterval(() => {
+        collapsed.value.showChevron = false;
+    }, 1000)
+}
+
+const unCollapse = () => {
+    collapsed.value.show = false;
+}
+const collapse = () => {
+    collapsed.value.show = true;
+}
 </script>
 
 
 <template>
-    <div class="drawer-container">
-        <div class="header">
-            <div class="icon">
-                <Light id="logo" color="var(--lightable-red)" />
+    <div class="bring-out" v-if="collapsed.show" @mouseenter="trackCollapseMouseOver" @mouseleave="trackCollapseMouseLeave">
+        <Transition name="bring-out">
+            <NButton text type="success" class="chevron" v-if="collapsed.showChevron" @click="unCollapse">
+                <template #icon>
+                    <NIcon>
+                        <ChevronForward />
+                    </NIcon>
+                </template>
+            </NButton>
+        </Transition>
+
+        <!-- <Transition>
+            <div class="inner" :style="{ left: `15px`, top: `${collapsed.pos.y}px` }" v-if="showChevron">
+                
             </div>
-            <span class="title">
-                Lightable
-            </span>
-            <div class="search-container" @click="onSearchClick" ref="container">
-                <input type="text" placeholder="Search..." class="search-input" :searching="search.searching" />
-                <NButton text type="info" size="large" class="search-btn" v-if="!search.searching">
+        </Transition> -->
+    </div>
+    <Transition name="bring-out">
+        <div class="drawer-container" v-if="!collapsed.show">
+            <div class="header">
+                <NButton text type="error" class="chevron" @click="collapse">
                     <template #icon>
                         <NIcon>
-                            <Search24Regular />
+                            <ChevronBack />
                         </NIcon>
                     </template>
                 </NButton>
+                <div class="search-container" @click="onSearchClick" ref="container">
+                    <input type="text" placeholder="Search..." class="search-input" :searching="search.searching" />
+                    <NButton text type="info" size="large" class="search-btn" v-if="!search.searching">
+                        <template #icon>
+                            <NIcon>
+                                <Search24Regular />
+                            </NIcon>
+                        </template>
+                    </NButton>
+                </div>
+            </div>
+            <div class="actions">
+                <div class="top-level">
+                    <slot name="top" />
+                </div>
+                <div class="groups">
+                    <slot name="groups" />
+                </div>
+            </div>
+            <div class="lower ns">
+                <span>{{ version }}</span>
             </div>
         </div>
-        <div class="actions">
-            <div class="top-level">
-                <slot name="top" />
-            </div>
-            <div class="groups">
-                <slot name="groups" />
-            </div>
-        </div>
-        <div class="lower ns">
-            <span>{{ version }}</span>
-        </div>
-    </div>
+    </Transition>
 </template>
 
 
 <style lang="scss" scoped>
+.bring-out {
+    height: 100vh;
+    width: 20px;
+    transition: background-color 250ms ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    z-index: 5;
+}
+
 .drawer-container {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    height: 100%;
+    background-color: rgba(51, 51, 51, 0.055);
 
     .header {
         display: flex;
@@ -98,7 +163,7 @@ document.addEventListener('keydown', (ev) => {
 
         .search-container {
             height: 25px;
-            width: 120px;
+            width: 100%;
             margin-left: auto;
             margin-right: 12px;
             background-color: rgba(41, 41, 41, 0.411);
@@ -112,7 +177,7 @@ document.addEventListener('keydown', (ev) => {
                 font-size: 12px;
                 line-height: inherit;
                 height: 20px;
-                width: 90px;
+                width: 75%;
                 padding-left: 5px;
                 color: var(--text-color-2);
 
@@ -167,6 +232,17 @@ document.addEventListener('keydown', (ev) => {
             font-weight: lighter;
         }
     }
+}
+
+.bring-out-enter-active,
+.bring-out-leave-active {
+    transition: all 0.5s ease;
+}
+
+.bring-out-enter-from,
+.bring-out-leave-to {
+    opacity: 0;
+    transform: translateX(-30px);
 }
 </style>
 

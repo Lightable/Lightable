@@ -2,7 +2,6 @@
 import { ref, computed, Ref, onMounted } from 'vue';
 import { NIcon, NTooltip, NAvatar, NEllipsis } from 'naive-ui';
 import { ChevronRightFilled } from '@vicons/material';
-import { Warning } from '@vicons/ionicons5';
 import { useAppStore } from '../../stores/AppStore';
 import ProfileCard from '../ProfileCard.vue';
 import { useRouter } from 'vue-router';
@@ -49,27 +48,16 @@ router.afterEach(() => {
         searchApp.value.show = false
     }
 })
+
+appStore.setTitle('Search');
 </script>
 
 <template>
     <div class="search-global">
         <div class="query-error ns">
             <div class="kbd"><span>Tap <kbd>Escape</kbd> to leave</span></div>
-            <!-- <Transition name="fade"> -->
-            <div class="inner" v-if="search.find.length === 0 && search.term.length !== 0">
-                <NIcon :size="32" color="var(--warning-color)">
-                    <Warning />
-                </NIcon>
-                <NEllipsis style="max-width: 400px;">
-                    <span class="query-result">
-                        "<b class="term">{{ search.term }}</b>"
-                        couldn't be found
-                    </span>
-                </NEllipsis>
-            </div>
-            <!-- </Transition> -->
         </div>
-        <div class="header ns" :searching="search.searching" :input-term="search.onTerm">
+        <div class="header ns" :searching="search.searching" :input-term="search.onTerm" :not-found="search.find.length === 0 && search.term.length !== 0">
             <NTooltip trigger="hover" placement="left">
                 <template #trigger>
                     <span class="modifier">
@@ -111,7 +99,9 @@ router.afterEach(() => {
         &[input-term='true'] {
             border: 1px solid rgb(106, 144, 250);
         }
-
+        &[not-found='true'] {
+            border: 1px solid var(--error-color);
+        }
         .modifier {
             display: flex;
         }

@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { OnRouteChange } from '../wailsjs/go/app/App';
+import { WindowSetTitle } from '../wailsjs/runtime/runtime';
 import { debug } from './composable/Logger';
 
 const router = createRouter({
@@ -89,6 +90,59 @@ const router = createRouter({
                     }
                 },
                 {
+                    path: 'friends',
+                    name: 'app-friends',
+                    children: [
+                        {
+                            path: '',
+                            name: 'friends-home',
+                            component() {
+                                return import('./views/app/channels/@me/friends/all.vue')
+                            }
+                        },
+                        {
+                            path: '/pending',
+                            name: 'friends-pending',
+                            component() {
+                                return import('./views/app/channels/@me/friends/pending.vue')
+                            }
+                        },
+                        {
+                            path: '/requests',
+                            name: 'friends-requests',
+                            component() {
+                                return import('./views/app/channels/@me/friends/requests.vue')
+                            }
+                        }
+                    ],
+                    component() {
+                        return import('./views/app/channels/@me/friends/friends.vue')
+                    }
+                },
+                {
+                    path: 'settings',
+                    name: 'app-settings',
+                    children: [
+                        {
+                            path: '',
+                            name: 'settings-profile',
+                            component() {
+                                return import('./views/app/settings/Profile.vue')
+                            }
+                        },
+                        {
+                            path: 'debug',
+                            name: 'settings-debug',
+                            component() {
+                                return import('./views/app/settings/Debug.vue')
+                            }
+                        }
+                    ],
+                    component() {
+                        return import('./views/app/settings/Settings.vue')
+                    }
+                },
+                {
                     path: 'channel/dm/:id',
                     name: 'channel-dm',
                     component() {
@@ -101,10 +155,6 @@ const router = createRouter({
             }
         }
     ]
-});
-router.beforeEach((to, from) => {
-    debug('Router', `Route changed from ${from.fullPath} to ${to.fullPath}`);
-    OnRouteChange(from.fullPath, to.fullPath);
 });
 
 export default router;

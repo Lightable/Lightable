@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement } from 'naive-ui';
+import { computed, ref } from 'vue';
+import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement, NModal, NInput, NSelect, NButton } from 'naive-ui';
 import Titlebar from './components/Titlebar.vue';
 import LeftDrawer from './components/LeftDrawer/LeftDrawer.vue';
 import DrawerComponent from './components/LeftDrawer/DrawerComponent.vue';
@@ -8,6 +8,8 @@ import { useAppStore } from './stores/AppStore';
 import ConfettiCanvasProvider from './components/confetti/ConfettiCanvasProvider.vue';
 import SettingsConfigProvider from './components/settings/SettingsConfigProvider.vue';
 import SearchProvider from './components/search/SearchProvider.vue';
+import BeforeStartModal from './components/BeforeStartModal.vue';
+import DebugSocket from './components/debug/DebugSocket.vue';
 const appStore = useAppStore();
 
 darkTheme.Button!!.common!!.errorColor = "#ED4245";
@@ -18,15 +20,18 @@ const leftDrawer = computed(() => appStore.leftDrawer)
 const search = computed(() => appStore.search)
 appStore.load();
 appStore.startRealtime();
+
 </script>
 
 <template>
   <div class="lightable-red">
     <ConfettiCanvasProvider>
       <NConfigProvider :theme="(theme == 'Dark') ? darkTheme : lightTheme">
+       <BeforeStartModal/>
         <NDialogProvider>
+          <DebugSocket/>
           <NElement>
-            <Titlebar />
+            <Titlebar v-if="false" />
             <NMessageProvider>
               <SettingsConfigProvider>
                 <SearchProvider :show="search.show">
@@ -78,27 +83,16 @@ appStore.startRealtime();
     width: 100%;
     display: flex;
     flex-direction: row;
-
-    .lightable-drawer {
-      display: flex;
-      flex-direction: column;
-      width: 250px;
-      min-width: 250px;
-      max-width: 250px;
-      height: 100%;
-      background-color: rgba(51, 51, 51, 0.055);
-    }
-
     .page {
       width: 100%;
       // background-color: #121219;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
+      justify-content: flex-start;
 
       .content {
         width: 100%;
-        height: calc(100% - 32px);
+        height: 100%;
       }
     }
   }
@@ -124,4 +118,6 @@ appStore.startRealtime();
     }
   }
 }
+
+
 </style>

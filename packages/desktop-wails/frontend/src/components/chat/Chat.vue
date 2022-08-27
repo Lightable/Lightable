@@ -49,7 +49,7 @@ onMounted(async () => {
                         <span class="error" v-else-if="!status">How did you get here? How did we allow you to get here? We'll never know 🤫</span>
                     </NAlert>
                 </div>
-                <Message v-for="(item, _) in channel.messages" v-if="channel?.messages" :author="getUser(item?.author)" :content="item.content" />
+                <Message v-for="(item, _) in channel.messages" v-if="channel?.messages" :author="getUser(item?.author as any)" :content="item.content" />
                 <!-- <Message :is-preview="true" />
                 <Message :is-preview="true" />
                 <Message :is-preview="true" />
@@ -69,13 +69,12 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .chat {
     height: 100vh;
-    width: calc(100vw - 250px);
+    width: 100%;
     position: fixed;
     top: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-
     .pad {
         padding: 8px;
         margin-top: 50px;

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"red/mocks"
+	gor "runtime"
 	"strconv"
 	"time"
 
@@ -24,7 +25,7 @@ type App struct {
 	Logger  *zerolog.Logger
 	Config  mocks.AppConfig
 	Update  mocks.Update
-	Colour string
+	Colour  string
 	Version string
 	Dir     string
 	start   time.Time
@@ -38,6 +39,14 @@ type WriteCounter struct {
 	Start    time.Time
 	Logger   *zerolog.Logger
 	Ctx      context.Context
+}
+
+type CustomMemoryStats struct {
+	TotalAlloc uint64 `json:"totalAlloc"`
+	Alloc      uint64 `json:"alloc"`
+	SysAlloc   uint64 `json:"sysAlloc"`
+	HeapAlloc  uint64 `json:"heapSpace"`
+	NumGC      uint32 `json:"gcTotal"`
 }
 
 // NewApp creates a new App application struct
@@ -90,6 +99,14 @@ func (a *App) PreInit() {
 	a.Config = appConfig
 }
 
+func (a *App) CreateResponder() {
+	a.Config.Responder = &mocks.AppResponderConfig{}
+	WriteAppConfig(a.Logger, a.Dir, a.Config)
+}
+
+func (a *App) SaveConfig() {
+	WriteAppConfig(a.Logger, a.Dir, a.Config)
+}
 
 func (a *App) GetColour() string {
 	k, err := registry.OpenKey(registry.CURRENT_USER, `SOFTWARE\Microsoft\Windows\DWM`, registry.QUERY_VALUE)
@@ -105,6 +122,7 @@ func (a *App) GetColour() string {
 	a.Colour = fmt.Sprintf("#%v", strconv.FormatUint(i, 16)[2:])
 	return a.Colour
 }
+
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) Startup(ctx context.Context) {
@@ -113,8 +131,8 @@ func (a *App) Startup(ctx context.Context) {
 	defer func() {
 		if e := recover(); e != nil {
 			_, err := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
-				Type: runtime.ErrorDialog,
-				Title: "Fatal Crash",
+				Type:    runtime.ErrorDialog,
+				Title:   "Fatal Crash",
 				Message: fmt.Sprintf("Something broke internally\n%v", e),
 				Buttons: []string{"Close", "Close and report error"},
 			})
@@ -155,17 +173,32 @@ func (a *App) HasUser(statement bool) {
 	a.Config.HasUser = statement
 	WriteAppConfig(a.Logger, a.Dir, a.Config)
 }
-
+func (a *App) GetMemoryStats() CustomMemoryStats {
+	var m gor.MemStats
+	gor.ReadMemStats(&m)
+	return CustomMemoryStats{
+		TotalAlloc: m.TotalAlloc,
+		Alloc: m.Alloc,
+		SysAlloc: m.Sys,
+		HeapAlloc: m.HeapAlloc,
+		NumGC: m.NumGC,
+	}
+}
+func (a *App) ForceGC() {
+	gor.GC()
+}
 // Set a user in the map
 func (a *App) SetUser(id string, user mocks.PrivateUser) {
 	(*a.Config.Users)[id] = &user
 	a.SetCurrentUser(user)
 	WriteAppConfig(a.Logger, a.Dir, a.Config)
 }
+
 // JS Func
 func (a *App) OnRouteChange(before string, after string) {
 	a.Logger.Debug().Str("before", before).Str("after", after).Msg("JS || Route Change")
 }
+
 // Make an empty method to test ipc ms delay
 func (c *App) PingDelay() {
 	c.Logger.Debug().Str("type", "PingDelayRequest").Msg("JS || Ping")
