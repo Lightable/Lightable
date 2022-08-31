@@ -57,7 +57,7 @@ const block = () => {
             </button>
         </RelationshipCard>
         <ContextMenu :x="contextMenuPos.x" :y="contextMenuPos.y" :show="contextMenuPos.show" @close="(e) => contextMenuPos.show = e">
-            <ContextMenuButton>
+            <ContextMenuButton @click="$router.push(`/app/channel/dm/${user?.id}`)">
                 <template #icon>
                     <Chatbox />
                 </template>

@@ -112,6 +112,9 @@ func (c *Client) DialSocket() (*string, error) {
 			}
 		}()
 	}
+	bus.Subscribe("ws:read:close:error", func(message []byte) {
+		runtime.EventsEmit(*c.Ctx, "ws:close", string(message))
+	})
 	bus.Subscribe("ws:read:message", c.ReadAndRespond)
 	fmt.Printf("New connection established LOCAL=%v REMOTE=%v\n", c.Connection.Ws.LocalAddr().String(), u.String())
 	status := fmt.Sprintf("Connected, took %v to connect", time.Since(start))
@@ -215,20 +218,20 @@ func (c *Client) OpenAvatarPickDialog() *string {
 		Filters: []runtime.FileFilter{
 			{
 				DisplayName: "Avatar Formats",
-				Pattern: "*.jpg;*.jpeg;*.png;*.webp;*.gif",
+				Pattern:     "*.jpg;*.jpeg;*.png;*.webp;*.gif",
 			},
 		},
 	})
 	if err != nil {
 		c.Logger.Err(err)
-		return nil 
+		return nil
 	}
 	if path == "" {
 		return nil
 	}
 	wd, _ := os.Getwd()
 	basePath := p.Base(path)
-	backend.CopyFile(path, wd + "/" + basePath)
+	backend.CopyFile(path, wd+"/"+basePath)
 	return &basePath
 }
 func (c *Client) GetHttpURL() string {

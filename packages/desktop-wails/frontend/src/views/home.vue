@@ -2,16 +2,10 @@
 import { NButton } from 'naive-ui';
 import { computed, onBeforeMount } from 'vue';
 import { HasUser } from '../../wailsjs/go/app/App';
-import { SetSocket } from '../../wailsjs/go/client/Client';
-import { SetAPI, SetSecure } from '../../wailsjs/go/client/HttpClient';
 import { useAppStore } from '../stores/AppStore';
 
 const appStore = useAppStore();
 const hasUser = computed(() => appStore.hasUser);
-SetSocket('api.lightable.app');
-SetAPI('api.lightable.app');
-SetSecure(true);
-
 const setHasUser = (bool: boolean) => {
     HasUser(bool);
     appStore.load();

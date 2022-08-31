@@ -4,7 +4,7 @@ import { NButton, NIcon } from 'naive-ui';
 import { EditRound as Edit, CheckRound as Check, CloseRound as Close } from '@vicons/material';
 
 
-const emit = defineEmits(['enable', 'disable']);
+const emit = defineEmits(['enable', 'disable', 'clicked']);
 const props = defineProps({
     title: String,
     togglable: Boolean,

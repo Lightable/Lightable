@@ -29,11 +29,11 @@ const props = defineProps({
     flex-direction: row;
     gap: 30px;
     align-items: center;
-    height: 28px;
+    height: 30px;
     background-color: #9b9da410;
     padding: 10px;
     border-radius: .5rem;
-    max-width: 65%;
+    max-width: 90%;
     min-width: 10%;
 
     .stat-header {

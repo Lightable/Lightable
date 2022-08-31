@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { PropType } from 'vue';
-import { NIcon } from 'naive-ui';
+import { NIcon, NBadge } from 'naive-ui';
 import { LightableDrawerComponentPair } from '../../stores/AppStore';
 import { useRouter } from 'vue-router';
 
@@ -36,13 +36,13 @@ const clickEvent = () => {
 
 <template>
     <div :class="`drawer-component ${(pair.t !== `Function` && $router.currentRoute.value.fullPath === pair.path) ? 'active-path' : ''}`" :disabled="(pair.t !== `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '' || router.currentRoute.value.name === pair.name) ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
-        <NIcon :size="18" v-if="pair.icon">
-            <component :is="pair.icon" />
-        </NIcon>
+        <NBadge :dot="pair.badge && pair.badge.show">
+                <component :is="pair.icon" weight="duotone" :size="24" color="var(--text-color-2)"/>
+        </NBadge>
         <slot name="icon" v-if="!pair.icon" />
 
         <div class="content">
-            {{ pair.text }}
+            {{  pair.text  }}
         </div>
     </div>
 </template>

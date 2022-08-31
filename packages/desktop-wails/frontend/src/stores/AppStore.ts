@@ -117,6 +117,14 @@ export interface LightableDrawerComponentPair {
     path?: string,
     name?: string,
     color?: string | '#fff',
+    badge?: {
+        show: boolean,
+        type?: 'default' | 'success' | 'error' | 'warning' | 'info',
+        max?: number,
+        color?: string,
+        processing?: boolean,
+        value?: string | number
+    }
 }
 
 export type LightableDrawerType = "Function" | "Route"

@@ -25,8 +25,8 @@ const navigate = (path: string) => {
             <NButton quaternary @click="navigate('friends-pending')" :disabled="$router.currentRoute.value.name === 'friends-pending'">
                 <span class="friend-btn">Pending</span>
             </NButton>
-            <NButton quaternary @click="navigate('friends-requests')" :disabled="$router.currentRoute.value.name === 'friends-requests'">
-                <span class="friend-btn">Requests</span>
+            <NButton quaternary type="primary" @click="navigate('friends-add')" :disabled="$router.currentRoute.value.name === 'friends-add'">
+                <span class="friend-btn">Add Friend</span>
             </NButton>
         </template>
     </AppHeader>

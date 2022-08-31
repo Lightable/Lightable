@@ -58,6 +58,11 @@ object Utils {
         RANDOM.nextBytes(salt)
         return Base64.getEncoder().encodeToString(salt);
     }
+    fun getNextSalt(size: Int): String {
+        val salt = ByteArray(size)
+        RANDOM.nextBytes(salt)
+        return Base64.getEncoder().encodeToString(salt);
+    }
     @Throws(Exception::class)
     fun getProcessCpuLoad(): Double {
         val mbs = ManagementFactory.getPlatformMBeanServer()

@@ -34,5 +34,6 @@ const props = defineProps({
     align-items: center;
     gap: 8px;
     flex-direction: column;
+    z-index: 5;
 }
 </style>

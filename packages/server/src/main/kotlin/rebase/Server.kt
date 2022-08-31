@@ -115,6 +115,7 @@ class Server(
     private val websocketController = WebSocketController(eventBus, logger, userCache, isProd)
 
     private val developerController = DeveloperController(userCache)
+    private val authController = AuthenticationController()
     val user = rebase.controllers.UserController(userCache, dmCache, eventBus, db.getInviteCodeCollection(), session, snowflake, isProd, fileController, napi)
     private val cdnController = CDNController(userCache, fileController)
     private val inviteCodeController = InviteCodeController(db, userCache)
@@ -165,12 +166,17 @@ class Server(
         }
         javalin.exception(Exception::class.java) {e, ctx ->
             ctx.status(500).json(object { val message = e.message })
+            if (!isProd) e.printStackTrace()
             return@exception
         }
         javalin.routes {
             path("/internal") {
                 get("/users/all", internalController::getAllUsers)
                 get("/users/minimal/all", internalController::getAllMinimalUsers)
+            }
+            path("/auth") {
+                get("token", authController::testToken)
+                post("refresh", authController::refreshToken)
             }
             get("/experimental/image/generate") {
                 val type = it.queryParam("type")

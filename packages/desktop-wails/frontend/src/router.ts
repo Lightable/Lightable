@@ -109,9 +109,9 @@ const router = createRouter({
                         },
                         {
                             path: '/requests',
-                            name: 'friends-requests',
+                            name: 'friends-add',
                             component() {
-                                return import('./views/app/channels/@me/friends/requests.vue')
+                                return import('./views/app/channels/@me/friends/addFriend.vue')
                             }
                         }
                     ],

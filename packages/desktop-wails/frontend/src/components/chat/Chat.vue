@@ -50,7 +50,6 @@ onMounted(async () => {
                     </NAlert>
                 </div>
                 <Message v-for="(item, _) in channel.messages" v-if="channel?.messages" :author="getUser(item?.author as any)" :content="item.content" />
-                <!-- <Message :is-preview="true" />
                 <Message :is-preview="true" />
                 <Message :is-preview="true" />
                 <Message :is-preview="true" />
@@ -59,7 +58,8 @@ onMounted(async () => {
                 <Message :is-preview="true" />
                 <Message :is-preview="true" />
                 <Message :is-preview="true" />
-                <Message :author="tempAuthor" /> -->
+                <Message :is-preview="true" />
+                <Message :author="tempAuthor" />
             </div>
         </NScrollbar>
         <ChatInput />

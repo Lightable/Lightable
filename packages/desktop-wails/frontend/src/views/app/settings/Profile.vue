@@ -71,6 +71,7 @@ const uploadAvatar = async () => {
         preview.closable = true;
         preview.waiting = false;
     } catch (e: Error) {
+        console.log(e);
         preview.closable = true;
         preview.waiting = false;
         preview.uploadable = false;

@@ -39,6 +39,7 @@ class FileController() {
         val path = "./storage/user/$user/avatars/avatar_$imageID.webp"
         val file = File(path)
         val existingFiles = File("./storage/user/$user/avatars/").listFiles()
+        createUserDir(user)
         if (existingFiles != null && existingFiles.isNotEmpty()) {
             for (existingFile in existingFiles) {
                 existingFile.delete()

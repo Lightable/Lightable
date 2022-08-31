@@ -10,6 +10,7 @@
     "vue-tsc": "vue-tsc"
   },
   "dependencies": {
+    "@dnlsndr/vue-phosphor-icons": "^1.16.2",
     "@pinia/testing": "^0.0.13",
     "@vicons/carbon": "^0.12.0",
     "@vicons/fluent": "^0.12.0",
@@ -17,8 +18,10 @@
     "@vicons/material": "0.12.0",
     "@vicons/utils": "^0.1.4",
     "evtd": "^0.2.4",
+    "moment": "^2.29.4",
     "ms": "^2.1.3",
     "naive-ui": "^2.32.1",
+    "phosphor-vue": "^1.4.2",
     "pinia": "^2.0.18",
     "sass": "^1.54.4",
     "vue": "^3.2.37",
@@ -32,6 +35,7 @@
     "cypress": "^10.6.0",
     "typescript": "^4.7.4",
     "vite": "^2.9.15",
+    "vite-plugin-obfuscator": "^1.0.5",
     "vue-tsc": "^0.38.9"
   }
 }

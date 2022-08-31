@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAppStore } from '../../stores/AppStore';
-import { PersonAdd, Home, Chatbubbles } from '@vicons/ionicons5';
 import Loading from '../../components/loading/Loading.vue';
 import { LoadingStates } from '../../composable/LoadingData';
 import Overlay from '../../components/Overlay.vue';
 import { DialSocket, LoginToSocket, GetUser } from '../../../wailsjs/go/client/Client';
 import { NModal, NInput, NButton, NIcon, useMessage } from 'naive-ui';
 import { GetRelations, RequestFriend } from '../../../wailsjs/go/client/RelationshipManager';
-import { Workspace } from '@vicons/carbon';
-import { GroupFilled, PersonRound as Friends } from '@vicons/material';
-import { Cog } from '@vicons/ionicons5';
+import {PhHouse as Home, PhChats as Chatbubbles, PhUser as Friends, PhShareNetwork as Workspace, PhUsers as GroupFilled, PhGearSix as Cog} from '@dnlsndr/vue-phosphor-icons';
 const appStore = useAppStore();
 const toast = useMessage();
 
@@ -136,14 +133,6 @@ appStore.leftDrawer.components = [
         text: 'Friends',
         path: '/app/friends',
         icon: Friends
-    },
-    {
-        t: "Function",
-        text: 'Add Friend',
-        icon: PersonAdd,
-        cb: () => {
-            addFriendModal.value.show = true;
-        }
     },
     {
         t: "Route",

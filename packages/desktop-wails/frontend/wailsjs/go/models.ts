@@ -1,3 +1,25 @@
+export namespace client {
+	
+	
+	export class HttpResponse {
+	    status: number;
+	    Json: string;
+	    Err: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HttpResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.Json = source["Json"];
+	        this.Err = source["Err"];
+	    }
+	}
+
+}
+
 export namespace mocks {
 	
 	export class Icon {
@@ -28,6 +50,22 @@ export namespace mocks {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.permissions = source["permissions"];
 	        this.token = source["token"];
+	    }
+	}
+	export class UserAnalytics {
+	    messages: number;
+	    callTime: number;
+	    activeTime: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new UserAnalytics(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.messages = source["messages"];
+	        this.callTime = source["callTime"];
+	        this.activeTime = source["activeTime"];
 	    }
 	}
 	export class Message {
@@ -216,26 +254,6 @@ export namespace mocks {
 		    return a;
 		}
 	}
-	
-	
-	export class UserAnalytics {
-	    messages: number;
-	    callTime: number;
-	    activeTime: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new UserAnalytics(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.messages = source["messages"];
-	        this.callTime = source["callTime"];
-	        this.activeTime = source["activeTime"];
-	    }
-	}
-	
-	
 	export class PrivateUser {
 	    name: string;
 	    id: string;
@@ -337,6 +355,10 @@ export namespace mocks {
 		}
 	}
 	
+	
+	
+	
+	
 
 }
 
@@ -360,28 +382,6 @@ export namespace app {
 	        this.sysAlloc = source["sysAlloc"];
 	        this.heapSpace = source["heapSpace"];
 	        this.gcTotal = source["gcTotal"];
-	    }
-	}
-
-}
-
-export namespace client {
-	
-	
-	export class HttpResponse {
-	    status: number;
-	    Json: string;
-	    Err: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new HttpResponse(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.status = source["status"];
-	        this.Json = source["Json"];
-	        this.Err = source["Err"];
 	    }
 	}
 
