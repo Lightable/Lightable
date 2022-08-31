@@ -21,14 +21,13 @@ import io.swagger.v3.oas.models.info.Info
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import me.kosert.flowbus.EventsReceiver
-import me.kosert.flowbus.subscribe
 import org.slf4j.LoggerFactory
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
 import rebase.controllers.*
 import rebase.detection.NudeDetection
-import rebase.events.EventBus
+import rebase.events.EventHandler
+import rebase.events.EventListener
 import rebase.generator.EmbedImageGenerator
 import rebase.messages.ScyllaConnector
 import java.awt.Color
@@ -49,7 +48,7 @@ val t = Terminal()
 
 @OptIn(ExperimentalStdlibApi::class)
 class Server(
-    val eventBus: EventBus,
+    var handler: EventHandler,
     var internals: List<String>,
     var dbhost: String = "localhost",
     var dbport: Int = 27017,
@@ -59,7 +58,7 @@ class Server(
     var nudeAPIGateway: String = "http://localhost:8089",
     var session: CqlSession,
     var isProd: Boolean = false
-) {
+): EventListener {
     val logger: org.slf4j.Logger = LoggerFactory.getLogger("Server")!!
     var totalRequests = 0
     var port = 8080
@@ -112,24 +111,29 @@ class Server(
     }
     val userCache = UserCache(async, db, snowflake, this, fileController, batchInterval)
     val dmCache = DMChannelCache(async, db, session, snowflake, batchInterval)
-    private val websocketController = WebSocketController(eventBus, logger, userCache, isProd)
+    val websocketController = WebSocketController(logger, handler, userCache, isProd)
 
-    private val developerController = DeveloperController(userCache)
+    private val developerController = DeveloperController(userCache, handler)
     private val authController = AuthenticationController()
-    val user = rebase.controllers.UserController(userCache, dmCache, eventBus, db.getInviteCodeCollection(), session, snowflake, isProd, fileController, napi)
+    val user = rebase.controllers.UserController(userCache, dmCache, handler, db.getInviteCodeCollection(), session, snowflake, isProd, fileController, napi)
     private val cdnController = CDNController(userCache, fileController)
     private val inviteCodeController = InviteCodeController(db, userCache)
     private val internalController = InternalsController(internals, userCache)
     private var serverOverloaded = false
     private var serverCPUUsage = 0L
+    override fun onUserUpdate(payload: UserUpdateEvent) {}
+    override fun onTyping(payload: TypingEvent) {}
+    override fun onPendingFriend(payload: PendingFriendEvent) {}
+    override fun onRemoveFriendRequest(payload: RemoveFriendRequestEvent) {}
+    override fun onAcceptFriendRequest(payload: AcceptFriendRequestEvent) {}
+    override fun onUpdate(payload: UpdateEvent) {}
 
-    suspend fun startCollecting() {
-        eventBus.subscribe<GetCPUUsage.CPUUsageUpdate> {
-            this.serverOverloaded = it.usage > 75
-            this.serverCPUUsage = it.usage
-        }
+    override fun onCPUUsage(payload: GetCPUUsage.CPUUsageUpdate) {
+        this.serverOverloaded = payload.usage > 75
+        this.serverCPUUsage = payload.usage
     }
     init {
+        handler.add(websocketController)
         Thread.currentThread().name = "Server (Main)"
         Thread.setDefaultUncaughtExceptionHandler { thread, err ->
             clearConsole()
@@ -334,7 +338,6 @@ class Server(
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 fun main(args: Array<String>) {
     println(Utils.BANNER)
     var dbhost: String = "localhost"
@@ -347,7 +350,6 @@ fun main(args: Array<String>) {
     var internals = System.getenv("internals").split(",")
     var prod = false
     val root: Logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
-    val eventBus = EventBus()
     println("Working -> ${File("./storage").absolutePath}")
     println("Internal IP's -> $internals")
     File("./releases").mkdir()
@@ -377,8 +379,10 @@ fun main(args: Array<String>) {
     println("Nudity Detection Gateway -> $nudeAPIGateway")
     val scyllaHost = System.getenv("SCYLLA_HOST") ?: "192.168.50.111"
     val connector = ScyllaConnector()
+    val eventHandler = EventHandler()
     connector.connect(scyllaHost, 9042, "datacenter1")
-    val server = Server(eventBus, internals, dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession(), isProd = prod)
+    val server = Server(eventHandler, internals, dbhost, dbport, dbuser, dbpass, dbBatchUpdateInterval, nudeAPIGateway, connector.getSession(), isProd = prod)
+    eventHandler.add(server)
     println("${t.colors.brightRed.invoke("---->>")} Config ${t.colors.brightBlue.invoke("<<----")}")
     if (!System.getenv("port").isNullOrBlank()) {
         server.port = System.getenv("port").toInt()
@@ -398,20 +402,14 @@ fun main(args: Array<String>) {
     }
     println("${t.colors.brightRed.invoke("---->>")} Logs ${t.colors.brightBlue.invoke("<<----\n")}")
     server.javalin.start(server.port)
-    Timer().scheduleAtFixedRate(GetCPUUsage(eventBus), 0, 2000)
-    GlobalScope.launch {
-        server.startCollecting()
-    }
+    Timer().scheduleAtFixedRate(GetCPUUsage(eventHandler), 0, 2000)
 }
 
 
-class GetCPUUsage(val eventBus: EventBus) : java.util.TimerTask() {
-    @OptIn(DelicateCoroutinesApi::class)
+class GetCPUUsage(private val handler: EventHandler) : java.util.TimerTask() {
     override fun run() {
         val osBean: OperatingSystemMXBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
-        GlobalScope.launch {
-            eventBus.post(CPUUsageUpdate((osBean.processCpuLoad * 100).toLong()))
-        }
+        handler.broadcastCPUUsage(CPUUsageUpdate((osBean.processCpuLoad * 100).toLong()))
     }
 
     data class CPUUsageUpdate(val usage: Long)

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, ref } from 'vue';
+import { PropType, ref, onUnmounted } from 'vue';
 import { NIcon } from 'naive-ui';
 import { PhMicrophone as Microphone, PhTimer as Timer, PhChats as Chat } from '@dnlsndr/vue-phosphor-icons'
 import { mocks } from '../../../wailsjs/go/models';
@@ -40,9 +40,10 @@ function convertSecondsToReadableString(seconds: number) {
 }
 
 
-setInterval(() => {
+var interval = setInterval(() => {
     activeTime.value += 1
 }, 1000)
+
 </script>
 
 <template>

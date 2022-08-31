@@ -1,35 +1,31 @@
 package rebase.controllers
 
 import com.datastax.oss.driver.api.core.CqlSession
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mongodb.client.MongoCollection
 import io.javalin.http.Context
 import io.javalin.plugin.openapi.annotations.*
 import io.javalin.plugin.openapi.dsl.document
 import io.javalin.plugin.openapi.dsl.documentedContent
 import io.javalin.plugin.openapi.dsl.oneOf
-import me.kosert.flowbus.GlobalBus
 import org.litote.kmongo.eq
 import org.litote.kmongo.findOne
-import org.litote.kmongo.json
 import rebase.*
 import rebase.cache.DMChannelCache
 import rebase.cache.UserCache
 import rebase.detection.NudeDetection
-import rebase.events.EventBus
+import rebase.events.EventHandler
 import rebase.interfaces.EventController
 import rebase.interfaces.FailImpl
 import rebase.interfaces.cache.IUserCache
 import rebase.messages.DMDao
 import rebase.messages.Message
 import rebase.schema.*
-import java.util.concurrent.ExecutorService
 import kotlin.system.measureTimeMillis
 
 class UserController(
     val userCache: UserCache,
     val dmCache: DMChannelCache,
-    override val eventBus: EventBus,
+    override val handler: EventHandler,
     private val inviteDB: MongoCollection<InviteCode>,
     val cqlSession: CqlSession,
     val snowflake: Snowflake,
@@ -210,7 +206,7 @@ class UserController(
                     }
                 }
             }
-            eventBus.postGlobal(UserUpdateEvent(user, user.differenceOfUpdatedUser(oldUser)))
+            handler.broadcastUserUpdate(UserUpdateEvent(user, user.differenceOfUpdatedUser(oldUser)))
             user.save()
             ctx.status(200).json(user.toPrivate())
             return
@@ -236,7 +232,7 @@ class UserController(
                             fileController.addAvatar(napi, user.identifier, image.identifier, file, "png")
                             user.avatar = image
                             user.save()
-                            eventBus.postGlobal(UserUpdateEvent(user, mutableMapOf(Pair("id", user.identifier.toString()), Pair("avatar", user.avatar))))
+                            handler.broadcastUserUpdate(UserUpdateEvent(user, mutableMapOf(Pair("id", user.identifier.toString()), Pair("avatar", user.avatar))))
                             ctx.json(201).json(user.toPublic())
                             return
                         } catch (e: InvalidAvatarException) {
@@ -414,7 +410,6 @@ class UserController(
                     ctx.status(400).json(RelationshipRequestFail("Friend doesn't exist"))
                     return
                 }
-
                 if (!user.checkValidFriendRequest(friend.identifier)) {
                     ctx.status(403)
                         .json(
@@ -442,7 +437,7 @@ class UserController(
                         )
                         dmChannel.dao!!.init()
                         println("Ran dao")
-                        eventBus.postGlobal(AcceptFriendRequestEvent(user, friend))
+                        handler.broadcastAcceptFriendRequest(AcceptFriendRequestEvent(user, friend))
                         ctx.status(201).json(userCache.users[friend.identifier]?.toPublic()!!)
                         dmCache.saveOrReplaceChannel(dmChannel)
                         return
@@ -452,7 +447,7 @@ class UserController(
                     }
                 }
                 user.addRequest(friend.identifier)
-                eventBus.postGlobal(PendingFriendEvent(user, friend))
+                handler.broadcastPendingFriend(PendingFriendEvent(user, friend))
                 ctx.status(201).json(friend.toPublic()).run {
                     user.save()
                     friend.save()
@@ -535,7 +530,7 @@ class UserController(
             if (user != null) {
                 if (user.relationships.pending.contains(pendingUser.toLong())) {
                     user.removePendingFriend(pendingUser.toLong())
-                    eventBus.postGlobal(RemoveFriendRequestEvent(user, userCache.users.values.find { u -> u.identifier == pendingUser.toLong()}!!))
+                    handler.broadcastRemoveFriendRequest(RemoveFriendRequestEvent(user, userCache.users.values.find { u -> u.identifier == pendingUser.toLong()}!!))
                     ctx.status(204)
                 } else {
                     ctx.status(403).json(UserDataFail("$pendingUser isn't pending with you"))
@@ -809,7 +804,7 @@ class UserController(
                                     "Server-Timing",
                                     "creation;desc=\"Message creation time on DB\";dur=${messageCreateTiming}"
                                 )
-                                GlobalBus.post(ServerMessageCreate(friend.identifier, message))
+//                                GlobalBus.post(ServerMessageCreate(friend.identifier, message))
                                 return
                             } else {
                                 ctx.status(403).json(DMChannelResponse.InvalidChannelPermissions())

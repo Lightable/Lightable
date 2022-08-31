@@ -5,12 +5,14 @@ import Loading from '../../components/loading/Loading.vue';
 import { LoadingStates } from '../../composable/LoadingData';
 import Overlay from '../../components/Overlay.vue';
 import { DialSocket, LoginToSocket, GetUser } from '../../../wailsjs/go/client/Client';
-import { NModal, NInput, NButton, NIcon, useMessage } from 'naive-ui';
+import { NModal, NInput, NButton, NIcon, useMessage, useLoadingBar } from 'naive-ui';
 import { GetRelations, RequestFriend } from '../../../wailsjs/go/client/RelationshipManager';
-import {PhHouse as Home, PhChats as Chatbubbles, PhUser as Friends, PhShareNetwork as Workspace, PhUsers as GroupFilled, PhGearSix as Cog} from '@dnlsndr/vue-phosphor-icons';
+import {PhHouse as Home, PhChats as Chatbubbles, PhUser as Friends, PhShareNetwork as Workspace, PhUsers as GroupFilled, PhGearSix as Cog, PhDownload as Download} from '@dnlsndr/vue-phosphor-icons';
+import { useRouter } from 'vue-router';
 const appStore = useAppStore();
 const toast = useMessage();
-
+const router = useRouter();
+const loading = useLoadingBar();
 appStore.users = [];
 const loadingSteps = ref([
     {
@@ -137,11 +139,34 @@ appStore.leftDrawer.components = [
     {
         t: "Route",
         text: 'Settings',
+        name: 'settings',
         path: '/app/settings',
-        icon: Cog
+        icon: Cog,
     },
 ]
+  router.beforeResolve((to, from, next) => {
+    // If this isn't an initial page load.
+    if (to.name) {
+      // Start the route progress bar.
+      loading.start()
+    }
+    next()
+  });
+  router.afterEach(() => {
+    loading.finish();
+  });
 
+
+  setTimeout(() => {
+    appStore.updateDrawerComponent('settings', {
+        badge: {
+            show: true,
+            type: 'success',
+            processing: true,
+        },
+        tooltip: 'Update Avaliable'
+    })
+  }, 5000)
 </script>
 
 

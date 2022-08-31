@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
+import { useLoadingBar } from 'naive-ui';
 import { OnRouteChange } from '../wailsjs/go/app/App';
 import { WindowSetTitle } from '../wailsjs/runtime/runtime';
 import { debug } from './composable/Logger';
@@ -157,4 +158,6 @@ const router = createRouter({
     ]
 });
 
+
+  
 export default router;

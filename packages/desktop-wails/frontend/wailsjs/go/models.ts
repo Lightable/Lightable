@@ -1,3 +1,28 @@
+export namespace app {
+	
+	export class CustomMemoryStats {
+	    totalAlloc: number;
+	    alloc: number;
+	    sysAlloc: number;
+	    heapSpace: number;
+	    gcTotal: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomMemoryStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.totalAlloc = source["totalAlloc"];
+	        this.alloc = source["alloc"];
+	        this.sysAlloc = source["sysAlloc"];
+	        this.heapSpace = source["heapSpace"];
+	        this.gcTotal = source["gcTotal"];
+	    }
+	}
+
+}
+
 export namespace client {
 	
 	
@@ -38,18 +63,18 @@ export namespace mocks {
 	        this.id = source["id"];
 	    }
 	}
-	export class StandardToken {
-	    permissions: string[];
-	    token: string;
+	export class UserAvatar {
+	    animated: boolean;
+	    id: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new StandardToken(source);
+	        return new UserAvatar(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.permissions = source["permissions"];
-	        this.token = source["token"];
+	        this.animated = source["animated"];
+	        this.id = source["id"];
 	    }
 	}
 	export class UserAnalytics {
@@ -90,58 +115,6 @@ export namespace mocks {
 	        this.author = source["author"];
 	        this.created = source["created"];
 	        this.edited = source["edited"];
-	    }
-	}
-	export class Channel {
-	    id: string;
-	    type: number;
-	    users: number[];
-	    owner?: PublicUser;
-	    messages: Message[];
-	
-	    static createFrom(source: any = {}) {
-	        return new Channel(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.type = source["type"];
-	        this.users = source["users"];
-	        this.owner = this.convertValues(source["owner"], PublicUser);
-	        this.messages = this.convertValues(source["messages"], Message);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class UserAvatar {
-	    animated: boolean;
-	    id: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UserAvatar(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.animated = source["animated"];
-	        this.id = source["id"];
 	    }
 	}
 	export class UserStatus {
@@ -218,22 +191,24 @@ export namespace mocks {
 		    return a;
 		}
 	}
-	export class RelationshipStruct {
-	    pending: PublicUser[];
-	    requests: PublicUser[];
-	    friends: PublicUser[];
-	    empty: boolean;
+	export class Channel {
+	    id: string;
+	    type: number;
+	    users: number[];
+	    owner?: PublicUser;
+	    messages: Message[];
 	
 	    static createFrom(source: any = {}) {
-	        return new RelationshipStruct(source);
+	        return new Channel(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.pending = this.convertValues(source["pending"], PublicUser);
-	        this.requests = this.convertValues(source["requests"], PublicUser);
-	        this.friends = this.convertValues(source["friends"], PublicUser);
-	        this.empty = source["empty"];
+	        this.id = source["id"];
+	        this.type = source["type"];
+	        this.users = source["users"];
+	        this.owner = this.convertValues(source["owner"], PublicUser);
+	        this.messages = this.convertValues(source["messages"], Message);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -253,6 +228,20 @@ export namespace mocks {
 		    }
 		    return a;
 		}
+	}
+	export class StandardToken {
+	    permissions: string[];
+	    token: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new StandardToken(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.permissions = source["permissions"];
+	        this.token = source["token"];
+	    }
 	}
 	export class PrivateUser {
 	    name: string;
@@ -280,6 +269,45 @@ export namespace mocks {
 	        this.avatar = this.convertValues(source["avatar"], UserAvatar);
 	        this.profileOptions = source["profileOptions"];
 	        this.analytics = this.convertValues(source["analytics"], UserAnalytics);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	export class RelationshipStruct {
+	    pending: PublicUser[];
+	    requests: PublicUser[];
+	    friends: PublicUser[];
+	    empty: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RelationshipStruct(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pending = this.convertValues(source["pending"], PublicUser);
+	        this.requests = this.convertValues(source["requests"], PublicUser);
+	        this.friends = this.convertValues(source["friends"], PublicUser);
+	        this.empty = source["empty"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -353,36 +381,6 @@ export namespace mocks {
 		    }
 		    return a;
 		}
-	}
-	
-	
-	
-	
-	
-
-}
-
-export namespace app {
-	
-	export class CustomMemoryStats {
-	    totalAlloc: number;
-	    alloc: number;
-	    sysAlloc: number;
-	    heapSpace: number;
-	    gcTotal: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new CustomMemoryStats(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.totalAlloc = source["totalAlloc"];
-	        this.alloc = source["alloc"];
-	        this.sysAlloc = source["sysAlloc"];
-	        this.heapSpace = source["heapSpace"];
-	        this.gcTotal = source["gcTotal"];
-	    }
 	}
 
 }

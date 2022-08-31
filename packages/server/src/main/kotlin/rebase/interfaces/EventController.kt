@@ -1,7 +1,7 @@
 package rebase.interfaces
 
-import rebase.events.EventBus
+import rebase.events.EventHandler
 
 interface EventController {
-    val eventBus: EventBus
+    val handler: EventHandler
 }

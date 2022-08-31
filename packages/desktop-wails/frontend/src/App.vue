@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
-import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement, NModal, NInput, NSelect, NButton } from 'naive-ui';
+import { computed, ref, onMounted } from 'vue';
+import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement, NLoadingBarProvider, useLoadingBar } from 'naive-ui';
 import Titlebar from './components/Titlebar.vue';
 import LeftDrawer from './components/LeftDrawer/LeftDrawer.vue';
 import DrawerComponent from './components/LeftDrawer/DrawerComponent.vue';
@@ -10,6 +10,8 @@ import SettingsConfigProvider from './components/settings/SettingsConfigProvider
 import SearchProvider from './components/search/SearchProvider.vue';
 import BeforeStartModal from './components/BeforeStartModal.vue';
 import DebugSocket from './components/debug/DebugSocket.vue';
+import { useRouter } from 'vue-router';
+
 const appStore = useAppStore();
 
 darkTheme.Button!!.common!!.errorColor = "#ED4245";
@@ -20,52 +22,54 @@ const leftDrawer = computed(() => appStore.leftDrawer)
 const search = computed(() => appStore.search)
 appStore.load();
 appStore.startRealtime();
-
 </script>
 
 <template>
   <div class="lightable-red">
     <ConfettiCanvasProvider>
       <NConfigProvider :theme="(theme == 'Dark') ? darkTheme : lightTheme">
-       <BeforeStartModal/>
-        <NDialogProvider>
-          <DebugSocket/>
-          <NElement>
-            <Titlebar v-if="false" />
-            <NMessageProvider>
-              <SettingsConfigProvider>
-                <SearchProvider :show="search.show">
-                  <div class="general-co">
-                    <div class="lightable-drawer" v-if="leftDrawer.show">
-                      <LeftDrawer>
-                        <template #top>
-                          <DrawerComponent :pair="item" v-for="(item, index) in leftDrawer.components" v-bind:key="index" />
-                        </template>
-                        <template #groups>
-                          <div class="group" v-for="(group, index) in leftDrawer.groups" v-bind:key="index">
-                            <div class="header ns">
-                              <span>{{ group.name }}</span>
-                            </div>
-                            <div class="group-contents" :id="`group-${group.name}`">
-                              <div class="group-item" v-for="(gitem, gid) in group.items" v-bind:key="gid" :id="`group-item-${gitem.text}`">
-                                <DrawerComponent :pair="gitem" :style="{ width: '88%' }" />
+        <BeforeStartModal />
+        <NLoadingBarProvider>
+          <NDialogProvider>
+            <DebugSocket />
+            <NElement>
+              <Titlebar v-if="false" />
+              <NMessageProvider>
+                <SettingsConfigProvider>
+
+                  <SearchProvider :show="search.show">
+                    <div class="general-co">
+                      <div class="lightable-drawer" v-if="leftDrawer.show">
+                        <LeftDrawer>
+                          <template #top>
+                            <DrawerComponent :pair="item" v-for="(item, index) in leftDrawer.components" v-bind:key="index" />
+                          </template>
+                          <template #groups>
+                            <div class="group" v-for="(group, index) in leftDrawer.groups" v-bind:key="index">
+                              <div class="header ns">
+                                <span>{{ group.name }}</span>
+                              </div>
+                              <div class="group-contents" :id="`group-${group.name}`">
+                                <div class="group-item" v-for="(gitem, gid) in group.items" v-bind:key="gid" :id="`group-item-${gitem.text}`">
+                                  <DrawerComponent :pair="gitem" :style="{ width: '88%' }" />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </template>
-                      </LeftDrawer>
-                    </div>
-                    <div class="page" :style="{ 'background': ($router.currentRoute.value.name == 'login' || $router.currentRoute.value.name == 'home' || $router.currentRoute.value.name == 'invitesignup' || $router.currentRoute.value.name == 'signup') ? 'transparent' : `${theme == 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
-                      <div class="content">
-                        <router-view />
+                          </template>
+                        </LeftDrawer>
+                      </div>
+                      <div class="page" :style="{ 'background': ($router.currentRoute.value.name == 'login' || $router.currentRoute.value.name == 'home' || $router.currentRoute.value.name == 'invitesignup' || $router.currentRoute.value.name == 'signup') ? 'transparent' : `${theme == 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
+                        <div class="content">
+                          <router-view />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </SearchProvider>
-              </SettingsConfigProvider>
-            </NMessageProvider>
-          </NElement>
-        </NDialogProvider>
+                  </SearchProvider>
+                </SettingsConfigProvider>
+              </NMessageProvider>
+            </NElement>
+          </NDialogProvider>
+        </NLoadingBarProvider>
       </NConfigProvider>
     </ConfettiCanvasProvider>
   </div>
@@ -83,6 +87,7 @@ appStore.startRealtime();
     width: 100%;
     display: flex;
     flex-direction: row;
+
     .page {
       width: 100%;
       // background-color: #121219;
@@ -118,6 +123,4 @@ appStore.startRealtime();
     }
   }
 }
-
-
 </style>

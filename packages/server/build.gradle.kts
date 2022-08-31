@@ -19,7 +19,6 @@ repositories {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
     implementation(kotlin("stdlib"))
-    implementation("com.github.Kosert.FlowBus:FlowBus:1.1")
     implementation("io.javalin:javalin:4.6.4")
     implementation("io.javalin:javalin-openapi:4.6.4")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")

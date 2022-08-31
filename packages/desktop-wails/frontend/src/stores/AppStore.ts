@@ -89,6 +89,20 @@ export const useAppStore = defineStore('AppStore', {
         },
         setTitle(name: string) {
             WindowSetTitle(`Lightable｜${name}`);
+        },
+        updateDrawerComponent(name: string, component: Partial<LightableDrawerComponentPair>) {
+            let comp = this.leftDrawer.components[this.leftDrawer.components.findIndex(f => f.name == name)];
+            if (comp) {
+                if (component.t) comp.t = component.t;
+                if (component.icon) comp.icon = component.icon;
+                if (component.text) comp.text = component.text;
+                if (component.cb) comp.cb = component.cb;
+                if (component.path) comp.path = component.path;
+                if (component.name) comp.name = component.name;
+                if (component.color) comp.color = component.color;
+                if (component.tooltip) comp.tooltip = component.tooltip;
+                if (component.badge) comp.badge = component.badge;
+            }
         }
     }
 })
@@ -117,13 +131,15 @@ export interface LightableDrawerComponentPair {
     path?: string,
     name?: string,
     color?: string | '#fff',
+    tooltip?: string,
     badge?: {
         show: boolean,
         type?: 'default' | 'success' | 'error' | 'warning' | 'info',
         max?: number,
         color?: string,
         processing?: boolean,
-        value?: string | number
+        icon?: any,
+        value?: string | number,
     }
 }
 

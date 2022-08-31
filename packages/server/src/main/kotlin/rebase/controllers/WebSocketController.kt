@@ -4,39 +4,34 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.javalin.websocket.WsCloseContext
 import io.javalin.websocket.WsConnectContext
 import io.javalin.websocket.WsContext
 import io.javalin.websocket.WsMessageContext
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import me.kosert.flowbus.GlobalBus
 import org.slf4j.Logger
+import rebase.GetCPUUsage
 import rebase.cache.UserCache
 import rebase.compression.CompressionUtil
-import rebase.events.EventBus
+import rebase.events.EventHandler
+import rebase.events.EventListener
 import rebase.interfaces.GenericUser
 import rebase.messages.Message
 import rebase.schema.*
 import java.nio.ByteBuffer
 import java.time.Instant
 
-@OptIn(DelicateCoroutinesApi::class)
 class WebSocketController(
-    private val eventBus: EventBus,
     private val logger: Logger,
+    private val ehandler: EventHandler,
     private val userCache: UserCache,
     private val isProd: Boolean
-) {
+): EventListener {
     private val rawConnections = mutableMapOf<String, SessionWithCompression>()
     private val connections = mutableMapOf<String, SocketSession>()
     private val jsonWrap: ObjectMapper = jacksonObjectMapper().findAndRegisterModules()
     private val compressionEngine = CompressionUtil
-
     fun connection(handler: WsConnectContext) {
         val compressionType = handler.queryParam("compression") ?: "none"
         rawConnections[handler.sessionId] = SessionWithCompression(handler, compressionType)
@@ -97,7 +92,6 @@ class WebSocketController(
                 )
                 user.state = UserState.ONLINE.ordinal
                 user.save()
-                GlobalBus.post(FriendUpdatePayload(user, user.identifier, "user", user.toPublic()))
                 return
             } else if (connections[session.session.sessionId]?.authenticated == false) {
 
@@ -116,7 +110,7 @@ class WebSocketController(
                             ).toLong()
                         }
                         if (typingTo != null) {
-                            GlobalBus.post(TypingEvent(userSession, typingTo))
+                            ehandler.broadcastTyping(TypingEvent(userSession, typingTo))
                             return
                         } else {
                             send(userSession.ws.session, userSession.ws.type, object {
@@ -151,51 +145,6 @@ class WebSocketController(
             connection.user.save()
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private suspend fun startRealtime() {
-        eventBus.subscribe<UserUpdateEvent> {  payload ->
-            oneToPotentialMany(payload.toSelf(), payload.self)
-            oneToMany(payload.toExternal(), payload.self.getFriends().allAsOne())
-        }
-//        eventBus.subscribe<FriendUpdatePayload> { payload ->
-//            oneToMany(payload.toJSON(), payload.self.getFriends().allAsOne() as Collection<GenericUser>)
-//            return@subscribe
-//        }
-//        eventBus.subscribe<SelfUpdatePayload> { payload ->
-//            oneToPotentialMany(payload.toJSON(), payload.self as GenericUser)
-//            return@subscribe
-//        }
-        eventBus.subscribe<TypingEvent> { payload ->
-            oneToPotentialMany(payload.toSelf(), payload.self.user)
-            oneToPotentialMany(payload.toExternal(), payload.to.user)
-            return@subscribe
-        }
-        eventBus.subscribe<PendingFriendEvent> { payload ->
-            oneToPotentialMany(payload.toExternal(), payload.friend as GenericUser)
-            oneToPotentialMany(payload.toSelf(), payload.self as GenericUser)
-            return@subscribe
-        }
-        eventBus.subscribe<RemoveFriendRequestEvent> { payload ->
-            oneToPotentialMany(payload.toSelf(), payload.self as GenericUser)
-            oneToPotentialMany(payload.toExternal(), payload.pendingFriend as GenericUser)
-            return@subscribe
-        }
-        eventBus.subscribe<AcceptFriendRequestEvent> { payload ->
-            oneToPotentialMany(payload.toSelf(), payload.self as GenericUser)
-            oneToPotentialMany(payload.toExternal(), payload.pendingFriend as GenericUser)
-            return@subscribe
-        }
-        eventBus.subscribe<UpdateEvent> { payload ->
-            val sockets = connections.values.filter { u -> u.session.properties.build != payload.d.tag }
-            for (socket in sockets) {
-                send(socket.ws.session, socket.ws.type, payload)
-            }
-        }
-        eventBus.subscribe<UserUpdateEvent> { payload ->
-            oneToPotentialMany(payload.toSelf(), payload.self)
-            oneToMany(payload.toExternal(), payload.self.getFriends().allAsOne())
-        }
-    }
 
     /**
      * Get sockets based on a [Collection] of [GenericUser]
@@ -289,11 +238,40 @@ class WebSocketController(
         }
     }
 
-    init {
-        GlobalScope.launch {
-            startRealtime()
+    override fun onUserUpdate(payload: UserUpdateEvent) {
+        oneToPotentialMany(payload.toSelf(), payload.self)
+        oneToMany(payload.toExternal(), payload.self.getFriends().allAsOne())
+    }
+
+    override fun onTyping(payload: TypingEvent) {
+        oneToPotentialMany(payload.toSelf(), payload.self.user)
+        oneToPotentialMany(payload.toExternal(), payload.to.user)
+    }
+
+    override fun onPendingFriend(payload: PendingFriendEvent) {
+        println("paylaod moment")
+        oneToPotentialMany(payload.toExternal(), payload.friend as GenericUser)
+        oneToPotentialMany(payload.toSelf(), payload.self as GenericUser)
+    }
+
+    override fun onRemoveFriendRequest(payload: RemoveFriendRequestEvent) {
+        oneToPotentialMany(payload.toSelf(), payload.self as GenericUser)
+        oneToPotentialMany(payload.toExternal(), payload.pendingFriend as GenericUser)
+    }
+
+    override fun onAcceptFriendRequest(payload: AcceptFriendRequestEvent) {
+        oneToPotentialMany(payload.toSelf(), payload.self as GenericUser)
+        oneToPotentialMany(payload.toExternal(), payload.pendingFriend as GenericUser)
+    }
+
+    override fun onUpdate(payload: UpdateEvent) {
+        val sockets = connections.values.filter { u -> u.session.properties.build != payload.d.tag }
+        for (socket in sockets) {
+            send(socket.ws.session, socket.ws.type, payload)
         }
     }
+
+    override fun onCPUUsage(payload: GetCPUUsage.CPUUsageUpdate) {}
 }
 
 data class ReceivedMessage(

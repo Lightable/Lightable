@@ -2,19 +2,17 @@ package rebase.controllers
 
 import io.javalin.http.Context
 import io.javalin.plugin.openapi.annotations.*
-import me.kosert.flowbus.EventsReceiver
-import me.kosert.flowbus.GlobalBus
-import me.kosert.flowbus.subscribe
 import org.apache.commons.lang3.time.DateUtils
+import rebase.GetCPUUsage
 import rebase.cache.UserCache
+import rebase.events.EventHandler
 import rebase.schema.ChattyRelease
 import rebase.schema.PublicUser
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.*
 
-class DeveloperController(val userCache: UserCache) {
-    val events = EventsReceiver()
+class DeveloperController(val userCache: UserCache, val handler: EventHandler) {
 
     @OpenApi(
         path = "/admin/disable/{id}",
@@ -425,23 +423,12 @@ class DeveloperController(val userCache: UserCache) {
             )
             userCache.saveOrReplaceRelease(release)
             ctx.status(201).json(release)
-            GlobalBus.post(UpdateEvent(release))
+            handler.broadcastUpdate(UpdateEvent(release))
         } else {
             ctx.status(403).json(UserController.UserDataFail("You are not an Admin"))
         }
     }
 
-    init {
-        events.subscribe<ConnectedClient> {
-            when (it.inc) {
-                true -> connectedClients.inc()
-                false -> connectedClients.dec()
-            }
-        }
-        events.subscribe<SentMessage> {
-            sentMessages.inc()
-        }
-    }
 
     companion object {
         var connectedClients = 0
