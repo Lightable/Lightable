@@ -25,8 +25,8 @@ const props = defineProps({
     flex-direction: row;
     padding: 8px;
     // background-color: rgba(9, 9, 9, 0.253);
-    backdrop-filter: blur(8px);
-    width: 100%;
+    backdrop-filter: blur(2px) saturate(200%);
+    width: calc(100% - 25px);
     z-index: 5;
     .inner-header {
         font-size: 24px;
@@ -36,6 +36,7 @@ const props = defineProps({
         justify-content: center;
         align-items: center;
         gap: 16px;
+        color: var(--text-color-1);
     }
 }
 </style>

@@ -50,7 +50,9 @@ func (c *Connection) GracefulClose() {
 	println("Attempting graceful close")
 	c.Write(websocket.CloseMessage, []byte{})
 	for {
-		if c.Closed { break }
+		if c.Closed {
+			break
+		}
 	}
 }
 func (c *Connection) Ping() {
@@ -93,16 +95,20 @@ type ServerStartMessage struct {
 	T int                `json:"t"`
 	D ServerStartPayload `json:"d"`
 }
-
+type FriendRequestAddMessage struct {
+	T  int        `json:"t"`
+	D  PublicUser `json:"d"`
+	Id string     `json:"id"`
+}
 type UserStatusUpdateMessage struct {
-	T int `json:"t"`
+	T int                     `json:"t"`
 	D UserStatusUpdatePayload `json:"d"`
 }
 type UserStatusUpdatePayload struct {
 	User PublicUser `json:"user"`
 }
 type ServerStartPayload struct {
-	User          PrivateUser                 `json:"user"`
+	User          PrivateUser                `json:"user"`
 	Status        UserStatus                 `json:"status"`
 	Admin         bool                       `json:"admin"`
 	Enabled       bool                       `json:"enabled"`

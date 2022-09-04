@@ -14,16 +14,8 @@ export function FindRelation(arg1) {
   return window['go']['client']['RelationshipManager']['FindRelation'](arg1);
 }
 
-export function FindRelations(arg1) {
-  return window['go']['client']['RelationshipManager']['FindRelations'](arg1);
-}
-
 export function GetRelations() {
   return window['go']['client']['RelationshipManager']['GetRelations']();
-}
-
-export function InternalAddRelation(arg1, arg2) {
-  return window['go']['client']['RelationshipManager']['InternalAddRelation'](arg1, arg2);
 }
 
 export function RemoveFriend(arg1) {

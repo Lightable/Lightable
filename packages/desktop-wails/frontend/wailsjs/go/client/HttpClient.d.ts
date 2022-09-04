@@ -5,14 +5,6 @@ import {client} from '../models';
 
 export function AddFriend(arg1:string):Promise<mocks.PublicUser>;
 
-export function CreateGetRequestWithAuthorization(arg1:any,arg2:string):Promise<any>;
-
-export function CreatePostRequestWithAuthorization(arg1:any):Promise<any>;
-
-export function CreatePostRequestWithBodyAndAuthorization(arg1:any,arg2:Promise<any>): Promise<any>;
-
-export function CreateURL(arg1:string):Promise<any>;
-
 export function LoginWithEmailAndPassword(arg1:string,arg2:string):Promise<mocks.PrivateUser>;
 
 export function LoginWithToken(arg1:string):Promise<mocks.PrivateUser>;

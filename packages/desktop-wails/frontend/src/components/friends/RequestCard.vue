@@ -9,15 +9,14 @@
     
     <template>
         <div class="outer">
-            <RelationshipCard :friend="user">
-               
-            </RelationshipCard>
+            <RelationshipCard :friend="user"/>
         </div>
     </template>
     
     
 <style lang="scss" scoped>
-    .outer {
-        width: 90%;
-    }
+  .outer {
+    max-width: 95%;
+    min-width: 10%;
+}
 </style>

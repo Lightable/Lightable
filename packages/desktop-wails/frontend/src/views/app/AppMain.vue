@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAppStore } from '../../stores/AppStore';
+import { useUpdateStore } from '../../stores/UpdateStore';
 import Loading from '../../components/loading/Loading.vue';
 import { LoadingStates } from '../../composable/LoadingData';
 import Overlay from '../../components/Overlay.vue';
 import { DialSocket, LoginToSocket, GetUser } from '../../../wailsjs/go/client/Client';
 import { NModal, NInput, NButton, NIcon, useMessage, useLoadingBar } from 'naive-ui';
 import { GetRelations, RequestFriend } from '../../../wailsjs/go/client/RelationshipManager';
-import {PhHouse as Home, PhChats as Chatbubbles, PhUser as Friends, PhShareNetwork as Workspace, PhUsers as GroupFilled, PhGearSix as Cog, PhDownload as Download} from '@dnlsndr/vue-phosphor-icons';
+import { PhHouse as Home, PhChats as Chatbubbles, PhUser as Friends, PhShareNetwork as Workspace, PhUsers as GroupFilled, PhGearSix as Cog, PhDownload as Download, PhShieldStar as Shield } from '@dnlsndr/vue-phosphor-icons';
 import { useRouter } from 'vue-router';
 const appStore = useAppStore();
+const updateStore = useUpdateStore();
 const toast = useMessage();
 const router = useRouter();
 const loading = useLoadingBar();
@@ -61,14 +63,26 @@ GetUser().then((user) => {
                 name: 'App finished',
                 state: LoadingStates.FAILED
             }
-            GetRelations().then((r) => {
-                appStore.relationships = r;
-                appStore.users.push(...r.friends)
-                appStore.users.push(...r.pending)
-                appStore.users.push(...r.requests)
-                complete.value = true;
-                appStore.setTitle('Home');
-            });
+            setTimeout(() => {
+                GetRelations().then((r) => {
+                    appStore.relationships = r;
+                    console.log(r);
+                    appStore.users.push(...r.friends)
+                    appStore.users.push(...r.pending)
+                    appStore.users.push(...r.requests)
+                    complete.value = true;
+                    appStore.setTitle('Home');
+                    if (appStore.user!!.admin) {
+                        appStore.leftDrawer.components.push({
+                            t: "Route",
+                            text: 'Admin',
+                            name: 'admin',
+                            path: '/app/admin',
+                            icon: Shield,
+                        })
+                    }
+                });
+            }, 400)
         });
     }).catch((msg) => {
         appStore.setTitle('Loading • Socket • Failed');
@@ -133,6 +147,7 @@ appStore.leftDrawer.components = [
     {
         t: "Route",
         text: 'Friends',
+        name: 'friends',
         path: '/app/friends',
         icon: Friends
     },
@@ -144,29 +159,40 @@ appStore.leftDrawer.components = [
         icon: Cog,
     },
 ]
-  router.beforeResolve((to, from, next) => {
+
+router.beforeResolve((to, from, next) => {
     // If this isn't an initial page load.
     if (to.name) {
-      // Start the route progress bar.
-      loading.start()
+        // Start the route progress bar.
+        loading.start()
     }
     next()
-  });
-  router.afterEach(() => {
+});
+router.afterEach(() => {
     loading.finish();
-  });
+});
 
 
-  setTimeout(() => {
+setTimeout(async () => {
+    let perm = await Notification.requestPermission()
+    console.log(perm);
     appStore.updateDrawerComponent('settings', {
         badge: {
             show: true,
             type: 'success',
             processing: true,
+            closableOnClick: false,
         },
         tooltip: 'Update Avaliable'
     })
-  }, 5000)
+    updateStore.setCurrentUpdate({
+        version: 'v0.0.1-ALPHA',
+        title: 'Add Auto-Update',
+        notes: 'v0.15.5-ALPHA\n Adds support for REALTIME updates!',
+        signature: 'Brys0',
+        url: ''
+    });
+}, 5000)
 </script>
 
 

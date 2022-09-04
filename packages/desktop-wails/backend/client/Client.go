@@ -33,6 +33,7 @@ type Client struct {
 	Ctx                 *context.Context
 	Http                *HttpClient
 	RelationshipManager *RelationshipManager
+	DeveloperClient     *DeveloperClient
 	SocketHistory       []string
 	SocketTicker        *time.Ticker
 }
@@ -51,6 +52,7 @@ func NewClient(ctx *context.Context, logger *zerolog.Logger, config *mocks.AppCo
 		client.Http.Secure = config.Responder.Secure
 	}
 	client.RelationshipManager = NewRelationshipManager(client.Http, &client)
+	client.DeveloperClient = NewDeveloperClient(&a.Ctx)
 	return &client
 }
 
@@ -122,7 +124,7 @@ func (c *Client) DialSocket() (*string, error) {
 }
 
 func (c *Client) ReadAndRespond(m []byte) {
-	decoded := DecodeMessage(m)
+	decoded := decodeMessage(m)
 	fmt.Printf("Decoded message: %v\n", string(decoded))
 	tParse := mocks.GenericSocketMessage{}
 	err := json.Unmarshal(decoded, &tParse)
@@ -156,17 +158,27 @@ func (c *Client) ReadAndRespond(m []byte) {
 		if !d.Relationships.Empty {
 			relation := d.Relationships
 			for f := 0; f < len(relation.Friends); f++ {
-				c.RelationshipManager.InternalAddRelation("friend", relation.Friends[f])
+				c.RelationshipManager.internalAddRelation("friend", relation.Friends[f])
 			}
 			for p := 0; p < len(relation.Pending); p++ {
-				c.RelationshipManager.InternalAddRelation("pending", relation.Pending[p])
+				c.RelationshipManager.internalAddRelation("pending", relation.Pending[p])
 			}
 			for r := 0; r < len(relation.Requests); r++ {
-				c.RelationshipManager.InternalAddRelation("request", relation.Requests[r])
+				c.RelationshipManager.internalAddRelation("request", relation.Requests[r])
 			}
 		}
 		runtime.EventsEmit(*c.Ctx, "ws:read:server|start", cData.D)
 		c.Logger.Info().Msg(fmt.Sprintf("Server start with client: %v", cData.D.User.Id))
+	case 16:
+		cData := mocks.FriendRequestAddMessage{}
+		err := json.Unmarshal(decoded, &cData)
+		if err != nil {
+			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to read new pending request")
+			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
+			return
+		}
+		c.RelationshipManager.internalAddRelation("pending", cData.D)
+		runtime.EventsEmit(*c.Ctx, "ws:read:server|pending", cData.D)
 	case 24:
 		uData := mocks.UserStatusUpdateMessage{}
 		err := json.Unmarshal(decoded, &uData)
@@ -176,7 +188,7 @@ func (c *Client) ReadAndRespond(m []byte) {
 			return
 		}
 		d := uData.D.User
-		m, id, err := c.RelationshipManager.FindRelations(&d)
+		m, id, err := c.RelationshipManager.findRelations(&d)
 		if err != nil {
 			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to find user for update message")
 			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
@@ -200,6 +212,9 @@ func (c *Client) GetAvatar(id string, size int) string {
 		panic(err)
 	}
 	u := c.RelationshipManager.FindRelation(parse)
+	if u == nil {
+		return ""
+	}
 	if u.Avatar != nil {
 		return c.GetHttpURL() + "/cdn/user/" + u.Id + "/avatars/avatar_" + u.Avatar.Id + "?size=" + fmt.Sprint(size)
 	}
@@ -270,7 +285,7 @@ func (c *Client) GetSocketHistory() []string {
 	return c.SocketHistory
 }
 
-func DecodeMessage(m []byte) []byte {
+func decodeMessage(m []byte) []byte {
 	var out bytes.Buffer
 	r, err := zlib.NewReader(bytes.NewBuffer(m))
 	if err != nil {

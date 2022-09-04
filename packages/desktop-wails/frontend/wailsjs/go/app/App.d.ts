@@ -17,6 +17,8 @@ export function GetConfig():Promise<mocks.AppConfig>;
 
 export function GetMemoryStats():Promise<app.CustomMemoryStats>;
 
+export function GetRunningGoRoutines():Promise<number>;
+
 export function GetVersion():Promise<string>;
 
 export function HasUser(arg1:boolean):void;

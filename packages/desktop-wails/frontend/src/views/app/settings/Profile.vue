@@ -5,7 +5,7 @@ import { NAvatar, NModal, NButton, NProgress } from 'naive-ui';
 import { GetSelfAvatar, OpenAvatarPickDialog } from '../../../../wailsjs/go/client/Client';
 import AppSection from '../../../components/app/AppSection.vue';
 import ProfileCard from '../../../components/settings/ProfileCard.vue';
-import { PreviewRound } from '@vicons/material';
+import { debug } from '../../../composable/Logger';
 import { UploadAvatar } from '../../../../wailsjs/go/client/HttpClient';
 import { EventsOff, EventsOn } from '../../../../wailsjs/runtime/runtime';
 const appStore = useAppStore();
@@ -36,7 +36,7 @@ const selectAvatar = async () => {
     let preview = previewModal.value;
     const path = await OpenAvatarPickDialog()
     if (path === '.' || path === '' || !path) return
-    console.log('Select avatar', path)
+    debug('Avatar', `Select avatar with path ${path}`);
     appStore.avatar = path;
     preview.file = path;
     preview.show = true;
@@ -55,6 +55,7 @@ const uploadAvatar = async () => {
     let preview = previewModal.value;
     preview.closable = false;
     preview.uploading = true;
+    debug('Avatar', `Starting upload...`);
     EventsOn('upload:progress', (d: number) => {
         preview.uploadedPercent = roundOf(d, 0);
     });
@@ -63,6 +64,7 @@ const uploadAvatar = async () => {
         preview.waiting = true;
         EventsOff('upload:progress');
         EventsOff('upload:finished');
+        debug('Avatar', `Upload has finished`);
     });
     try {
         await UploadAvatar(preview.file);
@@ -71,7 +73,7 @@ const uploadAvatar = async () => {
         preview.closable = true;
         preview.waiting = false;
     } catch (e) {
-        console.log(e);
+        debug('Avatar', `Avatar couldn't be uploaded:`, e);
         preview.closable = true;
         preview.waiting = false;
         preview.uploadable = false;

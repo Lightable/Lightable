@@ -34,7 +34,9 @@ const props = defineProps({
     color: var(--text-color-2);
     border-radius: 5px;
     cursor: pointer;
-
+    transition: all 250ms ease;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: subpixel-antialiased;
     &[t='danger'] {
         color: var(--error-color-pressed);
     }
@@ -45,6 +47,7 @@ const props = defineProps({
 
     &:hover {
         background-color: #222225;
+        transform: scale(1.03);
     }
 }
 </style>

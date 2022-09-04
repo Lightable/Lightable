@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { PropType } from 'vue';
 import { NIcon, NBadge, NTooltip } from 'naive-ui';
-import { LightableDrawerComponentPair } from '../../stores/AppStore';
+import { LightableDrawerComponentPair, useAppStore } from '../../stores/AppStore';
 import { useRouter } from 'vue-router';
 
+const appStore = useAppStore();
 const props = defineProps({
     pair: Object as PropType<LightableDrawerComponentPair>
 });
@@ -13,6 +14,7 @@ const router = useRouter();
 const clickEvent = () => {
     const route = router.currentRoute.value.fullPath;
     const pair = props.pair!!;
+    if (pair.badge?.closableOnClick) appStore.updateDrawerComponent(pair?.name as string, { badge: { show: false } });
     switch (pair.t) {
         case "Route": {
             if (pair.path!! === route) return
@@ -38,14 +40,14 @@ const clickEvent = () => {
     <NTooltip v-if="pair && pair.tooltip" trigger="hover" placement="bottom">
         <template #trigger>
             <div :class="`drawer-component ${(pair.t !== `Function` && $router.currentRoute.value.fullPath === pair.path) ? 'active-path' : ''}`" :disabled="(pair.t !== `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '' || router.currentRoute.value.name === pair.name) ? true : Boolean(false)" @click="clickEvent" v-if="pair" :path="pair.path">
-                <NBadge :dot="pair?.badge?.show" :type="pair?.badge?.type" :processing="pair.badge.processing" v-if="pair.badge">
+                <NBadge :dot="pair?.badge?.show" :type="pair?.badge?.type" :processing="pair.badge.processing" v-if="pair.badge && pair.badge.show">
                     <template #value>
                         <component :is="pair.badge.icon" weight="duotone" color="var(--text-color-2)" v-if="pair.badge.icon" />
                         {{ pair.badge.value }}
                     </template>
                     <component :is="pair.icon" weight="duotone" :size="24" color="var(--text-color-2)" />
                 </NBadge>
-                <component :is="pair.icon" weight="duotone" :size="24" color="var(--text-color-2)" v-if="!pair.badge" />
+                <component :is="pair.icon" weight="duotone" :size="24" color="var(--text-color-2)" v-else />
                 <slot name="icon" v-if="!pair.icon" />
 
                 <div class="content">
@@ -56,14 +58,14 @@ const clickEvent = () => {
         {{ pair.tooltip }}
     </NTooltip>
     <div :class="`drawer-component ${(pair.t !== `Function` && $router.currentRoute.value.fullPath === pair.path) ? 'active-path' : ''}`" :disabled="(pair.t !== `Function` && router.currentRoute.value.fullPath === pair.path || pair.path === '' || router.currentRoute.value.name === pair.name) ? true : Boolean(false)" @click="clickEvent" v-if="pair && !pair.tooltip" :path="pair.path">
-        <NBadge :dot="pair?.badge?.show" :type="pair?.badge?.type" :processing="pair.badge.processing" v-if="pair.badge">
+        <NBadge :dot="pair?.badge?.show" :type="pair?.badge?.type" :processing="pair.badge.processing" v-if="pair.badge && pair.badge.show">
             <template #value>
                 <component :is="pair.badge.icon" weight="duotone" color="var(--text-color-2)" v-if="pair.badge.icon" />
                 {{ pair.badge.value }}
             </template>
             <component :is="pair.icon" weight="duotone" :size="24" color="var(--text-color-2)" />
         </NBadge>
-        <component :is="pair.icon" weight="duotone" :size="24" color="var(--text-color-2)" v-if="!pair.badge" />
+        <component :is="pair.icon" weight="duotone" :size="24" color="var(--text-color-2)" v-else />
         <slot name="icon" v-if="!pair.icon" />
 
         <div class="content">

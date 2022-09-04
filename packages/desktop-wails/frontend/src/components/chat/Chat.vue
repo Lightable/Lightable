@@ -15,8 +15,10 @@ const props = defineProps({
 });
 
 const avatar = ref() as Ref<string | undefined>
-const getUser = (id: string | undefined): mocks.PublicUser | undefined => {
-    return appStore.users.find(u => u.id === id)
+const getUser = (id: string | undefined): mocks.PublicUser | mocks.PrivateUser | undefined => {
+    const initalFind = appStore.users.find(u => u.id === id);
+    if (!initalFind && appStore.user!!.id == id) return appStore.user!!;
+    return initalFind
 }
 
 const user = computed(() => getUser(props.channel?.id))
@@ -27,6 +29,18 @@ onMounted(async () => {
         avatar.value = await GetAvatar(props.channel?.id, 64)
     }
 })
+const sendMessage = (cnt: string) => {
+    props.channel?.messages.push({
+        content: cnt,
+        type: 0,
+        // @ts-ignore
+        channel: props.channel.id,
+         // @ts-ignore
+        author: appStore.user!!.id,
+        created: Date.now(),
+        system: false,
+    })
+}
 </script>
 
 <template>
@@ -38,9 +52,9 @@ onMounted(async () => {
         </ChatHeader>
         <NScrollbar style="height: 100%; width: 100%; padding-bottom: 5px; padding-top: 5px;" trigger="hover">
             <div class="pad">
-                <!-- <div class="infinite-load ns">
-                    <span>Loading Messages...</span>
-                </div> -->
+                <div class="infinite-load ns">
+                    <span>THIS IS ONLY A PREVIEW<br/>Messages are NOT actually being sent!</span>
+                </div>
                 <div class="errors ns">
                     <NAlert id="request" title="Can't send messages to this user" type="error" v-if="!status || typeof status === 'number' && status != RelationshipStatus.FRIEND">
                         <span class="error" v-if="status === RelationshipStatus.REQUEST">This user has yet to accept your friend request</span>
@@ -50,19 +64,9 @@ onMounted(async () => {
                     </NAlert>
                 </div>
                 <Message v-for="(item, _) in channel.messages" v-if="channel?.messages" :author="getUser(item?.author as any)" :content="item.content" />
-                <!-- <Message :is-preview="true" />
-                <Message :is-preview="true" />
-                <Message :is-preview="true" />
-                <Message :is-preview="true" />
-                <Message :is-preview="true" />
-                <Message :is-preview="true" />
-                <Message :is-preview="true" />
-                <Message :is-preview="true" />
-                <Message :is-preview="true" />
-                <Message :author="tempAuthor" /> -->
             </div>
         </NScrollbar>
-        <ChatInput />
+        <ChatInput @message="sendMessage" />
     </div>
 </template>
 

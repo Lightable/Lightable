@@ -30,6 +30,10 @@ export function GetMemoryStats() {
   return window['go']['app']['App']['GetMemoryStats']();
 }
 
+export function GetRunningGoRoutines() {
+  return window['go']['app']['App']['GetRunningGoRoutines']();
+}
+
 export function GetVersion() {
   return window['go']['app']['App']['GetVersion']();
 }

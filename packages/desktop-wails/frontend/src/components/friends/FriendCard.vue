@@ -20,6 +20,7 @@ const contextMenuPos = ref({
     y: 0
 })
 const onContextMenu = ({ x, y }: MouseEvent) => {
+    x -= 150
     contextMenuPos.value = {
         show: true,
         x, y
@@ -82,9 +83,8 @@ const block = () => {
 
 <style lang="scss" scoped>
 .outer {
-    max-width: 65%;
+    max-width: 90%;
     min-width: 10%;
-
 }
 
 .context-menu-btn {

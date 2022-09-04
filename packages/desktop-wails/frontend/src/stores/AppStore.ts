@@ -68,6 +68,16 @@ export const useAppStore = defineStore('AppStore', {
             EventsOn('ws:read:user|status', async (_) => {
                 this.relationships = await GetRelations();
             });
+            EventsOn('ws:read:server|pending', async (_) => {
+                this.relationships = await GetRelations();
+                this.updateDrawerComponent('friends', {
+                    badge: {
+                        show: true,
+                        type: 'error',
+                        closableOnClick: true,
+                    }
+                })
+            })
         },
         async changeTheme(theme: LightableTheme) {
             this.theme = theme;
@@ -134,6 +144,7 @@ export interface LightableDrawerComponentPair {
     tooltip?: string,
     badge?: {
         show: boolean,
+        closableOnClick?: boolean,
         type?: 'default' | 'success' | 'error' | 'warning' | 'info',
         max?: number,
         color?: string,

@@ -27,7 +27,7 @@ func NewRelationshipManager(h *HttpClient, c *Client) *RelationshipManager {
 	}
 }
 
-func (rm *RelationshipManager) FindRelations(pubUser *mocks.PublicUser) (*map[int64]mocks.PublicUser, *int64, error) {
+func (rm *RelationshipManager) findRelations(pubUser *mocks.PublicUser) (*map[int64]mocks.PublicUser, *int64, error) {
 	intID, err := strconv.ParseInt(pubUser.Id, 10, 64)
 	if err != nil {
 		rm.c.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Could not convert string to int64")
@@ -87,6 +87,7 @@ func (rm *RelationshipManager) AcceptFriend(name string) (*mocks.PublicUser, err
 		rm.c.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Could not convert string to int64")
 		return nil, fmt.Errorf("could not convert string to int64 (%v)", err)
 	}
+	delete(rm.Pending, intID)
 	rm.Friends[intID] = *pubUser
 	return pubUser, nil
 }
@@ -114,7 +115,7 @@ func (rm *RelationshipManager) ClearRelations() {
 	}
 }
 
-func (rm *RelationshipManager) InternalAddRelation(Type string, u mocks.PublicUser) error {
+func (rm *RelationshipManager) internalAddRelation(Type string, u mocks.PublicUser) error {
 	intID, err := strconv.ParseInt(u.Id, 10, 64)
 	if err != nil {
 		return err

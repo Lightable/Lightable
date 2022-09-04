@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed } from 'vue';
 import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement, NLoadingBarProvider, useLoadingBar } from 'naive-ui';
-import Titlebar from './components/Titlebar.vue';
 import LeftDrawer from './components/LeftDrawer/LeftDrawer.vue';
 import DrawerComponent from './components/LeftDrawer/DrawerComponent.vue';
 import { useAppStore } from './stores/AppStore';
@@ -9,9 +8,6 @@ import ConfettiCanvasProvider from './components/confetti/ConfettiCanvasProvider
 import SettingsConfigProvider from './components/settings/SettingsConfigProvider.vue';
 import SearchProvider from './components/search/SearchProvider.vue';
 import BeforeStartModal from './components/BeforeStartModal.vue';
-import DebugSocket from './components/debug/DebugSocket.vue';
-import { useRouter } from 'vue-router';
-
 const appStore = useAppStore();
 
 darkTheme.Button!!.common!!.errorColor = "#ED4245";
@@ -31,12 +27,9 @@ appStore.startRealtime();
         <BeforeStartModal />
         <NLoadingBarProvider>
           <NDialogProvider>
-            <DebugSocket />
             <NElement>
-              <Titlebar v-if="false" />
               <NMessageProvider>
                 <SettingsConfigProvider>
-
                   <SearchProvider :show="search.show">
                     <div class="general-co">
                       <div class="lightable-drawer" v-if="leftDrawer.show">

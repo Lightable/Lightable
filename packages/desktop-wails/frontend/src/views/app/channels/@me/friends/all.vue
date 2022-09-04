@@ -14,7 +14,7 @@ appStore.setTitle('Friends • All')
 <template>
     <AppSection title="FRIENDS">
         <FriendCard v-for="(friend, _) in friends" v-bind:key="friend.id" :user="friend" />
-        <div class="empty">
+        <div class="empty" v-if="friends.length === 0">
             <h3 style="color: var(--text-color-2); text-align: center;" class="center">No friends were found. That sucks..<span>Maybe touch <span style="color: var(--success-color-pressed)">grass</span> instead?</span></h3>
             <NIcon :size="128" class="center" color="var(--success-color-pressed)" style="opacity: 0.6;">
                 <Grass/>

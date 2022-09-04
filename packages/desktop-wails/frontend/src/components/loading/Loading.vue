@@ -129,10 +129,11 @@ let props = defineProps({
 
                 .inner-bar {
                     transition: all 150ms ease;
-                    // width: 50%;
                     height: 20px;
                     background-color: var(--info-color);
                     border-radius: 20px;
+                    animation: rainbow 5s linear infinite;
+                    opacity: 0.6;
                 }
             }
 

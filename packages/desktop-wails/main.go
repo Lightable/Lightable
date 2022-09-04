@@ -17,6 +17,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -75,11 +76,20 @@ func main() {
 		OnShutdown:       app.Shutdown,
 		BackgroundColour: options.NewRGB(16, 16, 20),
 		DisableResize:    false,
+		Windows: &windows.Options{
+			CustomTheme: &windows.ThemeSettings{
+				DarkModeTitleBar: 0x141010,
+				DarkModeTitleText: 0xFFFFFF,
+				DarkModeTitleBarInactive: 0x101014,
+				DarkModeTitleTextInactive: 0x8c8c8c,
+			},
+		},
 		Bind: []interface{}{
 			app,
 			client,
 			client.Http,
 			client.RelationshipManager,
+			client.DeveloperClient,
 		},
 		AssetsHandler: NewFileLoader(),
 		Experimental: &options.Experimental{

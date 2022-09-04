@@ -80,6 +80,7 @@ func WriteAppConfig(logger *zerolog.Logger, dir string, config mocks.AppConfig) 
 // Run on preinit of wails app to make sure files and config is in order.
 func (a *App) PreInit() {
 	a.GetColour()
+	a.cleanOldApp()
 	file, err := ioutil.ReadFile(fmt.Sprintf("%v/.app", a.Dir))
 	wd, _ := os.Getwd()
 	a.Logger.Info().Str("working", wd).Msg("APP || Running preinit on app...")
@@ -98,7 +99,16 @@ func (a *App) PreInit() {
 	}
 	a.Config = appConfig
 }
-
+func (a *App) cleanOldApp() {
+	a.Logger.Info().Msg("Attempting to clean old exe if it exists...")
+	path, _ := os.Getwd()
+	err := os.Remove(path + "/Old.exe")
+	if err != nil && os.IsNotExist(err) {
+		a.Logger.Info().Msg("Old.exe was not found! :)")
+	} else {
+		a.Logger.Info().Msg("🧹 Cleaned up app")
+	}
+}
 func (a *App) CreateResponder() {
 	a.Config.Responder = &mocks.AppResponderConfig{}
 	WriteAppConfig(a.Logger, a.Dir, a.Config)
@@ -183,6 +193,9 @@ func (a *App) GetMemoryStats() CustomMemoryStats {
 		HeapAlloc: m.HeapAlloc,
 		NumGC: m.NumGC,
 	}
+}
+func (a *App) GetRunningGoRoutines() int {
+	return gor.NumGoroutine()
 }
 func (a *App) ForceGC() {
 	gor.GC()

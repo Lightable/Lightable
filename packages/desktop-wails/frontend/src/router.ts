@@ -137,10 +137,33 @@ const router = createRouter({
                             component() {
                                 return import('./views/app/settings/Debug.vue')
                             }
+                        },
+                        {
+                            path: 'update',
+                            name: 'settings-update',
+                            component() {
+                                return import('./views/app/settings/Update.vue')
+                            }
                         }
                     ],
                     component() {
                         return import('./views/app/settings/Settings.vue')
+                    }
+                },
+                {
+                    path: 'admin',
+                    name: 'app-admin',
+                    children: [
+                        {
+                            path: 'release',
+                            name: 'admin-release',
+                            component() {
+                                return import('./views/app/admin/AdminRelease.vue');
+                            }
+                        }
+                    ],
+                    component() {
+                        return import('./views/app/admin/Admin.vue');
                     }
                 },
                 {

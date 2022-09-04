@@ -1,5 +1,4 @@
 export default function (str: string) {
-    console.log('Highlighting')
     let library = {
         replacer: function (match: number, pIndent: number, pKey: string, pVal: any, pEnd: string) {
             var key = '<span class=json-key>';

@@ -5,6 +5,10 @@ import { AddCircleOutline as AddCircle, Heart, CloseOutline as Close, WarningOut
 import { ChatInputState } from '../../composable/ChatInput';
 import 'vfonts/Lato.css';
 import { mocks } from '../../../wailsjs/go/models.js';
+interface Emits {
+  (e: 'message', p: string): void
+}
+const emit= defineEmits<Emits>();
 const attribution = ref(true);
 const contentToSend = ref('');
 let src: HTMLElement;
@@ -21,6 +25,7 @@ const onKey = (e: KeyboardEvent) => {
     } else if (e.key == 'Enter' && !shiftMod) {
         e.preventDefault();
         src!!.style.height = src!!.style.minHeight;
+        emit('message', contentToSend.value);
         contentToSend.value = '';
     }
 }

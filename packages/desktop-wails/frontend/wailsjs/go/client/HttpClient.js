@@ -6,22 +6,6 @@ export function AddFriend(arg1) {
   return window['go']['client']['HttpClient']['AddFriend'](arg1);
 }
 
-export function CreateGetRequestWithAuthorization(arg1, arg2) {
-  return window['go']['client']['HttpClient']['CreateGetRequestWithAuthorization'](arg1, arg2);
-}
-
-export function CreatePostRequestWithAuthorization(arg1) {
-  return window['go']['client']['HttpClient']['CreatePostRequestWithAuthorization'](arg1);
-}
-
-export function CreatePostRequestWithBodyAndAuthorization(arg1, arg2) {
-  return window['go']['client']['HttpClient']['CreatePostRequestWithBodyAndAuthorization'](arg1, arg2);
-}
-
-export function CreateURL(arg1) {
-  return window['go']['client']['HttpClient']['CreateURL'](arg1);
-}
-
 export function LoginWithEmailAndPassword(arg1, arg2) {
   return window['go']['client']['HttpClient']['LoginWithEmailAndPassword'](arg1, arg2);
 }

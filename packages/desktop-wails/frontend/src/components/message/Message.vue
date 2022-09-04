@@ -5,7 +5,7 @@ import { mocks } from '../../../wailsjs/go/models';
 import { parseMarkdown } from '../../composable/Markdown';
 import { ReplyFilled as Reply, EditFilled as Edit, DeleteFilled as TrashCan } from '@vicons/material';
 import { useAppStore } from '../../stores/AppStore';
-import { GetAvatar } from '../../../wailsjs/go/client/Client';
+import { GetAvatar, GetSelfAvatar } from '../../../wailsjs/go/client/Client';
 const appStore = useAppStore();
 const props = defineProps({
     // @ts-ignore
@@ -27,9 +27,17 @@ const actionOnMouseLeave = () => {
     displayActions.value = false;
 }
 if (props.author && props.author.avatar) {
+    if (props.author.id == appStore!!.user!!.id) {
+        GetSelfAvatar(64).then(a => {
+            avatar.value = a;
+        })
+    } else {
         GetAvatar(props.author.id, 64).then(a => {
             avatar.value = a;
+            return
         });
+    }
+
 }
 
 </script>
@@ -64,7 +72,7 @@ if (props.author && props.author.avatar) {
     <div class="message" v-else>
         <div class="inner-message" @mouseover="actionOnMouseOver" @mouseleave="actionOnMouseLeave">
             <div class="avatar" v-if="author">
-                <NAvatar round :src="avatar" class="message-avatar" v-if="author.avatar" lazy />
+                <NAvatar round :src="avatar" class="message-avatar" v-if="author.avatar"/>
             </div>
             <div class="container">
                 <div class="name ns">
@@ -85,7 +93,7 @@ if (props.author && props.author.avatar) {
                             </NTooltip>
                             <NTooltip trigger="hover" v-if="author?.id == self?.id">
                                 <template #trigger>
-                                    <NButton text type="primary">
+                                    <NButton text type="primary" disabled>
                                         <template #icon>
                                             <NIcon>
                                                 <Edit />
@@ -97,7 +105,7 @@ if (props.author && props.author.avatar) {
                             </NTooltip>
                             <NTooltip trigger="hover" v-if="author?.id == self?.id">
                                 <template #trigger>
-                                    <NButton text type="error">
+                                    <NButton text type="error" disabled>
                                         <template #icon>
                                             <NIcon>
                                                 <TrashCan />
@@ -121,8 +129,6 @@ if (props.author && props.author.avatar) {
 </template>
 
 <style lang="scss" scoped>
-
-
 .link {
     color: var(--info-color);
     cursor: pointer;
@@ -219,7 +225,7 @@ if (props.author && props.author.avatar) {
                 color: var(--text-color-2);
                 font-size: 16px;
                 word-break: break-word;
-
+                white-space: pre-line;
 
 
             }

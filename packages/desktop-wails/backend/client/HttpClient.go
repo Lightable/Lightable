@@ -78,7 +78,7 @@ func (h *HttpClient) SetSecure(secure bool) {
 /* Commands */
 
 func (h *HttpClient) RegisterEmail(email string) HttpResponse {
-	u := h.CreateURL("/invite/register")
+	u := h.createURL("/invite/register")
 	json := bytes.NewBuffer([]byte(fmt.Sprintf(`{"email": "%s"}`, email)))
 	resp, err := h.Http.Post(u.String(), "application/json", json)
 	if err != nil {
@@ -104,7 +104,7 @@ func (h *HttpClient) RegisterEmail(email string) HttpResponse {
 }
 
 func (h *HttpClient) RegisterUser(username string, email string, password string, code string) HttpResponse {
-	u := h.CreateURL("/user")
+	u := h.createURL("/user")
 	resJson := bytes.NewBuffer([]byte(fmt.Sprintf(`{"username": "%s", "email": "%s", "password": "%s", "code": "%s"}`, username, email, password, code)))
 	resp, err := h.Http.Post(u.String(), "application/json", resJson)
 	if err != nil {
@@ -144,8 +144,8 @@ func (h *HttpClient) RegisterUser(username string, email string, password string
 }
 
 func (h *HttpClient) LoginWithToken(token string) (*user.PrivateUser, error) {
-	u := h.CreateURL("/user/@me")
-	req, err := h.CreateGetRequestWithAuthorization(u, token)
+	u := h.createURL("/user/@me")
+	req, err := h.createGetRequestWithAuthorization(u, token)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func (h *HttpClient) LoginWithToken(token string) (*user.PrivateUser, error) {
 }
 
 func (h *HttpClient) LoginWithEmailAndPassword(email string, password string) (*user.PrivateUser, error) {
-	u := h.CreateURL("/user/@me/login")
+	u := h.createURL("/user/@me/login")
 	resJson := bytes.NewBuffer([]byte(fmt.Sprintf(`{"email": "%v", "password": "%v"}`, email, password)))
 	resp, err := h.Http.Post(u.String(), "application/json", resJson)
 	if err != nil {
@@ -193,8 +193,8 @@ func (h *HttpClient) LoginWithEmailAndPassword(email string, password string) (*
 }
 
 func (h *HttpClient) AddFriend(name string) (*user.PublicUser, error) {
-	u := h.CreateURL(fmt.Sprintf("/user/@me/relationships/%s", name))
-	post, err := h.CreatePostRequestWithAuthorization(u)
+	u := h.createURL(fmt.Sprintf("/user/@me/relationships/%s", name))
+	post, err := h.createPostRequestWithAuthorization(u)
 	if err != nil {
 		h.Client.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Something went wrong when trying to create post request for add friend")
 		return nil, err
@@ -228,10 +228,9 @@ func (h *HttpClient) AddFriend(name string) (*user.PublicUser, error) {
 	}
 	return nil, nil
 }
-
 func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
 	fmt.Println(file)
-	u := h.CreateURL("/user/@me/avatar")
+	u := h.createURL("/user/@me/avatar")
     b := &bytes.Buffer{}
 	writer := multipart.NewWriter(b)
 	fw, err := CreateFormImageFile(writer, "avatar", "avatar")
@@ -251,7 +250,7 @@ func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
 	writer.Close()
 	byytes := b.Bytes()
 	passT := &PassThru{Reader: bytes.NewReader(byytes),  ctx: h.App.Ctx, length: int64(len(byytes))}
-	post, err := h.CreatePostRequestWithBodyAndAuthorization(u, passT)
+	post, err := h.createPostRequestWithBodyAndAuthorization(u, passT)
 	post.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%v", writer.Boundary()))
 	if err != nil {
 		return nil, err
@@ -298,7 +297,7 @@ func (h *HttpClient) RegisterLoginWithClient(u *user.PrivateUser) {
 
 /* Utils */
 
-func (h *HttpClient) CreateURL(path string) url.URL {
+func (h *HttpClient) createURL(path string) url.URL {
 	u := url.URL{Scheme: "http", Host: h.Api, Path: path}
 	if h.Secure {
 		u.Scheme = "https"
@@ -306,7 +305,7 @@ func (h *HttpClient) CreateURL(path string) url.URL {
 	return u
 }
 
-func (h *HttpClient) CreateGetRequestWithAuthorization(url url.URL, token string) (*http.Request, error) {
+func (h *HttpClient) createGetRequestWithAuthorization(url url.URL, token string) (*http.Request, error) {
 	req, err := http.NewRequest("GET", url.String(), nil)
 	if err != nil {
 		return nil, err
@@ -314,7 +313,7 @@ func (h *HttpClient) CreateGetRequestWithAuthorization(url url.URL, token string
 	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
 	return req, nil
 }
-func (h *HttpClient) CreatePostRequestWithAuthorization(url url.URL) (*http.Request, error) {
+func (h *HttpClient) createPostRequestWithAuthorization(url url.URL) (*http.Request, error) {
 	req, err := http.NewRequest("POST", url.String(), nil)
 	if err != nil {
 		return nil, err
@@ -322,7 +321,7 @@ func (h *HttpClient) CreatePostRequestWithAuthorization(url url.URL) (*http.Requ
 	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
 	return req, nil
 }
-func (h *HttpClient) CreatePostRequestWithBodyAndAuthorization(url url.URL, body *PassThru) (*http.Request, error) {
+func (h *HttpClient) createPostRequestWithBodyAndAuthorization(url url.URL, body *PassThru) (*http.Request, error) {
 	req, err := http.NewRequest("POST", url.String(), body)
 	if err != nil {
 		return nil, err

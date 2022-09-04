@@ -127,7 +127,14 @@ span {
   &.m-bold {
       font-weight: bold;
   }
-  
+  &.m-italic {
+    font-style: italic;
+  }
+  &.m-inline-code {
+    font-weight: 100;
+    font-family: "JetBrains Mono";
+    background-color: var(--modal-color);
+  }
 }
 
 button {
@@ -178,4 +185,15 @@ kbd {
 
 .n-avatar img {
   object-fit: cover;
+}
+
+@keyframes rainbow {
+  0% {
+      filter: hue-rotate(0);
+  }
+
+  100% {
+      filter: hue-rotate(360deg)
+  }
+
 }
