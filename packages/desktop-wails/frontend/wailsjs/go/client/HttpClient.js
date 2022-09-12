@@ -6,12 +6,20 @@ export function AddFriend(arg1) {
   return window['go']['client']['HttpClient']['AddFriend'](arg1);
 }
 
+export function GetLatestRelease() {
+  return window['go']['client']['HttpClient']['GetLatestRelease']();
+}
+
 export function LoginWithEmailAndPassword(arg1, arg2) {
   return window['go']['client']['HttpClient']['LoginWithEmailAndPassword'](arg1, arg2);
 }
 
 export function LoginWithToken(arg1) {
   return window['go']['client']['HttpClient']['LoginWithToken'](arg1);
+}
+
+export function PublishRelease(arg1) {
+  return window['go']['client']['HttpClient']['PublishRelease'](arg1);
 }
 
 export function RegisterEmail(arg1) {

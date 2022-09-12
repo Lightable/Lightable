@@ -1,5 +1,12 @@
 # Changelog
 <h2 align="center">August 23 2022</h2>
+<h3 align="center">1.18.1-ALPHA</h3>
+
+#### Changes:
+* Properly send update event to clients that are outdated
+
+
+<h2 align="center">August 23 2022</h2>
 <h3 align="center">1.18.0-ALPHA</h3>
 
 #### Changes:

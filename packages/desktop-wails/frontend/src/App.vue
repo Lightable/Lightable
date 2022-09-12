@@ -8,6 +8,7 @@ import ConfettiCanvasProvider from './components/confetti/ConfettiCanvasProvider
 import SettingsConfigProvider from './components/settings/SettingsConfigProvider.vue';
 import SearchProvider from './components/search/SearchProvider.vue';
 import BeforeStartModal from './components/BeforeStartModal.vue';
+import BugReport from './components/debug/BugReport.vue';
 const appStore = useAppStore();
 
 darkTheme.Button!!.common!!.errorColor = "#ED4245";
@@ -25,6 +26,7 @@ appStore.startRealtime();
     <ConfettiCanvasProvider>
       <NConfigProvider :theme="(theme == 'Dark') ? darkTheme : lightTheme">
         <BeforeStartModal />
+        <BugReport/>
         <NLoadingBarProvider>
           <NDialogProvider>
             <NElement>
@@ -51,7 +53,7 @@ appStore.startRealtime();
                           </template>
                         </LeftDrawer>
                       </div>
-                      <div class="page" :style="{ 'background': ($router.currentRoute.value.name == 'login' || $router.currentRoute.value.name == 'home' || $router.currentRoute.value.name == 'invitesignup' || $router.currentRoute.value.name == 'signup') ? 'transparent' : `${theme == 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
+                      <div class="page" :style="{ 'background': `${theme === 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
                         <div class="content">
                           <router-view />
                         </div>

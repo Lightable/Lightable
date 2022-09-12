@@ -16,11 +16,12 @@ const props = defineProps({
 
 const avatar = ref() as Ref<string | undefined>
 const getUser = (id: string | undefined): mocks.PublicUser | mocks.PrivateUser | undefined => {
-    const initalFind = appStore.users.find(u => u.id === id);
-    if (!initalFind && appStore.user!!.id == id) return appStore.user!!;
-    return initalFind
+    const initialFind = appStore.users.find(u => u.id === id);
+    if (!initialFind && appStore.user!!.id == id) return appStore.user!!;
+    return initialFind
 }
 
+const typing = ref([]) as Ref<Array<string>>
 const user = computed(() => getUser(props.channel?.id))
 const status = computed(() => appStore.getUserTypeRelation(props.channel?.id))
 
@@ -40,6 +41,10 @@ const sendMessage = (cnt: string) => {
         created: Date.now(),
         system: false,
     })
+}
+function destroy(arr: Array<any>, val: any) {
+  for (let i = 0; i < arr.length; i++) if (arr[i] === val) arr.splice(i, 1);
+  return arr;
 }
 </script>
 
@@ -66,7 +71,7 @@ const sendMessage = (cnt: string) => {
                 <Message v-for="(item, _) in channel.messages" v-if="channel?.messages" :author="getUser(item?.author as any)" :content="item.content" />
             </div>
         </NScrollbar>
-        <ChatInput @message="sendMessage" />
+        <ChatInput @message="sendMessage" :self="appStore.user as any" :recipient="user" @typing="(e: string) => typing.push(e)" @typing-end="(e: string) => { typing = destroy(typing, e) }" :typing-users="typing"/>
     </div>
 </template>
 

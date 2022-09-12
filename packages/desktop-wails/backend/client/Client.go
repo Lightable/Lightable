@@ -31,6 +31,7 @@ type Client struct {
 	Api                 string
 	Connection          *mocks.Connection
 	Ctx                 *context.Context
+	Update              *mocks.Update
 	Http                *HttpClient
 	RelationshipManager *RelationshipManager
 	DeveloperClient     *DeveloperClient
@@ -52,7 +53,7 @@ func NewClient(ctx *context.Context, logger *zerolog.Logger, config *mocks.AppCo
 		client.Http.Secure = config.Responder.Secure
 	}
 	client.RelationshipManager = NewRelationshipManager(client.Http, &client)
-	client.DeveloperClient = NewDeveloperClient(&a.Ctx)
+	client.DeveloperClient = NewDeveloperClient(&a.Ctx, *client.Http)
 	return &client
 }
 
@@ -187,15 +188,27 @@ func (c *Client) ReadAndRespond(m []byte) {
 			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
 			return
 		}
-		d := uData.D.User
-		m, id, err := c.RelationshipManager.findRelations(&d)
+		d := uData.D
+		m, u, i, err := c.RelationshipManager.findRelationWithId(d.Id)
+		nU := c.RelationshipManager.updateUserWithMessageData(*u, d)
 		if err != nil {
 			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to find user for update message")
 			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
 			return
 		}
-		(*m)[*id] = d
+		(*m)[*i] = nU
 		runtime.EventsEmit(*c.Ctx, "ws:read:user|status", d)
+	case 35:
+		uData := mocks.ServerUpdateMessage{}
+		err := json.Unmarshal(decoded, &uData)
+		if err != nil {
+			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to read server update message")
+			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
+			return
+		}
+		d := uData.D
+		c.Update = &d
+		runtime.EventsEmit(*c.Ctx, "ws:read:server|update", d)
 	}
 
 	if len(c.SocketHistory) > 50 {
@@ -204,6 +217,10 @@ func (c *Client) ReadAndRespond(m []byte) {
 	c.SocketHistory = append(c.SocketHistory, string(decoded))
 
 	runtime.EventsEmit(*c.Ctx, "ws:read:decode", string(decoded))
+}
+
+func (c *Client) GetUpdate() *mocks.Update {
+	return c.Update
 }
 
 func (c *Client) GetAvatar(id string, size int) string {
@@ -270,6 +287,13 @@ func (c *Client) LoginToSocket() {
 				Build:   "1.9.2",
 			},
 		},
+	})
+}
+
+func (c *Client) SendTyping(channel string) {
+	SendMessage(c, mocks.ClientTypingMessage{
+		T: 4,
+		D: channel,
 	})
 }
 

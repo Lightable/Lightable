@@ -81,7 +81,9 @@ class WebSocketController(
                     return
                 }
                 connections[session.session.sessionId] = SocketSession(session, true, user, properties)
-                if (userCache.releases.size >= 1 && properties.properties.build != userCache.releases.values.last().tag) {
+                val release = properties.properties.build.replace(".", "").toInt()
+                val latest = userCache.latestRelease
+                if (userCache.releases.size >= 1 && release < latest?.tag?.replace(".", "")?.toInt()!!) {
                     send(session.session, session.type, UpdateEvent(userCache.releases.values.last()))
                 }
 
@@ -265,7 +267,7 @@ class WebSocketController(
     }
 
     override fun onUpdate(payload: UpdateEvent) {
-        val sockets = connections.values.filter { u -> u.session.properties.build != payload.d.tag }
+        val sockets = connections.values.filter { u -> u.session.properties.build.replace(".", "").toInt() < payload.d.tag.replace(".", "").toInt() }
         for (socket in sockets) {
             send(socket.ws.session, socket.ws.type, payload)
         }

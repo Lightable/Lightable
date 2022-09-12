@@ -92,7 +92,6 @@ const clickEvent = () => {
     margin-top: 2px;
     gap: 16px;
     cursor: pointer;
-
     &[disabled='true'] {
         opacity: var(--opacity-disabled);
         cursor: not-allowed;

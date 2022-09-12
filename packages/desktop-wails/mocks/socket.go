@@ -31,7 +31,7 @@ func (c *Connection) ReadPump() {
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				c.Closed = true
-				fmt.Printf("\nUnexpected errror occurred in socket: %v", err)
+				fmt.Printf("\nUnexpected error occurred in socket: %v", err)
 				c.Bus.Publish("ws:read:close:error", message)
 			}
 			break
@@ -86,7 +86,10 @@ type ClientReadyPropertiesPayload struct {
 	Browser string `json:"browser"`
 	Build   string `json:"build"`
 }
-
+type ClientTypingMessage struct {
+	T int    `json:"t"`
+	D string `json:"d"`
+}
 type GenericSocketMessage struct {
 	T int `json:"t"`
 }
@@ -94,6 +97,10 @@ type GenericSocketMessage struct {
 type ServerStartMessage struct {
 	T int                `json:"t"`
 	D ServerStartPayload `json:"d"`
+}
+type ServerUpdateMessage struct {
+	T int `json:"t"`
+	D Update `json:"d"`
 }
 type FriendRequestAddMessage struct {
 	T  int        `json:"t"`
@@ -104,9 +111,16 @@ type UserStatusUpdateMessage struct {
 	T int                     `json:"t"`
 	D UserStatusUpdatePayload `json:"d"`
 }
+
 type UserStatusUpdatePayload struct {
-	User PublicUser `json:"user"`
+	Name   *string     `json:"name"`
+	Id     string      `json:"id"`
+	Status *UserStatus `json:"status"`
+	Admin  *bool       `json:"admin"`
+	Avatar *UserAvatar `json:"avatar"`
+	State  *int16      `json:"state"`
 }
+
 type ServerStartPayload struct {
 	User          PrivateUser                `json:"user"`
 	Status        UserStatus                 `json:"status"`

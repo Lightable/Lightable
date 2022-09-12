@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"red/mocks"
 	"strings"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -14,12 +15,16 @@ import (
 
 type DeveloperClient struct {
 	WorkDir string
+	ReadyToPublish bool
+	CachedUpdate *mocks.Update
+	http HttpClient
 	ctx *context.Context
 }
 
-func NewDeveloperClient(ctx *context.Context) *DeveloperClient {
+func NewDeveloperClient(ctx *context.Context, http HttpClient) *DeveloperClient {
 	return &DeveloperClient{
 		ctx: ctx,
+		http: http,
 	}
 }
 
@@ -116,5 +121,23 @@ func (d *DeveloperClient) WailsBuild() {
 	}
 	// wait for command to finish
 	cmd.Wait()
+	d.ReadyToPublish = true
+}
+
+func (d *DeveloperClient) GetReadyToPublish() bool {
+	return d.ReadyToPublish
+}
+
+func (d *DeveloperClient) SaveBuildData(data mocks.Update) {
+    d.ReadyToPublish = true
+	d.CachedUpdate = &data
+}
+
+func (d *DeveloperClient) GetBuildData() *mocks.Update {
+    return d.CachedUpdate
+}
+
+func (d *DeveloperClient) PublishRelease(release mocks.Update) (*mocks.Update, error){
+	return d.http.PublishRelease(release)
 }
 

@@ -138,7 +138,6 @@ const collapse = () => {
     max-width: 250px;
     height: 100%;
     background-color: rgba(51, 51, 51, 0.055);
-
     .header {
         display: flex;
         flex-direction: column;

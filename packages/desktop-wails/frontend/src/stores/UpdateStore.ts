@@ -1,16 +1,20 @@
 import { defineStore } from "pinia";
+import { mocks } from  '../../wailsjs/go/models';
 
 export const useUpdateStore = defineStore('updateStore', {
     state: () => ({
         currentUpdate: {
-            avaliable: false,
-            data: null as Release | null
+            available: false,
+            data: null as mocks.Update | null,
+            downloading: false,
+            percentage: 0,
+            finished: false,
         }
     }),
     actions: {
-        setCurrentUpdate(update: IRelease) {
-            this.currentUpdate.avaliable = true;
-            this.currentUpdate.data = new Release(update);
+        setCurrentUpdate(update: mocks.Update) {
+            this.currentUpdate.available = true;
+            this.currentUpdate.data = update;
         }
     }
 })

@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"red/backend/app"
+	"red/mocks"
 	user "red/mocks"
 	gr "runtime"
 	"runtime/debug"
@@ -170,6 +171,63 @@ func (h *HttpClient) LoginWithToken(token string) (*user.PrivateUser, error) {
 	return nil, fmt.Errorf("%v (%v)", string(body), resp.StatusCode)
 }
 
+func (h *HttpClient) GetLatestRelease() (*mocks.Update, error) {
+	u := h.createURL("/cdn/releases/" + h.App.Version)
+	resp, err := h.Http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode == 204 {
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	} else if (resp.StatusCode == 200) {
+		update := mocks.Update{}
+		jsonErr := json.Unmarshal(body, &update)
+		if jsonErr != nil {
+			return nil, err
+		} else {
+			return &update, nil
+		}
+	}
+	return nil, nil 
+}
+
+func (h *HttpClient) PublishRelease(r mocks.Update) (*mocks.Update, error) {
+	if (!h.Client.CurrentUser.Admin) {
+		return nil, fmt.Errorf("Missing correct user permissions")
+	}
+    u := h.createURL("/admin/release")
+	resJson := []byte(fmt.Sprintf(`{"version": "%s", "title": "%s", "notes": "%s", "signature": "%s", "url": "%s"}`, r.Version, r.Title, r.Notes, r.Author, r.URL))
+	req, err := http.NewRequest("POST", u.String(),  bytes.NewReader(resJson))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
+	resp, err := h.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err 
+	}
+	if resp.StatusCode == 201 {
+		update := mocks.Update{}
+		err := json.Unmarshal(body, &update)
+		if err != nil {
+			return nil, err
+		}
+		return &update, nil
+	} else {
+		return nil, fmt.Errorf("Something didn't quite go right: %s", string(body))
+	}
+
+}
 func (h *HttpClient) LoginWithEmailAndPassword(email string, password string) (*user.PrivateUser, error) {
 	u := h.createURL("/user/@me/login")
 	resJson := bytes.NewBuffer([]byte(fmt.Sprintf(`{"email": "%v", "password": "%v"}`, email, password)))

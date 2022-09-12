@@ -12,6 +12,8 @@ export function GetSelfAvatar(arg1:number):Promise<string>;
 
 export function GetSocketHistory():Promise<Array<string>>;
 
+export function GetUpdate():Promise<mocks.Update>;
+
 export function GetUser():Promise<mocks.PrivateUser>;
 
 export function LoginToSocket():void;
@@ -19,5 +21,7 @@ export function LoginToSocket():void;
 export function OpenAvatarPickDialog():Promise<any>;
 
 export function ReadAndRespond(arg1:Array<number>):void;
+
+export function SendTyping(arg1:string):void;
 
 export function SetSocket(arg1:string):void;

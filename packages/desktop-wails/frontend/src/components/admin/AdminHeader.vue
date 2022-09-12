@@ -1,5 +1,4 @@
 <script setup lang="ts">
-    import {computed} from 'vue';
     import { useUpdateStore } from '../../stores/UpdateStore';
     import AppHeader from '../header/AppHeader.vue';
     import { NIcon, NButton } from 'naive-ui';
@@ -17,7 +16,7 @@
     
     
     <template>
-        <AppHeader title="Settings">
+        <AppHeader title="Admin">
             <template #icon>
                 <NIcon :size="32">
                     <PhShieldStar />
@@ -32,30 +31,6 @@
                     </template>
                     Create Release
                 </NButton>
-                <!-- <NButton quaternary @click="navigate('settings-profile')" :disabled="$router.currentRoute.value.name === 'settings-profile'">
-                    <template #icon>
-                        <NIcon>
-                            <PhUser weight="duotone"/>
-                        </NIcon>
-                    </template>
-                    Profile
-                </NButton>
-                <NButton quaternary @click="navigate('settings-customize')" :disabled="$router.currentRoute.value.name === 'settings-customize'">
-                    <template #icon>
-                        <NIcon>
-                            <PhPalette weight="duotone"/>
-                        </NIcon>
-                    </template>
-                    Customize
-                </NButton>
-                <NButton quaternary @click="navigate('settings-debug')" :disabled="$router.currentRoute.value.name === 'settings-debug'">
-                    <template #icon>
-                        <NIcon>
-                            <PhBug weight="duotone"/>
-                        </NIcon>
-                    </template>
-                    Debug
-                </NButton> -->
             </template>
         </AppHeader>
     </template>

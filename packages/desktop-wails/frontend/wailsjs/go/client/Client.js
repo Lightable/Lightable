@@ -22,6 +22,10 @@ export function GetSocketHistory() {
   return window['go']['client']['Client']['GetSocketHistory']();
 }
 
+export function GetUpdate() {
+  return window['go']['client']['Client']['GetUpdate']();
+}
+
 export function GetUser() {
   return window['go']['client']['Client']['GetUser']();
 }
@@ -36,6 +40,10 @@ export function OpenAvatarPickDialog() {
 
 export function ReadAndRespond(arg1) {
   return window['go']['client']['Client']['ReadAndRespond'](arg1);
+}
+
+export function SendTyping(arg1) {
+  return window['go']['client']['Client']['SendTyping'](arg1);
 }
 
 export function SetSocket(arg1) {

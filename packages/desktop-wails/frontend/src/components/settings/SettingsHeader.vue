@@ -28,7 +28,7 @@ const navigate = (path: string) => {
             </NIcon>
         </template>
         <template #actions>
-            <NButton quaternary @click="navigate('settings-update')" :disabled="$router.currentRoute.value.name === 'settings-update'" v-if="update.avaliable">
+            <NButton quaternary @click="navigate('settings-update')" :disabled="$router.currentRoute.value.name === 'settings-update'" v-if="update.available">
                 <template #icon>
                     <NIcon>
                         <PhDownload weight="duotone" color="var(--success-color)"/>

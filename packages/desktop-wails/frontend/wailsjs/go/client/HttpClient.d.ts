@@ -5,9 +5,13 @@ import {client} from '../models';
 
 export function AddFriend(arg1:string):Promise<mocks.PublicUser>;
 
+export function GetLatestRelease():Promise<mocks.Update>;
+
 export function LoginWithEmailAndPassword(arg1:string,arg2:string):Promise<mocks.PrivateUser>;
 
 export function LoginWithToken(arg1:string):Promise<mocks.PrivateUser>;
+
+export function PublishRelease(arg1:mocks.Update):Promise<mocks.Update>;
 
 export function RegisterEmail(arg1:string):Promise<client.HttpResponse>;
 

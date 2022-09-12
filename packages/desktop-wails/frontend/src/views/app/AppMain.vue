@@ -11,7 +11,6 @@ import { GetRelations, RequestFriend } from '../../../wailsjs/go/client/Relation
 import { PhHouse as Home, PhChats as Chatbubbles, PhUser as Friends, PhShareNetwork as Workspace, PhUsers as GroupFilled, PhGearSix as Cog, PhDownload as Download, PhShieldStar as Shield } from '@dnlsndr/vue-phosphor-icons';
 import { useRouter } from 'vue-router';
 const appStore = useAppStore();
-const updateStore = useUpdateStore();
 const toast = useMessage();
 const router = useRouter();
 const loading = useLoadingBar();
@@ -171,28 +170,6 @@ router.beforeResolve((to, from, next) => {
 router.afterEach(() => {
     loading.finish();
 });
-
-
-setTimeout(async () => {
-    let perm = await Notification.requestPermission()
-    console.log(perm);
-    appStore.updateDrawerComponent('settings', {
-        badge: {
-            show: true,
-            type: 'success',
-            processing: true,
-            closableOnClick: false,
-        },
-        tooltip: 'Update Avaliable'
-    })
-    updateStore.setCurrentUpdate({
-        version: 'v0.0.1-ALPHA',
-        title: 'Add Auto-Update',
-        notes: 'v0.15.5-ALPHA\n Adds support for REALTIME updates!',
-        signature: 'Brys0',
-        url: ''
-    });
-}, 5000)
 </script>
 
 

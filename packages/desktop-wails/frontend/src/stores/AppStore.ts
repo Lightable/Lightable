@@ -1,12 +1,15 @@
-import { defineStore } from "pinia";
-import { GetConfig, ChangeTheme, PingDelay, GetVersion, GetColour } from '../../wailsjs/go/app/App'
-import { GetSocketHistory } from '../../wailsjs/go/client/Client';
-import { mocks } from "../../wailsjs/go/models";
-import { EventsOn, WindowSetTitle } from '../../wailsjs/runtime/runtime';
-import { debug } from '../composable/Logger';
-import { GetRelations } from '../../wailsjs/go/client/RelationshipManager';
+import {defineStore} from "pinia";
+import {ChangeTheme, GetColour, GetConfig, GetVersion, PingDelay} from '../../wailsjs/go/app/App';
+import {GetSocketHistory, GetUpdate} from '../../wailsjs/go/client/Client';
+import {mocks} from "../../wailsjs/go/models";
+import {EventsOn, WindowSetTitle} from '../../wailsjs/runtime/runtime';
+import {debug} from '../composable/Logger';
+import {GetRelations} from '../../wailsjs/go/client/RelationshipManager';
+import {useUpdateStore} from "./UpdateStore";
+
 export const useAppStore = defineStore('AppStore', {
     state: () => ({
+        events: new EventEmitter(),
         version: 'Unknown Version' as string,
         shouldShowOnboardModal: false,
         theme: 'Dark' as LightableTheme,
@@ -58,6 +61,7 @@ export const useAppStore = defineStore('AppStore', {
             debug('IPC', `IPC Delay is approx: ${(performance.now() - start).toFixed(3)}ms`);
         },
         async startRealtime() {
+            const updateStore = useUpdateStore();
             EventsOn('ws:read:decode', async () => {
                 this.history.websocket = await GetSocketHistory() as Array<string>
             });
@@ -67,6 +71,7 @@ export const useAppStore = defineStore('AppStore', {
             });
             EventsOn('ws:read:user|status', async (_) => {
                 this.relationships = await GetRelations();
+                this.events.emit('user|update', _);
             });
             EventsOn('ws:read:server|pending', async (_) => {
                 this.relationships = await GetRelations();
@@ -76,6 +81,19 @@ export const useAppStore = defineStore('AppStore', {
                         type: 'error',
                         closableOnClick: true,
                     }
+                })
+            })
+            EventsOn('ws:read:server|update', async (_) => {
+                updateStore.currentUpdate.data = await GetUpdate();
+                updateStore.currentUpdate.available = true;
+                this.updateDrawerComponent('settings', {
+                    badge: {
+                        show: true,
+                        type: 'success',
+                        processing: true,
+                        closableOnClick: false,
+                    },
+                    tooltip: 'Update Available'
                 })
             })
         },
@@ -155,3 +173,28 @@ export interface LightableDrawerComponentPair {
 }
 
 export type LightableDrawerType = "Function" | "Route"
+
+
+
+class EventEmitter{
+    constructor(){
+        // @ts-ignore
+        this.callbacks = {}
+    }
+    // @ts-ignore
+    on(event, cb){
+        // @ts-ignore
+        if(!this.callbacks[event]) this.callbacks[event] = [];
+        // @ts-ignore
+        this.callbacks[event].push(cb)
+    }
+    // @ts-ignore
+    emit(event, data){
+        // @ts-ignore
+        let cbs = this.callbacks[event]
+        if(cbs){
+            // @ts-ignore
+            cbs.forEach(cb => cb(data))
+        }
+    }
+}

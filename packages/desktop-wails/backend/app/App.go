@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"red/mocks"
 	gor "runtime"
 	"strconv"
@@ -188,10 +189,10 @@ func (a *App) GetMemoryStats() CustomMemoryStats {
 	gor.ReadMemStats(&m)
 	return CustomMemoryStats{
 		TotalAlloc: m.TotalAlloc,
-		Alloc: m.Alloc,
-		SysAlloc: m.Sys,
-		HeapAlloc: m.HeapAlloc,
-		NumGC: m.NumGC,
+		Alloc:      m.Alloc,
+		SysAlloc:   m.Sys,
+		HeapAlloc:  m.HeapAlloc,
+		NumGC:      m.NumGC,
 	}
 }
 func (a *App) GetRunningGoRoutines() int {
@@ -200,6 +201,7 @@ func (a *App) GetRunningGoRoutines() int {
 func (a *App) ForceGC() {
 	gor.GC()
 }
+
 // Set a user in the map
 func (a *App) SetUser(id string, user mocks.PrivateUser) {
 	(*a.Config.Users)[id] = &user
@@ -225,12 +227,13 @@ func (a *App) GetVersion() string {
 
 // Restart via starting a new process, releasing to system, and then closing this process
 func (a *App) Restart() {
+	path, _ := os.Getwd()
 	a.Logger.Debug().Str("type", "RestartRequest").Msg(fmt.Sprintf("RUNTIME || Application restart at %v", time.Now()))
-	procAttr := new(os.ProcAttr)
-	procAttr.Files = []*os.File{os.Stdin, os.Stdout, os.Stderr}
-	proc, _ := os.StartProcess(os.Args[0], []string{"", ""}, procAttr)
-	proc.Release()
-	os.Exit(0)
+	cmd := exec.Command(path + "\\Lightable Red.exe")
+	cmd.Start()
+	cmd.Process.Release()
+	time.Sleep(1000)
+	os.Exit(1)
 }
 
 // Download update with given URL (Insecure, allows any type/url to be downloaded)

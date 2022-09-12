@@ -47,6 +47,27 @@ func (rm *RelationshipManager) findRelations(pubUser *mocks.PublicUser) (*map[in
 	}
 	return nil, nil, fmt.Errorf("Could not find user")
 } 
+func (rm *RelationshipManager) findRelationWithId(id string) (*map[int64]mocks.PublicUser, *mocks.PublicUser, *int64,  error){
+	intID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		rm.c.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Could not convert string to int64")
+		return nil, nil, nil, fmt.Errorf("could not convert string to int64 (%v)", err)
+	}
+	f, ok := rm.Pending[intID]
+	if ok {
+		return &rm.Pending, &f, &intID, nil
+	}
+	f, ok = rm.Requests[intID]
+	if ok {
+		return &rm.Requests, &f, &intID, nil
+	}
+	f, ok = rm.Friends[intID]
+	if ok {
+		return &rm.Friends, &f, &intID,  nil
+	}
+	return nil, nil, nil, fmt.Errorf("Could not find user")
+}
+
 func (rm *RelationshipManager) FindRelation(id int64) *mocks.PublicUser {
 	u, ok := rm.Pending[id]
 	if ok {
@@ -145,4 +166,24 @@ func (rm *RelationshipManager) internalAddRelation(Type string, u mocks.PublicUs
 		rm.Requests[intID] = u
 	}
 	return nil
+}
+
+
+func (rm *RelationshipManager) updateUserWithMessageData(u mocks.PublicUser, msg mocks.UserStatusUpdatePayload) mocks.PublicUser {
+	if msg.Name != nil {
+		u.Name = *msg.Name
+	}
+	if msg.Admin != nil {
+		u.Admin = *msg.Admin
+	}
+	if msg.Avatar != nil {
+		u.Avatar = msg.Avatar
+	}
+	if msg.State != nil {
+		u.Status = msg.Status
+	}
+	if msg.State != nil {
+		u.State = msg.State
+	}
+	return u
 }

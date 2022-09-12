@@ -3,7 +3,9 @@ import { onMounted, PropType, ref } from 'vue';
 import { mocks } from '../../../wailsjs/go/models';
 import { NAvatar } from 'naive-ui';
 import { GetAvatar } from '../../../wailsjs/go/client/Client';
+import { useAppStore } from '../../stores/AppStore';
 
+const appStore = useAppStore();
 const avatar = ref();
 const props = defineProps({
     friend: Object as PropType<mocks.PublicUser>
@@ -13,6 +15,11 @@ onMounted(async () => {
     if (props.friend) {
         avatar.value = await GetAvatar(props.friend.id, 64)
     }
+})
+appStore.events.on('user|update', async (u: mocks.PublicUser) => {
+  if (u.avatar) {
+    avatar.value = await GetAvatar(props.friend!!.id, 64)
+  }
 })
 </script>
 
