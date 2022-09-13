@@ -14,6 +14,10 @@ export function GetHttpURL() {
   return window['go']['client']['Client']['GetHttpURL']();
 }
 
+export function GetLocation() {
+  return window['go']['client']['Client']['GetLocation']();
+}
+
 export function GetSelfAvatar(arg1) {
   return window['go']['client']['Client']['GetSelfAvatar'](arg1);
 }

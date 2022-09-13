@@ -8,6 +8,8 @@ export function GetAvatar(arg1:string,arg2:number):Promise<string>;
 
 export function GetHttpURL():Promise<string>;
 
+export function GetLocation():Promise<mocks.GeoLocation>;
+
 export function GetSelfAvatar(arg1:number):Promise<string>;
 
 export function GetSocketHistory():Promise<Array<string>>;

@@ -39,12 +39,44 @@ data class User constructor(
     @field:BsonProperty(useDiscriminator = true) @BsonProperty("avatar") var avatar: Avatar? = null,
     @BsonIgnore @JsonIgnore var test: Boolean = false,
     @BsonProperty("created") @JsonProperty var created: Instant = Instant.now(),
-    @BsonProperty("profileOptions") @JsonIgnore var profileOptions: MutableMap<String, Boolean>? = mutableMapOf(Pair("ShowStatus", false), Pair("IsPublic", false)),
-    @field:BsonProperty(useDiscriminator = true) @BsonProperty("analytics") var analytics: UserAnalytics = UserAnalytics(0,0,0)
+    @BsonProperty("profileOptions") @JsonIgnore var profileOptions: MutableMap<String, Boolean>? = mutableMapOf(
+        Pair(
+            "ShowStatus",
+            false
+        ), Pair("IsPublic", false)
+    ),
+    @field:BsonProperty(useDiscriminator = true) @BsonProperty("analytics") var analytics: UserAnalytics = UserAnalytics(
+        0,
+        0,
+        0
+    ),
+    @BsonProperty("devices") var devices: MutableList<Device> = mutableListOf()
 ) : BucketImpl, GenericUser {
     /** Deep Copy **/
 
-    internal constructor(user: User) : this(user.cache, user.jackson, user.connections, user.identifier, user.name, user.email, user.salt, user.password, user.token, user.notice, user.relationships, user.state, user.status, user.admin, user.enabled, user.avatar, user.test, user.created, user.profileOptions, user.analytics)
+    internal constructor(user: User) : this(
+        user.cache,
+        user.jackson,
+        user.connections,
+        user.identifier,
+        user.name,
+        user.email,
+        user.salt,
+        user.password,
+        user.token,
+        user.notice,
+        user.relationships,
+        user.state,
+        user.status,
+        user.admin,
+        user.enabled,
+        user.avatar,
+        user.test,
+        user.created,
+        user.profileOptions,
+        user.analytics,
+        user.devices
+    )
 
     @BsonIgnore
     @JsonIgnore
@@ -67,19 +99,23 @@ data class User constructor(
     fun checkConflicting(email: String): Boolean {
         return cache?.users?.values?.find { user -> user.email == email } != null
     }
+
     @BsonIgnore
     override fun toJSON(): String {
         return jackson.writeValueAsString(this)
     }
+
     @BsonIgnore
     fun toPrivate(): PrivateUser {
         return PrivateUser(this)
     }
+
     @BsonIgnore
     fun toPublic(): PublicUser {
         val public = PublicUser(this)
         return public
     }
+
     @BsonIgnore
     fun checkValidFriendRequest(id: Long): Boolean {
         val friend = cache?.users?.get(id) ?: return false
@@ -88,6 +124,7 @@ data class User constructor(
         }
         return true
     }
+
     @BsonIgnore
     fun checkValidFriend(id: Long): Boolean {
         val friend = cache?.users?.get(id) ?: return false
@@ -103,6 +140,7 @@ data class User constructor(
         if (friend.relationships.friends.contains(this.identifier) && this.relationships.friends.contains(friend.identifier)) return true
         return false
     }
+
     @BsonIgnore
     fun removeFriend(id: Long) {
         val friend = cache?.users?.get(id)
@@ -110,18 +148,21 @@ data class User constructor(
         this.relationships.friends.remove(id)
         friend?.save()
     }
+
     @BsonIgnore
     fun addRequest(id: Long) {
         val friend = this.cache?.users?.get(id)!!
         this.relationships.requests.add(id)
         friend.relationships.pending.add(this.identifier)
     }
+
     @BsonIgnore
     fun removePendingFriend(id: Long) {
         this.relationships.pending.remove(id)
         val pendingFriend = this.cache?.users?.get(id)
         pendingFriend?.relationships?.requests?.remove(this.identifier)
     }
+
     @BsonIgnore
     fun acceptRequest(id: Long): Boolean {
         val friend = cache?.users?.get(id) ?: return false
@@ -137,6 +178,7 @@ data class User constructor(
             true
         }
     }
+
     @BsonIgnore
     fun getFriends(): FriendsPublic {
         val friendList = mutableListOf<PublicUser>()
@@ -169,6 +211,7 @@ data class User constructor(
     fun copy(): User {
         return User(this)
     }
+
     fun differenceOfUpdatedUser(old: User): MutableMap<String, Any?> {
         val differenceMap = mutableMapOf<String, Any?>()
         differenceMap["id"] = this.identifier.toString()
@@ -182,8 +225,10 @@ data class User constructor(
         if (old.admin != this.admin) differenceMap["admin"] = this.admin
         if (old.avatar != this.avatar) differenceMap["avatar"] = this.avatar
         if (old.analytics != this.analytics) differenceMap["analytics"] = this.analytics
+        if (old.devices != this.devices) differenceMap["devices"] = this.devices
         return differenceMap
     }
+
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         if (this === other) return true
@@ -201,6 +246,7 @@ data class User constructor(
         if (other.avatar != this.avatar) return false
         if (other.created != this.created) return false
         if (other.analytics != this.analytics) return false
+        if (other.devices != this.devices) return false
         return true
     }
 
@@ -219,8 +265,10 @@ data class User constructor(
         this.avatar?.animated = user.avatar?.animated == true
         this.created = user.created
         this.analytics = user.analytics
+        this.devices = user.devices
         this.save(false)
     }
+
     init {
         jackson.findAndRegisterModules()
     }
@@ -242,19 +290,24 @@ data class PrivateUser(@JsonIgnore private val user: User) {
 
 data class PublicUser(@JsonIgnore private val user: User) : GenericUser {
     val name = user.name
-    @JsonIgnore override var identifier = user.identifier
+    @JsonIgnore
+    override var identifier = user.identifier
     val status = user.status
     val admin = user.admin
     val enabled = user.enabled
     val state = user.state
     val avatar = user.avatar
-    @JsonProperty("id") val id = identifier.toString()
+    @JsonProperty("id")
+    val id = identifier.toString()
 }
+
 data class UserNotice constructor(@BsonProperty val text: String?, @BsonProperty val icon: Icon?)
 
 data class Status constructor(@BsonProperty("icon") var icon: Icon, @BsonProperty("text") var text: String)
-data class Icon(override val cdn: String, override val animated: Boolean, @JsonIgnore override val id: Long) : ImageImpl {
-    @JsonProperty("id") val identifier = id.toString()
+data class Icon(override val cdn: String, override val animated: Boolean, @JsonIgnore override val id: Long) :
+    ImageImpl {
+    @JsonProperty("id")
+    val identifier = id.toString()
 }
 
 /**
@@ -270,6 +323,7 @@ data class UserAnalytics constructor(
     // In seconds
     @BsonProperty("activeTime") var activeTime: Long? = 0L
 )
+
 data class Friends constructor(
     @BsonProperty("relationships") @JsonProperty("relationships") var friends: ArrayList<Long> = arrayListOf(),
     // Other people's request show up as "Pending" for you
@@ -300,12 +354,18 @@ data class FriendsPublic @BsonCreator constructor(
         return arr
     }
 }
+
 data class Avatar constructor(
     @BsonProperty var animated: Boolean = false,
     @BsonProperty("identifier") @JsonIgnore var identifier: Long = 0L
 ) {
-    @BsonIgnore @JsonProperty("id") var idJSON = identifier.toString()
+    @BsonIgnore
+    @JsonProperty("id")
+    var idJSON = identifier.toString()
 }
+
+
+
 enum class UserState {
     OFFLINE,
     ONLINE,

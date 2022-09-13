@@ -27,7 +27,7 @@ class WebSocketController(
     private val ehandler: EventHandler,
     private val userCache: UserCache,
     private val isProd: Boolean
-): EventListener {
+) : EventListener {
     private val rawConnections = mutableMapOf<String, SessionWithCompression>()
     private val connections = mutableMapOf<String, SocketSession>()
     private val jsonWrap: ObjectMapper = jacksonObjectMapper().findAndRegisterModules()
@@ -50,24 +50,31 @@ class WebSocketController(
                 return
             } else if (message.t == SocketMessageType.ClientStart.ordinal) {
                 val properties = jsonWrap.convertValue(rawMessage["d"], SessionProperties::class.java)
-                properties.properties.ip = handler.session.remoteAddress.address.hostAddress
+                val device = Device(
+                    Instant.now(),
+                    handler.session.remoteAddress.address.hostAddress,
+                    properties.properties.browser,
+                    properties.properties.build,
+                    properties.properties.os,
+                    properties.properties.geo
+                )
                 val user = userCache.users.values.find { u -> u.token.token == properties.auth }
                     ?: return session.session.closeSession(
                         1010,
                         "Authentication matching ${properties.auth} doesn't exist"
                     )
+
+                if (user.devices.find { d -> d == device } == null) {
+                    user.devices.add(device)
+                    user.save(true)
+                }
                 val existingConnection = connections.values.find { u -> u.user.token.token == properties.auth }
                 if (existingConnection != null) {
                     send(
                         existingConnection.ws.session,
                         existingConnection.ws.type,
                         ServerDropGateway(
-                            Device(
-                                properties.properties.ip!!,
-                                properties.properties.browser,
-                                properties.properties.build,
-                                properties.properties.os
-                            )
+                            device
                         )
                     )
                     existingConnection.ws.session.closeSession(
@@ -138,13 +145,18 @@ class WebSocketController(
         val connection = connections[handler.sessionId] ?: return
 
         val friends = getSockets(connection.user.getFriends().allAsOne())
-            for (friend in friends) {
-                send(friend.ws.session, friend.ws.type, FriendUpdatePayload(connection.user, connection.user.identifier, "state", UserState.OFFLINE))
-            }
-            connections.remove(handler.sessionId)
-            rawConnections.remove(handler.sessionId)
-            connection.user.analytics.activeTime = connection.user.analytics.activeTime?.plus((Instant.now().toEpochMilli() - connection.start) / 1000)
-            connection.user.save()
+        for (friend in friends) {
+            send(
+                friend.ws.session,
+                friend.ws.type,
+                FriendUpdatePayload(connection.user, connection.user.identifier, "state", UserState.OFFLINE)
+            )
+        }
+        connections.remove(handler.sessionId)
+        rawConnections.remove(handler.sessionId)
+        connection.user.analytics.activeTime =
+            connection.user.analytics.activeTime?.plus((Instant.now().toEpochMilli() - connection.start) / 1000)
+        connection.user.save()
     }
 
 
@@ -267,7 +279,9 @@ class WebSocketController(
     }
 
     override fun onUpdate(payload: UpdateEvent) {
-        val sockets = connections.values.filter { u -> u.session.properties.build.replace(".", "").toInt() < payload.d.tag.replace(".", "").toInt() }
+        val sockets = connections.values.filter { u ->
+            u.session.properties.build.replace(".", "").toInt() < payload.d.tag.replace(".", "").toInt()
+        }
         for (socket in sockets) {
             send(socket.ws.session, socket.ws.type, payload)
         }
@@ -315,11 +329,13 @@ data class UserUpdateEvent(
     }
 
     data class UserUpdateExternal(val d: MutableMap<String, Any?>) {
-       val t = SocketMessageType.ServerUserUpdate.ordinal
+        val t = SocketMessageType.ServerUserUpdate.ordinal
     }
+
     data class UserUpdateSelf(val d: MutableMap<String, Any?>) {
         val t = SocketMessageType.ServerSelfUpdate.ordinal
     }
+
     companion object {
         fun MutableMap<String, Any?>.censorSensitiveData() {
             this.remove("email")
@@ -328,6 +344,7 @@ data class UserUpdateEvent(
         }
     }
 }
+
 data class FriendUpdatePayload(
     @JsonIgnore val self: User,
     val id: Long,
@@ -423,14 +440,14 @@ data class SocketSession(
 
 data class SessionProperties(
     val auth: String,
-    var properties: ClientProperties
+    var properties: WebSocketDevice
 )
 
-data class ClientProperties(
-    val os: String,
+data class WebSocketDevice(
     val browser: String,
     val build: String,
-    var ip: String?
+    val os: String,
+    val geo: GeoLocation
 )
 
 data class PendingFriendEvent(
@@ -440,9 +457,11 @@ data class PendingFriendEvent(
     fun toExternal(): ServerPendingExternal {
         return ServerPendingExternal(self)
     }
+
     fun toSelf(): ServerPendingSelf {
         return ServerPendingSelf(friend)
     }
+
     data class ServerPendingExternal(@JsonIgnore val user: User) {
         val t = SocketMessageType.ServerPendingFriend.ordinal
         val d = user.toPublic()
@@ -455,7 +474,6 @@ data class PendingFriendEvent(
 }
 
 
-
 data class RemoveFriendRequestEvent(
     @JsonIgnore val self: User,
     @JsonIgnore val pendingFriend: User
@@ -463,6 +481,7 @@ data class RemoveFriendRequestEvent(
     fun toExternal(): ServerRequestRemoveExternal {
         return ServerRequestRemoveExternal(self)
     }
+
     fun toSelf(): ServerRequestRemoveSelf {
         return ServerRequestRemoveSelf(pendingFriend)
     }
@@ -485,6 +504,7 @@ data class AcceptFriendRequestEvent(
     fun toExternal(): FriendRequestAcceptExternal {
         return FriendRequestAcceptExternal(self)
     }
+
     fun toSelf(): FriendRequestAcceptSelf {
         return FriendRequestAcceptSelf(pendingFriend)
     }
@@ -493,12 +513,12 @@ data class AcceptFriendRequestEvent(
         val t = SocketMessageType.ServerRequestAccepted.ordinal
         val d = user.toPublic()
     }
+
     data class FriendRequestAcceptSelf(@JsonIgnore val user: User) {
         val t = SocketMessageType.ServerSelfRequestAccepted.ordinal
         val d = user.toPublic()
     }
 }
-
 
 
 data class ServerDropGateway(val d: Device) {
@@ -521,7 +541,6 @@ interface WebsocketPayload {
     fun toServer(): Any
 }
 
-data class Device(val ip: String, val browser: String, val build: String, val os: String)
 enum class SocketMessageType {
     ClientStart,
     ServerStart,

@@ -30,6 +30,7 @@ type Client struct {
 	CurrentUser         *mocks.PrivateUser
 	Api                 string
 	Connection          *mocks.Connection
+	Location            *mocks.GeoLocation
 	Ctx                 *context.Context
 	Update              *mocks.Update
 	Http                *HttpClient
@@ -54,6 +55,15 @@ func NewClient(ctx *context.Context, logger *zerolog.Logger, config *mocks.AppCo
 	}
 	client.RelationshipManager = NewRelationshipManager(client.Http, &client)
 	client.DeveloperClient = NewDeveloperClient(&a.Ctx, *client.Http)
+	go func() {
+		location, err := client.Http.GetLocation()
+		if err != nil {
+			fmt.Printf("Something went wrong when trying to get location: %v\n", err)
+		}
+		fmt.Printf("Got location: %v", location)
+		client.Location = location
+
+	}()
 	return &client
 }
 
@@ -275,6 +285,11 @@ func (c *Client) GetHttpURL() string {
 	}
 	return url.String()
 }
+
+func (c *Client) GetLocation() *mocks.GeoLocation {
+	return c.Location
+}
+
 func (c *Client) LoginToSocket() {
 	fmt.Printf("Curr User %v", c.CurrentUser)
 	SendMessage(c, mocks.ClientReadyMessage{

@@ -1,5 +1,12 @@
 # Changelog
-<h2 align="center">August 23 2022</h2>
+<h2 align="center">September 12 2022</h2>
+<h3 align="center">1.19.0-ALPHA</h3>
+
+#### Changes:
+* Add Device Support + Geolocation
+
+
+<h2 align="center">September 11 2022</h2>
 <h3 align="center">1.18.1-ALPHA</h3>
 
 #### Changes:

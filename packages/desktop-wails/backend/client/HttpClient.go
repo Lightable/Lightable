@@ -349,6 +349,34 @@ func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
 	}
 }
 
+func (h *HttpClient) GetLocation() (*mocks.GeoLocation, error) {
+ u := url.URL{Scheme: "https", Path: "/cookieconsentpub/v1/geo/location", Host: "geolocation.onetrust.com"}
+ str := u.String()
+ req, err := http.NewRequest("GET", str, nil)
+ if err != nil {
+	return nil, err
+ }
+ req.Header.Set("Accept", "application/json")
+ resp, err := h.Http.Do(req)
+ if err != nil {
+	return nil, err
+ }
+ defer dclose(resp.Body)
+ body, err := ioutil.ReadAll(resp.Body)
+ if err != nil {
+	return nil, err
+ }
+ if resp.StatusCode == 200 {
+	location := mocks.GeoLocation{}
+	err := json.Unmarshal(body, &location)
+	if err != nil {
+		return nil, err
+	}
+	return &location, err
+ }
+ return nil, nil
+}
+
 func (h *HttpClient) RegisterLoginWithClient(u *user.PrivateUser) {
 	h.Client.CurrentUser = u
 }

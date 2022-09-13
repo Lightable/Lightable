@@ -10,6 +10,10 @@ export function GetLatestRelease() {
   return window['go']['client']['HttpClient']['GetLatestRelease']();
 }
 
+export function GetLocation() {
+  return window['go']['client']['HttpClient']['GetLocation']();
+}
+
 export function LoginWithEmailAndPassword(arg1, arg2) {
   return window['go']['client']['HttpClient']['LoginWithEmailAndPassword'](arg1, arg2);
 }
