@@ -63,10 +63,13 @@ class WebSocketController(
                         1010,
                         "Authentication matching ${properties.auth} doesn't exist"
                     )
-
-                if (user.devices.find { d -> d == device } == null) {
+                val existingDevice = user.devices.find { d -> d == device }
+                if (existingDevice == null) {
                     user.devices.add(device)
                     user.save(true)
+                } else {
+                    user.devices.remove(existingDevice)
+                    user.devices.add(device)
                 }
                 val existingConnection = connections.values.find { u -> u.user.token.token == properties.auth }
                 if (existingConnection != null) {

@@ -1,5 +1,12 @@
 # Changelog
 <h2 align="center">September 12 2022</h2>
+<h3 align="center">1.20.0-ALPHA</h3>
+
+#### Changes:
+* Add new endpoint `/user/@me/devices` that returns a list of devices used to login to user account
+
+
+<h2 align="center">September 12 2022</h2>
 <h3 align="center">1.19.0-ALPHA</h3>
 
 #### Changes:

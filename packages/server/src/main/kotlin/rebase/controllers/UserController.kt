@@ -175,6 +175,28 @@ class UserController(
         }
         ctx.status(401).json(UserLoginFail())
     }
+    @OpenApi(
+        path = "/user/@me/devices",
+        method = HttpMethod.GET,
+        responses = [
+            OpenApiResponse("400"),
+            OpenApiResponse(
+                "403",
+                content = [OpenApiContent(UserAuthFail::class, type = "application/json")]
+            ),
+            OpenApiResponse("200", content = [OpenApiContent(Device::class, type = "application/json", isArray = true)])
+        ],
+        summary = "Get devices",
+        description = "Get all devices that were used to login into this account",
+        tags = ["User", "Self", "Device", "Devices"]
+    )
+    fun getDevices(ctx: Context) {
+        val user = requireAuth(userCache, ctx)
+        if (user != null) {
+            ctx.status(200).json(user.devices)
+            return
+        }
+    }
 
     val patchUserDoc =
         document()

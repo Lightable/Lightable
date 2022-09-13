@@ -261,6 +261,7 @@ class Server(
                     post("login", documented(user.loginUserDoc, user::login))
                     get(documented(user.getSelfUserDoc, user::getSelfUser))
                     patch(documented(user.patchUserDoc, user::update))
+                    get("/devices", user::getDevices)
                     post("/avatar", user::updateAvatar)
                     path("/relationships") {
                         val relationship = user.Relationships()
