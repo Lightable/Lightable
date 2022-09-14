@@ -22,6 +22,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"golang.org/x/exp/maps"
 )
 
 type Client struct {
@@ -34,6 +35,7 @@ type Client struct {
 	Ctx                 *context.Context
 	Update              *mocks.Update
 	Http                *HttpClient
+	App                 *app.App
 	RelationshipManager *RelationshipManager
 	DeveloperClient     *DeveloperClient
 	SocketHistory       []string
@@ -55,15 +57,8 @@ func NewClient(ctx *context.Context, logger *zerolog.Logger, config *mocks.AppCo
 	}
 	client.RelationshipManager = NewRelationshipManager(client.Http, &client)
 	client.DeveloperClient = NewDeveloperClient(&a.Ctx, *client.Http)
-	go func() {
-		location, err := client.Http.GetLocation()
-		if err != nil {
-			fmt.Printf("Something went wrong when trying to get location: %v\n", err)
-		}
-		fmt.Printf("Got location: %v", location)
-		client.Location = location
-
-	}()
+	client.App = a
+	go client.getLocation()
 	return &client
 }
 
@@ -248,11 +243,18 @@ func (c *Client) GetAvatar(id string, size int) string {
 	return ""
 }
 func (c *Client) GetSelfAvatar(size int) string {
+	if c.CurrentUser == nil {
+		return ""
+	} 
 	if c.CurrentUser.Avatar != nil {
 		return c.GetHttpURL() + "/cdn/user/" + c.CurrentUser.Id + "/avatars/avatar_" + c.CurrentUser.Avatar.Id + "?size=" + fmt.Sprint(size)
 	}
 	return ""
 }
+func (c *Client) GetAvatarRaw(uid string, aid string, size int) string {
+	return c.GetHttpURL() + "/cdn/user/" + uid + "/avatars/avatar_" + aid + "?size=" + fmt.Sprint(size)
+}
+
 func (c *Client) OpenAvatarPickDialog() *string {
 	c.Logger.Info().Msg("Opened avatar picker")
 	path, err := runtime.OpenFileDialog(*c.Ctx, runtime.OpenDialogOptions{
@@ -290,6 +292,21 @@ func (c *Client) GetLocation() *mocks.GeoLocation {
 	return c.Location
 }
 
+func (c *Client) GetUsers() []*mocks.PrivateUser {
+	mape := *c.App.GetConfig().Users
+	v := maps.Values(mape)
+	return v
+}
+
+func (client *Client) getLocation() {
+		location, err := client.Http.GetLocation()
+		if err != nil {
+			fmt.Printf("Something went wrong when trying to get location: %v\n", err)
+		}
+		fmt.Printf("Got location: %v", location)
+		client.Location = location
+}
+
 func (c *Client) LoginToSocket() {
 	fmt.Printf("Curr User %v", c.CurrentUser)
 	SendMessage(c, mocks.ClientReadyMessage{
@@ -300,9 +317,14 @@ func (c *Client) LoginToSocket() {
 				Os:      r.GOOS,
 				Browser: "Desktop",
 				Build:   "1.9.2",
+				Geo:     *c.Location,
 			},
 		},
 	})
+}
+
+func (c *Client) ReconnectToSocket() {
+	c.DialSocket()
 }
 
 func (c *Client) SendTyping(channel string) {
@@ -310,6 +332,25 @@ func (c *Client) SendTyping(channel string) {
 		T: 4,
 		D: channel,
 	})
+}
+
+func (c *Client) ChangeUser(u mocks.PrivateUser) {
+	c.CurrentUser = &u
+	c.App.Config.LoggedInUser = c.CurrentUser
+	c.RelationshipManager.clearRelations()
+	c.DialSocket()
+	c.getLocation()
+	c.App.SaveConfig()
+	runtime.EventsEmit(*c.Ctx, "ws:reconnect", c.CurrentUser)
+}
+
+func (c *Client) RemoveUser(u mocks.PrivateUser) {
+	if (u.Id == c.App.GetConfig().LoggedInUser.Id) {
+		c.App.Config.LoggedInUser = nil
+		c.CurrentUser = nil;
+	}
+	delete(*c.App.GetConfig().Users, u.Id)
+	c.App.SaveConfig()
 }
 
 func SendMessage[T any](c *Client, u T) {

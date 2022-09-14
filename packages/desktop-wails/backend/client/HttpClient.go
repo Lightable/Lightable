@@ -377,6 +377,31 @@ func (h *HttpClient) GetLocation() (*mocks.GeoLocation, error) {
  return nil, nil
 }
 
+func (h *HttpClient) GetDevices(auth string) (*[]mocks.Device, error) {
+	u := h.createURL("/user/@me/devices")
+	req, err := h.createGetRequestWithAuthorization(u, auth)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := h.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer dclose(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 200 {
+		data := []mocks.Device{}
+		err := json.Unmarshal(body, &data)
+		if err != nil {
+			return nil, err
+		}
+		return &data, nil 
+	}
+	return nil, fmt.Errorf("Error with: %v", string(body)) 
+}
 func (h *HttpClient) RegisterLoginWithClient(u *user.PrivateUser) {
 	h.Client.CurrentUser = u
 }
@@ -396,7 +421,7 @@ func (h *HttpClient) createGetRequestWithAuthorization(url url.URL, token string
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
+	req.Header.Set("Authorization", token)
 	return req, nil
 }
 func (h *HttpClient) createPostRequestWithAuthorization(url url.URL) (*http.Request, error) {

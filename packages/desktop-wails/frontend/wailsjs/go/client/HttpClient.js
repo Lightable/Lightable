@@ -6,6 +6,10 @@ export function AddFriend(arg1) {
   return window['go']['client']['HttpClient']['AddFriend'](arg1);
 }
 
+export function GetDevices(arg1) {
+  return window['go']['client']['HttpClient']['GetDevices'](arg1);
+}
+
 export function GetLatestRelease() {
   return window['go']['client']['HttpClient']['GetLatestRelease']();
 }

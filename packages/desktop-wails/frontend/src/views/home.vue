@@ -3,7 +3,10 @@ import { NButton } from 'naive-ui';
 import { computed, onBeforeMount } from 'vue';
 import { HasUser } from '../../wailsjs/go/app/App';
 import { useAppStore } from '../stores/AppStore';
+import { GetUsers } from '../../wailsjs/go/client/Client';
+import {useRouter} from 'vue-router';
 
+const router = useRouter();
 const appStore = useAppStore();
 const hasUser = computed(() => appStore.hasUser);
 const setHasUser = (bool: boolean) => {
@@ -14,6 +17,15 @@ const setHasUser = (bool: boolean) => {
 onBeforeMount(() => appStore.leftDrawer.show = false);
 
 appStore.setTitle('Home');
+
+GetUsers().then((u) => {
+  console.log(u)
+  if (u.length > 0 && !appStore.overrideExistingUser) {
+    return router.push('/accounts')
+  } else if (appStore.overrideExistingUser) {
+    return
+  }
+})
 </script>
 
 
@@ -36,6 +48,9 @@ appStore.setTitle('Home');
         <NButton size="large" tertiary type="info" style="--n-width: 248px" id="login-btn" round @click="$router.push('/login')">
             Log In
         </NButton>
+      <NButton size="large" tertiary type="primary" style="--n-width: 248px" id="accounts-btn" round @click="$router.push('/accounts')">
+        Accounts
+      </NButton>
         <NButton class="subtext" text @click="setHasUser(false)">
             I want to register another user
         </NButton>

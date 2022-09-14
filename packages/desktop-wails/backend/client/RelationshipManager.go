@@ -136,6 +136,13 @@ func (rm *RelationshipManager) ClearRelations() {
 	}
 }
 
+func (rm *RelationshipManager) clearRelations() {
+	rm.Pending = make(map[int64]mocks.PublicUser)
+	rm.Requests = make(map[int64]mocks.PublicUser)
+	rm.Friends = make(map[int64]mocks.PublicUser)
+}
+
+
 func (rm *RelationshipManager) internalAddRelation(Type string, u mocks.PublicUser) error {
 	intID, err := strconv.ParseInt(u.Id, 10, 64)
 	if err != nil {

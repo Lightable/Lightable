@@ -31,6 +31,7 @@ export const useAppStore = defineStore('AppStore', {
         history: {
             websocket: [] as Array<string>
         },
+        overrideExistingUser: false,
         users: [] as Array<mocks.PublicUser>,
         relationships: new mocks.RelationshipStruct(),
         search: {

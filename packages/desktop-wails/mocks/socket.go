@@ -82,9 +82,10 @@ type ClientReadyPayload struct {
 	Properties ClientReadyPropertiesPayload `json:"properties"`
 }
 type ClientReadyPropertiesPayload struct {
-	Os      string `json:"os"`
-	Browser string `json:"browser"`
-	Build   string `json:"build"`
+	Os      string      `json:"os"`
+	Browser string      `json:"browser"`
+	Build   string      `json:"build"`
+	Geo     GeoLocation `json:"geo"`
 }
 type ClientTypingMessage struct {
 	T int    `json:"t"`
@@ -99,7 +100,7 @@ type ServerStartMessage struct {
 	D ServerStartPayload `json:"d"`
 }
 type ServerUpdateMessage struct {
-	T int `json:"t"`
+	T int    `json:"t"`
 	D Update `json:"d"`
 }
 type FriendRequestAddMessage struct {

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement, NLoadingBarProvider, useLoadingBar } from 'naive-ui';
+import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement, NLoadingBarProvider } from 'naive-ui';
 import LeftDrawer from './components/LeftDrawer/LeftDrawer.vue';
 import DrawerComponent from './components/LeftDrawer/DrawerComponent.vue';
 import { useAppStore } from './stores/AppStore';
@@ -91,8 +91,8 @@ appStore.startRealtime();
       justify-content: flex-start;
 
       .content {
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
       }
     }
   }

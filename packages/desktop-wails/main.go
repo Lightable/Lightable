@@ -24,7 +24,7 @@ import (
 //go:embed frontend/dist
 var assets embed.FS
 var start = time.Now()
-var currentVersion = "0.0.29"
+var currentVersion = "0.2.0"
 
 type FileLoader struct {
 	http.Handler

@@ -5,6 +5,8 @@ import {client} from '../models';
 
 export function AddFriend(arg1:string):Promise<mocks.PublicUser>;
 
+export function GetDevices(arg1:string):Promise<mocks.Device>;
+
 export function GetLatestRelease():Promise<mocks.Update>;
 
 export function GetLocation():Promise<mocks.GeoLocation>;

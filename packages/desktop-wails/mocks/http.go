@@ -13,3 +13,12 @@ type GeoLocation struct {
 	City      string `json:"city"`
 	Continent string `json:"continent"`
 }
+
+type Device struct {
+	LastAccess float64 `json:"lastAccess"`
+	IP         string  `json:"ip"`
+	Browser    string  `json:"browser"`
+	Build      string  `json:"build"`
+	Os         string  `json:"os"`
+	Geo        GeoLocation  `json:"geo"`
+}
