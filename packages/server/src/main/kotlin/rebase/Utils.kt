@@ -3,6 +3,7 @@ import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonProperty
 import java.lang.management.ManagementFactory
 import java.math.BigInteger
+import java.security.InvalidParameterException
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.time.Instant
@@ -62,6 +63,24 @@ object Utils {
         val salt = ByteArray(size)
         RANDOM.nextBytes(salt)
         return Base64.getEncoder().encodeToString(salt);
+    }
+    fun versionCompare(local: String, remoteVersion: String?): Int {
+        val remote = remoteVersion?.splitToSequence(".")?.toList() ?: return 1
+        val local = local.splitToSequence(".").toList()
+
+        if(local.filter { it.toIntOrNull() != null }.size != local.size) throw InvalidParameterException("version invalid: $this")
+        if(remote.filter { it.toIntOrNull() != null }.size != remote.size) throw InvalidParameterException("version invalid: $remoteVersion")
+
+        val totalRange = 0 until kotlin.math.max(local.size, remote.size)
+        for (i in totalRange) {
+            if (i < remote.size && i < local.size) {
+                val result = local[i].compareTo(remote[i])
+                if (result != 0) return result
+            } else (
+                    return local.size.compareTo(remote.size)
+                    )
+        }
+        return 0
     }
     @Throws(Exception::class)
     fun getProcessCpuLoad(): Double {

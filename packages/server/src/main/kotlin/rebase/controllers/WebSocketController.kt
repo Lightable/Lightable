@@ -12,6 +12,7 @@ import io.javalin.websocket.WsMessageContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import org.slf4j.Logger
 import rebase.GetCPUUsage
+import rebase.Utils
 import rebase.cache.UserCache
 import rebase.compression.CompressionUtil
 import rebase.events.EventHandler
@@ -91,9 +92,8 @@ class WebSocketController(
                     return
                 }
                 connections[session.session.sessionId] = SocketSession(session, true, user, properties)
-                val release = properties.properties.build.replace(".", "").toInt()
                 val latest = userCache.latestRelease
-                if (userCache.releases.size >= 1 && release < latest?.tag?.replace(".", "")?.toInt()!!) {
+                if (userCache.releases.size >= 1 && Utils.versionCompare(latest!!.tag, properties.properties.build) < 0) {
                     send(session.session, session.type, UpdateEvent(userCache.releases.values.last()))
                 }
 
