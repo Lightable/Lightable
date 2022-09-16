@@ -1,19 +1,27 @@
 export namespace mocks {
 	
-	export class UserAnalytics {
-	    messages: number;
-	    callTime: number;
-	    activeTime: number;
+	export class Message {
+	    content?: string;
+	    system: boolean;
+	    type: number;
+	    channel: number;
+	    author: number;
+	    created: number;
+	    edited?: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new UserAnalytics(source);
+	        return new Message(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.messages = source["messages"];
-	        this.callTime = source["callTime"];
-	        this.activeTime = source["activeTime"];
+	        this.content = source["content"];
+	        this.system = source["system"];
+	        this.type = source["type"];
+	        this.channel = source["channel"];
+	        this.author = source["author"];
+	        this.created = source["created"];
+	        this.edited = source["edited"];
 	    }
 	}
 	export class UserAvatar {
@@ -28,20 +36,6 @@ export namespace mocks {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.animated = source["animated"];
 	        this.id = source["id"];
-	    }
-	}
-	export class StandardToken {
-	    permissions: string[];
-	    token: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new StandardToken(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.permissions = source["permissions"];
-	        this.token = source["token"];
 	    }
 	}
 	export class Icon {
@@ -92,144 +86,6 @@ export namespace mocks {
 		    return a;
 		}
 	}
-	export class PrivateUser {
-	    name: string;
-	    id: string;
-	    email: string;
-	    status?: UserStatus;
-	    token: StandardToken;
-	    admin: boolean;
-	    avatar?: UserAvatar;
-	    profileOptions: {[key: string]: boolean};
-	    analytics?: UserAnalytics;
-	
-	    static createFrom(source: any = {}) {
-	        return new PrivateUser(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.id = source["id"];
-	        this.email = source["email"];
-	        this.status = this.convertValues(source["status"], UserStatus);
-	        this.token = this.convertValues(source["token"], StandardToken);
-	        this.admin = source["admin"];
-	        this.avatar = this.convertValues(source["avatar"], UserAvatar);
-	        this.profileOptions = source["profileOptions"];
-	        this.analytics = this.convertValues(source["analytics"], UserAnalytics);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	
-	
-	export class GeoLocation {
-	    country: string;
-	    state: string;
-	    stateName: string;
-	    zipcode: string;
-	    timezone: string;
-	    latitude: string;
-	    longitude: string;
-	    city: string;
-	    continent: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new GeoLocation(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.country = source["country"];
-	        this.state = source["state"];
-	        this.stateName = source["stateName"];
-	        this.zipcode = source["zipcode"];
-	        this.timezone = source["timezone"];
-	        this.latitude = source["latitude"];
-	        this.longitude = source["longitude"];
-	        this.city = source["city"];
-	        this.continent = source["continent"];
-	    }
-	}
-	export class Message {
-	    content?: string;
-	    system: boolean;
-	    type: number;
-	    channel: number;
-	    author: number;
-	    created: number;
-	    edited?: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new Message(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.content = source["content"];
-	        this.system = source["system"];
-	        this.type = source["type"];
-	        this.channel = source["channel"];
-	        this.author = source["author"];
-	        this.created = source["created"];
-	        this.edited = source["edited"];
-	    }
-	}
-	export class Channel {
-	    id: string;
-	    type: number;
-	    users: number[];
-	    owner?: PublicUser;
-	    messages: Message[];
-	
-	    static createFrom(source: any = {}) {
-	        return new Channel(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.type = source["type"];
-	        this.users = source["users"];
-	        this.owner = this.convertValues(source["owner"], PublicUser);
-	        this.messages = this.convertValues(source["messages"], Message);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
 	export class PublicUser {
 	    name: string;
 	    id: string;
@@ -252,6 +108,44 @@ export namespace mocks {
 	        this.avatar = this.convertValues(source["avatar"], UserAvatar);
 	        this.state = source["state"];
 	        this.channel = this.convertValues(source["channel"], Channel);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Channel {
+	    id: string;
+	    type: number;
+	    users: number[];
+	    owner?: PublicUser;
+	    messages: Message[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Channel(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.type = source["type"];
+	        this.users = source["users"];
+	        this.owner = this.convertValues(source["owner"], PublicUser);
+	        this.messages = this.convertValues(source["messages"], Message);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -324,9 +218,50 @@ export namespace mocks {
 	        this.secure = source["secure"];
 	    }
 	}
+	export class UserAnalytics {
+	    messages: number;
+	    callTime: number;
+	    activeTime: number;
 	
+	    static createFrom(source: any = {}) {
+	        return new UserAnalytics(source);
+	    }
 	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.messages = source["messages"];
+	        this.callTime = source["callTime"];
+	        this.activeTime = source["activeTime"];
+	    }
+	}
+	export class GeoLocation {
+	    country: string;
+	    state: string;
+	    stateName: string;
+	    zipcode: string;
+	    timezone: string;
+	    latitude: string;
+	    longitude: string;
+	    city: string;
+	    continent: string;
 	
+	    static createFrom(source: any = {}) {
+	        return new GeoLocation(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.country = source["country"];
+	        this.state = source["state"];
+	        this.stateName = source["stateName"];
+	        this.zipcode = source["zipcode"];
+	        this.timezone = source["timezone"];
+	        this.latitude = source["latitude"];
+	        this.longitude = source["longitude"];
+	        this.city = source["city"];
+	        this.continent = source["continent"];
+	    }
+	}
 	export class Update {
 	    version: string;
 	    title: string;
@@ -348,6 +283,67 @@ export namespace mocks {
 	    }
 	}
 	
+	
+	export class StandardToken {
+	    permissions: string[];
+	    token: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new StandardToken(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.permissions = source["permissions"];
+	        this.token = source["token"];
+	    }
+	}
+	export class PrivateUser {
+	    name: string;
+	    id: string;
+	    email: string;
+	    status?: UserStatus;
+	    token: StandardToken;
+	    admin: boolean;
+	    avatar?: UserAvatar;
+	    profileOptions: {[key: string]: boolean};
+	    analytics?: UserAnalytics;
+	
+	    static createFrom(source: any = {}) {
+	        return new PrivateUser(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.id = source["id"];
+	        this.email = source["email"];
+	        this.status = this.convertValues(source["status"], UserStatus);
+	        this.token = this.convertValues(source["token"], StandardToken);
+	        this.admin = source["admin"];
+	        this.avatar = this.convertValues(source["avatar"], UserAvatar);
+	        this.profileOptions = source["profileOptions"];
+	        this.analytics = this.convertValues(source["analytics"], UserAnalytics);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class AppConfig {
 	    theme: string;
 	    responder?: AppResponderConfig;
@@ -386,6 +382,9 @@ export namespace mocks {
 		    return a;
 		}
 	}
+	
+	
+	
 
 }
 

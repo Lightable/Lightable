@@ -25,6 +25,7 @@ export const useAppStore = defineStore('AppStore', {
         },
         leftDrawer: {
             show: false,
+            collapsed: false,
             components: [] as Array<LightableDrawerComponentPair>,
             groups: [] as Array<LightableDrawerGroupComponent>,
         },
@@ -36,7 +37,8 @@ export const useAppStore = defineStore('AppStore', {
         relationships: new mocks.RelationshipStruct(),
         search: {
             show: false
-        }
+        },
+        customTheme: CustomTheme
     }),
 
     actions: {
@@ -173,6 +175,39 @@ export interface LightableDrawerComponentPair {
     }
 }
 
+let CustomTheme =  {
+    "primaryColor": "#63e2b7",
+    "primaryColorHover": "#7fe7c4",
+    "primaryColorPressed": "#5acea7",
+    "primaryColorSuppl": "rgb(42, 148, 125)",
+    "infoColor": "#70c0e8",
+    "infoColorHover": "#8acbec",
+    "infoColorPressed": "#66afd3",
+    "infoColorSuppl": "rgb(56, 137, 197)",
+    "successColor": "#63e2b7",
+    "successColorHover": "#7fe7c4",
+    "successColorPressed": "#5acea7",
+    "successColorSuppl": "rgb(42, 148, 125)",
+    "warningColor": "#f2c97d",
+    "warningColorHover": "#f5d599",
+    "warningColorPressed": "#e6c260",
+    "warningColorSuppl": "rgb(240, 138, 0)",
+    "errorColor": "#e88080",
+    "errorColorHover": "#e98b8b",
+    "errorColorPressed": "#e57272",
+    "errorColorSuppl": "rgb(208, 58, 82)",
+    "textColorBase": "#fff",
+    "textColor1": "rgba(255, 255, 255, 0.9)",
+    "textColor2": "rgba(255, 255, 255, 0.82)",
+    "textColor3": "rgba(255, 255, 255, 0.52)",
+    "textColorDisabled": "rgba(255, 255, 255, 0.38)",
+    "placeholderColor": "rgba(255, 255, 255, 0.38)",
+    "placeholderColorDisabled": "rgba(255, 255, 255, 0.28)",
+    "iconColor": "rgba(255, 255, 255, 0.38)",
+    "iconColorDisabled": "rgba(255, 255, 255, 0.28)",
+    "iconColorHover": "rgba(255, 255, 255, 0.475)",
+    "iconColorPressed": "rgba(255, 255, 255, 0.30400000000000005)",
+}
 export type LightableDrawerType = "Function" | "Route"
 
 

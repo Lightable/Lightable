@@ -151,6 +151,13 @@ const router = createRouter({
                             component() {
                                 return import('./views/app/settings/Update.vue')
                             }
+                        },
+                        {
+                            path: 'customize',
+                            name: 'settings-customize',
+                            component() {
+                                return import('./views/app/settings/Customize.vue')
+                            }
                         }
                     ],
                     component() {

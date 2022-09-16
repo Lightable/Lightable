@@ -196,7 +196,7 @@ function destroy(arr: Array<any>, val: any) {
         padding: 8px 8px 8px 20px;
         background-color: var(--card-color);
         border-radius: .5rem;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.3s ease, transform .1s ease-in-out;
         cursor: pointer;
         user-select: none;
         box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -217,6 +217,8 @@ function destroy(arr: Array<any>, val: any) {
 
         &:hover {
           opacity: 0.8;
+          transform: translateY(-1px);
+          box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
         }
       }
     }
@@ -234,6 +236,11 @@ function destroy(arr: Array<any>, val: any) {
       background-color: var(--card-color);
       box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
       gap: 16px;
+      transition: all .1s ease-in-out;
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+      }
       .part {
         display: flex;
         flex-direction: row;

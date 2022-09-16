@@ -38,6 +38,7 @@ onMounted(() => {
   src = document.getElementById('chat-input')!!
 });
 const onKey = (e: KeyboardEvent) => {
+
   let shiftMod = e.getModifierState('Shift');
   if (e.key == 'Enter' && shiftMod) {
     src!!.style.height = src.scrollHeight + 24 + 'px';
@@ -88,9 +89,7 @@ const onPaste = () => {
   }, 1)
 }
 
-setInterval(() => {
-  computedHeight.value = rawState.value.offsetHeight;
-}, 20)
+
 </script>
 
 
@@ -101,7 +100,7 @@ setInterval(() => {
   <div class="outer-chat">
     <Transition name="slide-right-ext">
       <div class="states ns"
-           v-if="isPreview || typingUsers !== undefined && typingUsers.length > 0 || state !== undefined" ref="rawState"
+           v-if="isPreview || typingUsers !== undefined && typingUsers.length > 0 || state !== undefined" :ref="rawState"
            :style="{top: `-${computedHeight*2}px`}">
         <div class="state typing" v-if="isPreview || typingUsers !== undefined">
           <TransitionGroup name="slide-right">

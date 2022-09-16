@@ -14,6 +14,7 @@ const appStore = useAppStore();
 darkTheme.Button!!.common!!.errorColor = "#ED4245";
 darkTheme.Button!!.common!!.infoColor = "#62CDFE";
 
+const collapsed = computed(() => appStore.leftDrawer.collapsed);
 const theme = computed(() => appStore.theme);
 const leftDrawer = computed(() => appStore.leftDrawer)
 const search = computed(() => appStore.search)
@@ -54,7 +55,7 @@ appStore.startRealtime();
                         </LeftDrawer>
                       </div>
                       <div class="page" :style="{ 'background': `${theme === 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
-                        <div class="content">
+                        <div class="content" :style="collapsed ? 'width: 100vw' : 'width: calc(100vw - 250px)'">
                           <router-view />
                         </div>
                       </div>
@@ -91,8 +92,9 @@ appStore.startRealtime();
       justify-content: flex-start;
 
       .content {
-        width: 100vw;
+        width: calc(100vw - 250px);
         height: 100vh;
+        transition: all 250ms ease;
       }
     }
   }

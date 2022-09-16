@@ -79,7 +79,6 @@ function destroy(arr: Array<any>, val: any) {
 .chat {
     height: 100vh;
     width: 100%;
-    position: fixed;
     top: 0;
     display: flex;
     flex-direction: column;
