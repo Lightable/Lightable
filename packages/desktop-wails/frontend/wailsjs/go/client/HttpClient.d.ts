@@ -11,6 +11,8 @@ export function GetLatestRelease():Promise<mocks.Update>;
 
 export function GetLocation():Promise<mocks.GeoLocation>;
 
+export function GetMessagesFromDM(arg1:string,arg2:any,arg3:any):Promise<mocks.Message>;
+
 export function LoginWithEmailAndPassword(arg1:string,arg2:string):Promise<mocks.PrivateUser>;
 
 export function LoginWithToken(arg1:string):Promise<mocks.PrivateUser>;

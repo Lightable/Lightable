@@ -6,7 +6,8 @@ import { NAvatar, NScrollbar, NAlert } from 'naive-ui';
 import Message from '../message/Message.vue';
 import { useAppStore } from '../../stores/AppStore';
 import { mocks } from '../../../wailsjs/go/models';
-import { GetAvatar } from '../../../wailsjs/go/client/Client';
+import { EventsOn, EventsOff } from '../../../wailsjs/runtime';
+; import { GetAvatar, SendTyping } from '../../../wailsjs/go/client/Client';
 import { RelationshipStatus } from '../../stores/AppStore'
 const appStore = useAppStore();
 
@@ -27,6 +28,7 @@ const status = computed(() => appStore.getUserTypeRelation(props.channel?.id))
 
 onMounted(async () => {
     if (props.channel) {
+        props.channel.messages = [];
         avatar.value = await GetAvatar(props.channel?.id, 64)
     }
 })
@@ -36,16 +38,29 @@ const sendMessage = (cnt: string) => {
         type: 0,
         // @ts-ignore
         channel: props.channel.id,
-         // @ts-ignore
+        // @ts-ignore
         author: appStore.user!!.id,
         created: Date.now(),
         system: false,
     })
 }
 function destroy(arr: Array<any>, val: any) {
-  for (let i = 0; i < arr.length; i++) if (arr[i] === val) arr.splice(i, 1);
-  return arr;
+    for (let i = 0; i < arr.length; i++) if (arr[i] === val) arr.splice(i, 1);
+    return arr;
 }
+
+const startTyping = (e: string) => {
+    typing.value.push(e)
+    SendTyping(props.channel.id!!);
+}
+
+EventsOn('ws:read:server|dm-message', ({ channel, message }) => {
+    if (props.channel?.messages.length == 2) {
+        delete props.channel?.messages[props.channel?.messages.length-1];
+    }
+    
+    props?.channel?.messages.push(message)
+})
 </script>
 
 <template>
@@ -58,7 +73,7 @@ function destroy(arr: Array<any>, val: any) {
         <NScrollbar style="height: 100%; width: 100%; padding-bottom: 5px; padding-top: 5px;" trigger="hover">
             <div class="pad">
                 <div class="infinite-load ns">
-                    <span>THIS IS ONLY A PREVIEW<br/>Messages are NOT actually being sent!</span>
+                    <span>THIS IS ONLY A PREVIEW<br />Messages are NOT actually being sent!</span>
                 </div>
                 <div class="errors ns">
                     <NAlert id="request" title="Can't send messages to this user" type="error" v-if="!status || typeof status === 'number' && status != RelationshipStatus.FRIEND">
@@ -71,7 +86,7 @@ function destroy(arr: Array<any>, val: any) {
                 <Message v-for="(item, _) in channel.messages" v-if="channel?.messages" :author="getUser(item?.author as any)" :content="item.content" />
             </div>
         </NScrollbar>
-        <ChatInput @message="sendMessage" :self="appStore.user as any" :recipient="user" @typing="(e: string) => typing.push(e)" @typing-end="(e: string) => { typing = destroy(typing, e) }" :typing-users="typing"/>
+        <ChatInput @message="sendMessage" :self="appStore.user as any" :recipient="user" @typing="(e) => startTyping(e!!)" @typing-end="(e: string) => { typing = destroy(typing, e) }" :typing-users="typing" />
     </div>
 </template>
 
@@ -83,6 +98,7 @@ function destroy(arr: Array<any>, val: any) {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+
     .pad {
         padding: 8px;
         margin-top: 50px;

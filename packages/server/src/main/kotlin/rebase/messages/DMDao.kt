@@ -15,6 +15,7 @@ import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder
 import com.datastax.oss.driver.internal.core.type.codec.BigIntCodec
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.joda.time.DateTime
 import java.math.BigInteger
@@ -267,6 +268,7 @@ data class DMDao(override val table: String, override val session: CqlSession) :
     override fun createMessage(message: Message) {
         val rendered = "INSERT INTO ${KEYSPACE}.${table} (id, content, system, type, channel, author, created, edited, gameActive, gameType, gameData) VALUES (${BigInteger.valueOf(message.id)}, '${message.content}', ${message.system}, ${message.type}, ${message.channel}, ${message.author}, '${message.created.toEpochMilli()}', ${message.edited}, ${message.gameActive}, ${message.gameType}, '${message.gameData}');"
         session.execute(rendered)
+        println("Created message:  $message")
     }
 
     private fun executeStatement(statement: SimpleStatement): ResultSet {
@@ -297,7 +299,7 @@ data class Message(
     var system: Boolean = false,
     var type: Int = MessageType.Text.ordinal,
     var channel: Long? = null,
-    var author: Long? = null,
+    @JsonIgnore var author: Long? = null,
     val created: Instant = Instant.now(),
     var edited: Instant? = null,
     // Experiment.. Games?
@@ -308,7 +310,7 @@ data class Message(
     @JsonIgnore
     val gameData: String? = null
 ) {
-
+    @JsonProperty("author") val authorIdentifier = author.toString()
     init {
         println("New message created at $created")
     }

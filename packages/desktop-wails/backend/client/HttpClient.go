@@ -32,27 +32,28 @@ type HttpClient struct {
 	Api    string
 }
 type PassThru struct {
-    io.Reader
-	ctx context.Context
-    total    int64 // Total # of bytes transferred
-    length   int64 // Expected length
-    progress float64
+	io.Reader
+	ctx      context.Context
+	total    int64 // Total # of bytes transferred
+	length   int64 // Expected length
+	progress float64
 }
+
 func (pt *PassThru) Read(p []byte) (int, error) {
-    n, err := pt.Reader.Read(p)
-    if n > 0 {
-        pt.total += int64(n)
-        percentage := float64(pt.total) / float64(pt.length) * float64(100)
-        if percentage-pt.progress > 2 {
-            pt.progress = percentage
+	n, err := pt.Reader.Read(p)
+	if n > 0 {
+		pt.total += int64(n)
+		percentage := float64(pt.total) / float64(pt.length) * float64(100)
+		if percentage-pt.progress > 2 {
+			pt.progress = percentage
 			runtime.EventsEmit(pt.ctx, "upload:progress", pt.progress)
-        }
+		}
 		if pt.total == pt.length {
 			runtime.EventsEmit(pt.ctx, "upload:finished", pt.length)
 		}
-    }
+	}
 
-    return n, err
+	return n, err
 }
 func CreateHTTP(client *Client, app *app.App) *HttpClient {
 	return &HttpClient{Client: client, App: app, Http: http.Client{Timeout: time.Duration(25) * time.Second}}
@@ -184,7 +185,7 @@ func (h *HttpClient) GetLatestRelease() (*mocks.Update, error) {
 			return nil, err
 		}
 		return nil, nil
-	} else if (resp.StatusCode == 200) {
+	} else if resp.StatusCode == 200 {
 		update := mocks.Update{}
 		jsonErr := json.Unmarshal(body, &update)
 		if jsonErr != nil {
@@ -193,16 +194,16 @@ func (h *HttpClient) GetLatestRelease() (*mocks.Update, error) {
 			return &update, nil
 		}
 	}
-	return nil, nil 
+	return nil, nil
 }
 
 func (h *HttpClient) PublishRelease(r mocks.Update) (*mocks.Update, error) {
-	if (!h.Client.CurrentUser.Admin) {
+	if !h.Client.CurrentUser.Admin {
 		return nil, fmt.Errorf("Missing correct user permissions")
 	}
-    u := h.createURL("/admin/release")
+	u := h.createURL("/admin/release")
 	resJson := []byte(fmt.Sprintf(`{"version": "%s", "title": "%s", "notes": "%s", "signature": "%s", "url": "%s"}`, r.Version, r.Title, r.Notes, r.Author, r.URL))
-	req, err := http.NewRequest("POST", u.String(),  bytes.NewReader(resJson))
+	req, err := http.NewRequest("POST", u.String(), bytes.NewReader(resJson))
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +215,7 @@ func (h *HttpClient) PublishRelease(r mocks.Update) (*mocks.Update, error) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err 
+		return nil, err
 	}
 	if resp.StatusCode == 201 {
 		update := mocks.Update{}
@@ -287,16 +288,18 @@ func (h *HttpClient) AddFriend(name string) (*user.PublicUser, error) {
 	return nil, nil
 }
 func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
-	fmt.Println(file)
 	u := h.createURL("/user/@me/avatar")
-    b := &bytes.Buffer{}
+	b := &bytes.Buffer{}
 	writer := multipart.NewWriter(b)
 	fw, err := CreateFormImageFile(writer, "avatar", "avatar")
 	if err != nil {
+		fmt.Printf("Got error : %v", err)
 		return nil, err
 	}
+
 	wd, err := os.Getwd()
 	if err != nil {
+		fmt.Printf("Got error : %v", err)
 		return nil, err
 	}
 	f, err := os.Open(wd + "/" + file)
@@ -307,7 +310,7 @@ func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
 	fw.Write(by)
 	writer.Close()
 	byytes := b.Bytes()
-	passT := &PassThru{Reader: bytes.NewReader(byytes),  ctx: h.App.Ctx, length: int64(len(byytes))}
+	passT := &PassThru{Reader: bytes.NewReader(byytes), ctx: h.App.Ctx, length: int64(len(byytes))}
 	post, err := h.createPostRequestWithBodyAndAuthorization(u, passT)
 	post.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%v", writer.Boundary()))
 	if err != nil {
@@ -324,10 +327,10 @@ func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
 		h.Client.Logger.Error().Str("err", fmt.Sprint(err)).Msg("Something went wrong when serializing body in set avatar")
 		return nil, err
 	}
-	
+
 	// Free memory (GC is extremely aggresive)
 	gr.GC()
-	debug.FreeOSMemory() // Free more memory 
+	debug.FreeOSMemory() // Free more memory
 	code := resp.StatusCode
 	if code == 200 || code == 201 {
 		pubUser := &user.PublicUser{}
@@ -335,7 +338,7 @@ func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
 		if jsonErr != nil {
 			return nil, jsonErr
 		}
-	    h.Client.CurrentUser.Avatar = pubUser.Avatar
+		h.Client.CurrentUser.Avatar = pubUser.Avatar
 		os.Remove(wd + "/" + file)
 		return pubUser, nil
 	} else {
@@ -350,31 +353,31 @@ func (h *HttpClient) UploadAvatar(file string) (*user.PublicUser, error) {
 }
 
 func (h *HttpClient) GetLocation() (*mocks.GeoLocation, error) {
- u := url.URL{Scheme: "https", Path: "/cookieconsentpub/v1/geo/location", Host: "geolocation.onetrust.com"}
- str := u.String()
- req, err := http.NewRequest("GET", str, nil)
- if err != nil {
-	return nil, err
- }
- req.Header.Set("Accept", "application/json")
- resp, err := h.Http.Do(req)
- if err != nil {
-	return nil, err
- }
- defer dclose(resp.Body)
- body, err := ioutil.ReadAll(resp.Body)
- if err != nil {
-	return nil, err
- }
- if resp.StatusCode == 200 {
-	location := mocks.GeoLocation{}
-	err := json.Unmarshal(body, &location)
+	u := url.URL{Scheme: "https", Path: "/cookieconsentpub/v1/geo/location", Host: "geolocation.onetrust.com"}
+	str := u.String()
+	req, err := http.NewRequest("GET", str, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &location, err
- }
- return nil, nil
+	req.Header.Set("Accept", "application/json")
+	resp, err := h.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer dclose(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 200 {
+		location := mocks.GeoLocation{}
+		err := json.Unmarshal(body, &location)
+		if err != nil {
+			return nil, err
+		}
+		return &location, err
+	}
+	return nil, nil
 }
 
 func (h *HttpClient) GetDevices(auth string) (*[]mocks.Device, error) {
@@ -398,10 +401,49 @@ func (h *HttpClient) GetDevices(auth string) (*[]mocks.Device, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &data, nil 
+		return &data, nil
 	}
-	return nil, fmt.Errorf("Error with: %v", string(body)) 
+	return nil, fmt.Errorf("Error with: %v", string(body))
 }
+
+func (h *HttpClient) GetMessagesFromDM(id string, before *string, after *string) (*[]mocks.Message, error) {
+	var u url.URL
+	str := "/user/@me/" + id + "/messages"+ "?type=FRIEND"
+	if after == nil && before == nil {
+		u = h.createURL(str)
+	} else if after == nil && before != nil {
+		u = h.createURL(str + "&before=" + *before)
+	} else if after != nil && before == nil {
+		u = h.createURL(str + "&after=" + *after)
+	} else if after != nil && before != nil {
+		u = h.createURL(str + "&before=" + *before + "&after=" + *after)
+	}
+	req, err := h.createGetRequestWithAuthorization(u, h.Client.CurrentUser.Token.Token)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := h.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer dclose(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 200 {
+		data := []mocks.Message{}
+		err := json.Unmarshal(body, &data)
+		if err != nil {
+			return nil, err
+		}
+		return &data, nil
+	} else if resp.StatusCode == 204 {
+		return nil, nil
+	}
+	return nil, fmt.Errorf("Error with: %v", string(body))
+}
+
 func (h *HttpClient) RegisterLoginWithClient(u *user.PrivateUser) {
 	h.Client.CurrentUser = u
 }
@@ -440,6 +482,7 @@ func (h *HttpClient) createPostRequestWithBodyAndAuthorization(url url.URL, body
 	req.Header.Set("Authorization", h.Client.CurrentUser.Token.Token)
 	return req, nil
 }
+
 type HttpResponse struct {
 	Status int    `json:"status"`
 	Json   string `json:"Json"`
@@ -456,9 +499,9 @@ type GenericFail struct {
 }
 
 func dclose(c io.Closer) {
-    if err := c.Close(); err != nil {
-        log.Fatal(err)
-    }
+	if err := c.Close(); err != nil {
+		log.Fatal(err)
+	}
 }
 func CreateFormImageFile(w *multipart.Writer, fieldname, filename string) (io.Writer, error) {
 	h := make(textproto.MIMEHeader)
@@ -468,6 +511,7 @@ func CreateFormImageFile(w *multipart.Writer, fieldname, filename string) (io.Wr
 	h.Set("Content-Type", "image/png")
 	return w.CreatePart(h)
 }
+
 var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
 
 func escapeQuotes(s string) string {

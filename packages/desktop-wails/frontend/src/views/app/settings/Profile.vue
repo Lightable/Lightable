@@ -79,6 +79,7 @@ const uploadAvatar = async () => {
         preview.uploadable = false;
         preview.error = 'This avatar can\'t be uploaded';
         appStore.avatar = null;
+        throw e
     }
     // var interval = setInterval(() => {
     //     if (preview.uploadedPercent === 100) {

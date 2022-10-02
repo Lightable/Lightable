@@ -78,7 +78,7 @@ onMounted(async () => {
     }
 
     &:hover {
-        background-color: var(--card-color);
+        background-color: var(--lightable-card-color);
     }
 }
 </style>

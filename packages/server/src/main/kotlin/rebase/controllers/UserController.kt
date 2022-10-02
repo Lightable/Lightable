@@ -20,6 +20,7 @@ import rebase.interfaces.cache.IUserCache
 import rebase.messages.DMDao
 import rebase.messages.Message
 import rebase.schema.*
+import java.time.Instant
 import kotlin.system.measureTimeMillis
 
 class UserController(
@@ -458,8 +459,11 @@ class UserController(
                             dao = DMDao("dm_${dmChannelID}", cqlSession)
                         )
                         dmChannel.dao!!.init()
+                        val message = Message(snowflake.nextId(), "You became friends on ${Instant.now()}", system = true, author = null)
+                        dmChannel.dao!!.createMessage(message)
                         println("Ran dao")
                         handler.broadcastAcceptFriendRequest(AcceptFriendRequestEvent(user, friend))
+                        handler.broadcastDMMessageCreate(DMMessageCreateEvent(user, friend, message))
                         ctx.status(201).json(userCache.users[friend.identifier]?.toPublic()!!)
                         dmCache.saveOrReplaceChannel(dmChannel)
                         return
@@ -826,6 +830,7 @@ class UserController(
                                     "Server-Timing",
                                     "creation;desc=\"Message creation time on DB\";dur=${messageCreateTiming}"
                                 )
+                                handler.broadcastDMMessageCreate(DMMessageCreateEvent(user, friend, message))
 //                                GlobalBus.post(ServerMessageCreate(friend.identifier, message))
                                 return
                             } else {

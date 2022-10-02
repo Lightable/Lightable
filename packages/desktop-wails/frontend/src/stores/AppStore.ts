@@ -2,7 +2,7 @@ import {defineStore} from "pinia";
 import {ChangeTheme, GetColour, GetConfig, GetVersion, PingDelay} from '../../wailsjs/go/app/App';
 import {GetSocketHistory, GetUpdate} from '../../wailsjs/go/client/Client';
 import {mocks} from "../../wailsjs/go/models";
-import {EventsOn, WindowSetTitle} from '../../wailsjs/runtime/runtime';
+import {EventsOn, WindowSetTitle, WindowSetBackgroundColour} from '../../wailsjs/runtime';
 import {debug} from '../composable/Logger';
 import {GetRelations} from '../../wailsjs/go/client/RelationshipManager';
 import {useUpdateStore} from "./UpdateStore";
@@ -54,6 +54,7 @@ export const useAppStore = defineStore('AppStore', {
             let root = document.documentElement;
             this.colour = colour;
             root.style.setProperty("--windows-accent-colour", this.colour);
+            this.loadCustomStyling(this.theme)
             debug('Theme', `Current theme is "${config.theme} With accent colour "${this.colour}" `);
             if (history) {
                 this.history.websocket = history;
@@ -102,7 +103,8 @@ export const useAppStore = defineStore('AppStore', {
         },
         async changeTheme(theme: LightableTheme) {
             this.theme = theme;
-            await ChangeTheme(theme);
+            ChangeTheme(theme);
+            this.loadCustomStyling(theme)
         },
         getUserTypeRelation(us?: string): RelationshipStatus | undefined {
             if (!us) return
@@ -133,6 +135,28 @@ export const useAppStore = defineStore('AppStore', {
                 if (component.color) comp.color = component.color;
                 if (component.tooltip) comp.tooltip = component.tooltip;
                 if (component.badge) comp.badge = component.badge;
+            }
+        },
+        loadCustomStyling(theme: LightableTheme) {
+            let root = document.documentElement;
+            const setProperty = (prop: string, value: any) => {
+                root.style.setProperty(prop, value)
+            }
+            switch (theme) {
+                case "Dark": {
+                    setProperty("--lightable-header-color", "var(--lightable-dark-header-color)");
+                    setProperty("--lightable-drawer-color", "var(--lightable-dark-drawer-color)");
+                    setProperty("--lightable-card-color", "var(--lightable-dark-card-color)");
+                    WindowSetBackgroundColour(16, 16, 20, 1);
+                    break
+                }
+                case "Light": {
+                    setProperty("--lightable-header-color", "var(--lightable-light-header-color)");
+                    setProperty("--lightable-drawer-color", "var(--lightable-light-drawer-color)");
+                    setProperty("--lightable-card-color", "var(--lightable-light-card-color)");
+                    WindowSetBackgroundColour( 	255, 255, 255, 1);
+                    break
+                }
             }
         }
     }

@@ -30,7 +30,7 @@ const collapsed = ref(false)
             </NButton>
         </span>
     <div class="divider"/>
-    <div class="body" v-if="!collapsed">
+    <div class="body" v-if="!collapsed" style="padding: 8px;">
       <slot/>
     </div>
 

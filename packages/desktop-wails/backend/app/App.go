@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	p "path/filepath"
+	"red/backend"
 	"red/mocks"
 	gor "runtime"
 	"strconv"
@@ -183,6 +185,29 @@ func (a *App) HasUser(statement bool) {
 	a.Logger.Debug().Str("type", "SetHasUser").Msg(fmt.Sprintf("CONFIG || Has user was changed from: %v, to: %v", a.Config.HasUser, statement))
 	a.Config.HasUser = statement
 	WriteAppConfig(a.Logger, a.Dir, a.Config)
+}
+
+func (a *App) SelectSideDrawerPhoto() *string {
+	path, err := runtime.OpenFileDialog(a.Ctx, runtime.OpenDialogOptions{
+		Title: "Select your avatar",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "Photo Formats",
+				Pattern:     "*.jpg;*.jpeg;*.png;*.webp;*.gif",
+			},
+		},
+	})
+	if err != nil {
+		a.Logger.Err(err)
+		return nil
+	}
+	if path == "" {
+		return nil
+	}
+	wd, _ := os.Getwd()
+	basePath := p.Base(path)
+	backend.CopyFile(path, wd+"/"+"TEMP_" + basePath)
+	return &basePath
 }
 func (a *App) GetMemoryStats() CustomMemoryStats {
 	var m gor.MemStats

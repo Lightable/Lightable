@@ -130,7 +130,7 @@ const collapse = () => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: rgba(51, 51, 51, 0.055);
+  background-color: var(--lightable-drawer-color);
   transition: all .25s ease;
   .header {
     display: flex;
@@ -170,7 +170,7 @@ const collapse = () => {
         height: 20px;
         width: 75%;
         padding-left: 5px;
-        color: var(--text-color-2);
+        color: var(--info-color-pressed);
 
         &[searching='true'] {
           width: 111px;
@@ -217,7 +217,7 @@ const collapse = () => {
   .lower {
     margin-top: auto;
     margin-left: 5px;
-    color: var(--text-color-3);
+    color: var(--info-color-suppl);
 
     span {
       font-family: "Jetbrains Mono";

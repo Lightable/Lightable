@@ -24,7 +24,7 @@ import (
 //go:embed frontend/dist
 var assets embed.FS
 var start = time.Now()
-var currentVersion = "0.3.5"
+var currentVersion = "0.3.0"
 
 type FileLoader struct {
 	http.Handler
@@ -78,7 +78,7 @@ func main() {
 		DisableResize:    false,
 		Windows: &windows.Options{
 			CustomTheme: &windows.ThemeSettings{
-				DarkModeTitleBar: 0x141010,
+				DarkModeTitleBar: 0xD0D0D,
 				DarkModeTitleText: 0xFFFFFF,
 				DarkModeTitleBarInactive: 0x101014,
 				DarkModeTitleTextInactive: 0x8c8c8c,

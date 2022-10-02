@@ -62,6 +62,10 @@ export function SaveConfig() {
   return window['go']['app']['App']['SaveConfig']();
 }
 
+export function SelectSideDrawerPhoto() {
+  return window['go']['app']['App']['SelectSideDrawerPhoto']();
+}
+
 export function SetCurrentUser(arg1) {
   return window['go']['app']['App']['SetCurrentUser'](arg1);
 }

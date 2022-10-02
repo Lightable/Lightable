@@ -161,7 +161,7 @@ func (rm *RelationshipManager) internalAddRelation(Type string, u mocks.PublicUs
 		Type: 0,
 		Users: users,
 		Owner: rm.c.CurrentUser.ToPublic(),
-		Messages: make([]mocks.Message, 0),
+		Messages: make(map[int64]*mocks.Message, 0),
 	}
 	fmt.Printf("Adding internal %v\n", u)
 	switch Type {

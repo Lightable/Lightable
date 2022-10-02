@@ -18,11 +18,12 @@ type _channelType int
 type _messageType int
 
 type Channel struct {
-	Id       string       `json:"id"`
-	Type     _channelType `json:"type"`
-	Users    []int64      `json:"users"`
-	Owner    *PublicUser  `json:"owner"`
-	Messages []Message    `json:"messages"`
+	Id       string             `json:"id"`
+	Type     _channelType       `json:"type"`
+	Users    []int64            `json:"users"`
+	Owner    *PublicUser        `json:"owner"`
+	Messages map[int64]*Message `json:"messages"`
+	Active   bool               `json:"active"`
 }
 
 type Message struct {
@@ -30,7 +31,8 @@ type Message struct {
 	System  bool     `json:"system"`
 	Type    int      `json:"type"`
 	Channel int64    `json:"channel"`
-	Author  int64    `json:"author"`
+	Author  string   `json:"author"`
 	Created float64  `json:"created"`
 	Edited  *float64 `json:"edited"`
+	Id      int64    `json:"id"`
 }

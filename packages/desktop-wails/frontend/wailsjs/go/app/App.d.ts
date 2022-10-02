@@ -33,6 +33,8 @@ export function Restart():void;
 
 export function SaveConfig():void;
 
+export function SelectSideDrawerPhoto():Promise<any>;
+
 export function SetCurrentUser(arg1:mocks.PrivateUser):void;
 
 export function SetUser(arg1:string,arg2:mocks.PrivateUser):void;

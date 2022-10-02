@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/asaskevich/EventBus"
 	"github.com/gorilla/websocket"
@@ -12,6 +13,7 @@ import (
 type Connection struct {
 	// WS connection
 	Ws *websocket.Conn
+	mu sync.Mutex
 	// Buff channel outbound
 	Send chan []byte
 	// Bus to comm between structs
@@ -41,6 +43,8 @@ func (c *Connection) ReadPump() {
 }
 
 func (c *Connection) Write(mt int, payload []byte) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.Closed {
 		return nil
 	}
@@ -112,7 +116,10 @@ type UserStatusUpdateMessage struct {
 	T int                     `json:"t"`
 	D UserStatusUpdatePayload `json:"d"`
 }
-
+type ServerMessage struct {
+	T int     `json:"t"`
+	D ServerMessagePayload `json:"d"`
+}
 type UserStatusUpdatePayload struct {
 	Name   *string     `json:"name"`
 	Id     string      `json:"id"`
@@ -143,4 +150,9 @@ type ServerRelationshipsPayload struct {
 
 type ServerMetaPayload struct {
 	Production bool `json:"prod"`
+}
+
+type ServerMessagePayload struct {
+	Channel string `json:"channel"`
+	Message Message `json:"message"`
 }

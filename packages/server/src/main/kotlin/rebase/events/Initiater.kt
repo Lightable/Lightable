@@ -43,4 +43,10 @@ class EventHandler {
             listener.onCPUUsage(event)
         }
     }
+
+    fun broadcastDMMessageCreate(event: DMMessageCreateEvent) {
+        for (listener in listeners) {
+            listener.onDMMessageCreate(event)
+        }
+    }
 }

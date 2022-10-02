@@ -1,4 +1,10 @@
 # Changelog
+<h2 align="center">October 2 2022</h2>
+<h3 align="center">1.21.0-ALPHA</h3>
+
+#### Changes:
+* Add real time message events
+
 <h2 align="center">September 12 2022</h2>
 <h3 align="center">1.20.0-ALPHA</h3>
 

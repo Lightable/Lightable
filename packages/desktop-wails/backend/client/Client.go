@@ -37,6 +37,7 @@ type Client struct {
 	Http                *HttpClient
 	App                 *app.App
 	RelationshipManager *RelationshipManager
+	ChannelManager      *ChannelManager
 	DeveloperClient     *DeveloperClient
 	SocketHistory       []string
 	SocketTicker        *time.Ticker
@@ -58,6 +59,7 @@ func NewClient(ctx *context.Context, logger *zerolog.Logger, config *mocks.AppCo
 	client.RelationshipManager = NewRelationshipManager(client.Http, &client)
 	client.DeveloperClient = NewDeveloperClient(&a.Ctx, *client.Http)
 	client.App = a
+	client.ChannelManager = NewChannelManager(&client, client.Http, client.RelationshipManager)
 	go client.getLocation()
 	return &client
 }
@@ -203,6 +205,16 @@ func (c *Client) ReadAndRespond(m []byte) {
 		}
 		(*m)[*i] = nU
 		runtime.EventsEmit(*c.Ctx, "ws:read:user|status", d)
+	case 25:
+		uData := mocks.ServerMessage{}
+		err := json.Unmarshal(decoded, &uData)
+		if err != nil {
+			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to read server dm message")
+			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
+			return
+		}
+		c.ChannelManager.addMessageToChannel(uData.D.Channel, &uData.D.Message)
+		runtime.EventsEmit(*c.Ctx, "ws:read:server|dm-message", uData.D)
 	case 35:
 		uData := mocks.ServerUpdateMessage{}
 		err := json.Unmarshal(decoded, &uData)

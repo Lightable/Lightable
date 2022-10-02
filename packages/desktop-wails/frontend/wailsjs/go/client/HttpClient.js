@@ -18,6 +18,10 @@ export function GetLocation() {
   return window['go']['client']['HttpClient']['GetLocation']();
 }
 
+export function GetMessagesFromDM(arg1, arg2, arg3) {
+  return window['go']['client']['HttpClient']['GetMessagesFromDM'](arg1, arg2, arg3);
+}
+
 export function LoginWithEmailAndPassword(arg1, arg2) {
   return window['go']['client']['HttpClient']['LoginWithEmailAndPassword'](arg1, arg2);
 }

@@ -10,7 +10,8 @@ class CDNController(val userCache: UserCache, val fileController: FileController
     fun getRelease(ctx: Context) {
         val release = ctx.pathParam("release").replace(".", "").toInt()
         val latest = userCache.latestRelease
-        if (latest == null || release > latest.tag.replace(".", "").toInt()) {
+        val latestVer = latest?.tag?.replace(".", "")?.toInt()
+        if (latest == null || release >= latestVer!!) {
             ctx.status(204)
             return
         } else {

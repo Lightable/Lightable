@@ -24,7 +24,8 @@ const props = defineProps({
     display: flex;
     flex-direction: row;
     align-items: center;
-    background-color: #1919208f;
+    background-color: var(--lightable-header-color);
+    color: var(--text-color-1);
     .divider {
         height: 20px;
         width: 3px;

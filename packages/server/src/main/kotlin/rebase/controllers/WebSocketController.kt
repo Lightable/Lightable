@@ -40,7 +40,7 @@ class WebSocketController(
     }
 
     fun message(handler: WsMessageContext) {
-        logger.debug("Socket Message: ${handler.message()}")
+        logger.info("Socket Message: ${handler.message()}")
         try {
             val session = rawConnections[handler.sessionId]!!
             val rawMessage = jsonWrap.readTree(handler.message())
@@ -115,14 +115,14 @@ class WebSocketController(
                 val userSession = connections[handler.sessionId]!!
                 when (message.t) {
                     SocketMessageType.ClientTyping.ordinal -> {
-                        val typingTo = connections.values.find { f ->
-                            f.user.identifier == jsonWrap.convertValue(
+                        val typingTo = userCache.users.values.find { f ->
+                            f.identifier == jsonWrap.convertValue(
                                 rawMessage["d"],
                                 String::class.java
                             ).toLong()
                         }
                         if (typingTo != null) {
-                            ehandler.broadcastTyping(TypingEvent(userSession, typingTo))
+                            ehandler.broadcastTyping(TypingEvent(userSession.user, typingTo))
                             return
                         } else {
                             send(userSession.ws.session, userSession.ws.type, object {
@@ -261,12 +261,11 @@ class WebSocketController(
     }
 
     override fun onTyping(payload: TypingEvent) {
-        oneToPotentialMany(payload.toSelf(), payload.self.user)
-        oneToPotentialMany(payload.toExternal(), payload.to.user)
+        oneToPotentialMany(payload.toExternal(), payload.to)
+        oneToPotentialMany(payload.toSelf(), payload.self)
     }
 
     override fun onPendingFriend(payload: PendingFriendEvent) {
-        println("paylaod moment")
         oneToPotentialMany(payload.toExternal(), payload.friend as GenericUser)
         oneToPotentialMany(payload.toSelf(), payload.self as GenericUser)
     }
@@ -282,8 +281,14 @@ class WebSocketController(
     }
 
     override fun onUpdate(payload: UpdateEvent) {
+        connections.values.forEach { u ->
+            println(u.session.properties.build.replace(".", "").toInt())
+            println(payload.d.tag.replace(".", "").toInt())
+        }
+        println()
         val sockets = connections.values.filter { u ->
-            u.session.properties.build.replace(".", "").toInt() < payload.d.tag.replace(".", "").toInt()
+            u.session.properties.build.replace(".", "").toInt() <= payload.d.tag.replace(".", "").toInt()
+
         }
         for (socket in sockets) {
             send(socket.ws.session, socket.ws.type, payload)
@@ -291,12 +296,34 @@ class WebSocketController(
     }
 
     override fun onCPUUsage(payload: GetCPUUsage.CPUUsageUpdate) {}
+    override fun onDMMessageCreate(payload: DMMessageCreateEvent) {
+        oneToPotentialMany(payload.toSelf(), payload.self as GenericUser)
+        oneToPotentialMany(payload.toExternal(), payload.to as GenericUser)
+    }
 }
 
 data class ReceivedMessage(
     val t: Int,
 )
 
+data class DMMessageCreateEvent(@JsonIgnore val self: User, @JsonIgnore val to: User, val message: Message) {
+    fun toExternal(): DMMessageCreateEventExternal {
+        return DMMessageCreateEventExternal()
+    }
+    fun toSelf(): DMMessageCreateEventSelf {
+        return DMMessageCreateEventSelf()
+    }
+    inner class DMMessageCreateEventExternal {
+        val d = DMMessageWrapper(self.identifier.toString(), message)
+        val t = SocketMessageType.ServerMessageCreate.ordinal
+    }
+    inner class DMMessageCreateEventSelf {
+        val d = DMMessageWrapper(to.identifier.toString(), message)
+        val t = SocketMessageType.ServerSelfMessageCreate.ordinal
+    }
+
+    data class DMMessageWrapper(val channel: String, val message: Message)
+}
 data class ServerMessageCreate(
     @JsonIgnore var to: Long,
     var d: Message
@@ -385,25 +412,25 @@ data class SelfUpdatePayload(
 }
 
 data class TypingEvent(
-    @JsonIgnore val self: SocketSession,
-    @JsonIgnore val to: SocketSession,
+    @JsonIgnore val self: User,
+    @JsonIgnore val to: User,
 ) {
     fun toExternal(): ClientTypingExternal {
-        return ClientTypingExternal(self.user as GenericUser)
+        return ClientTypingExternal(self)
     }
 
     fun toSelf(): ClientTypingSelf {
-        return ClientTypingSelf(to.user as GenericUser)
+        return ClientTypingSelf(to)
     }
 
-    data class ClientTypingExternal(@JsonIgnore val user: GenericUser) {
+    data class ClientTypingExternal(@JsonIgnore val user: User) {
         val t = SocketMessageType.ServerTyping.ordinal
-        val d = user.identifier
+        val d = user.toPublic()
     }
 
-    data class ClientTypingSelf(@JsonIgnore val user: GenericUser) {
+    data class ClientTypingSelf(@JsonIgnore val user: User?) {
         val t = SocketMessageType.ServerSelfTyping.ordinal
-        val d = user.identifier
+        val d = user?.toPublic()
     }
 }
 

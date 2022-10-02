@@ -13,4 +13,5 @@ interface EventListener {
     fun onAcceptFriendRequest(payload: AcceptFriendRequestEvent)
     fun onUpdate(payload: UpdateEvent)
     fun onCPUUsage(payload: GetCPUUsage.CPUUsageUpdate)
+    fun onDMMessageCreate(payload: DMMessageCreateEvent)
 }

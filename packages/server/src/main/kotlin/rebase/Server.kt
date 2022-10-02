@@ -132,6 +132,9 @@ class Server(
         this.serverOverloaded = payload.usage > 75
         this.serverCPUUsage = payload.usage
     }
+
+    override fun onDMMessageCreate(payload: DMMessageCreateEvent) {}
+
     init {
         handler.add(websocketController)
         Thread.currentThread().name = "Server (Main)"

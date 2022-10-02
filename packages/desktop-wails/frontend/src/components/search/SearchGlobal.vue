@@ -110,6 +110,7 @@ appStore.setTitle('Search');
             all: unset;
             width: 90%;
             height: 30px;
+            color: var(--text-color-1);
         }
 
         .amount {
