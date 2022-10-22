@@ -120,6 +120,10 @@ type ServerMessage struct {
 	T int     `json:"t"`
 	D ServerMessagePayload `json:"d"`
 }
+type ServerTypingMessage struct {
+	T int `json:"t"`
+	D PublicUser `json:"d"`
+}
 type UserStatusUpdatePayload struct {
 	Name   *string     `json:"name"`
 	Id     string      `json:"id"`

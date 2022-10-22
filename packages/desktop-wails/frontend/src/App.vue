@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { NConfigProvider, NMessageProvider, NDialogProvider, darkTheme, lightTheme, NElement, NLoadingBarProvider } from 'naive-ui';
 import LeftDrawer from './components/LeftDrawer/LeftDrawer.vue';
 import DrawerComponent from './components/LeftDrawer/DrawerComponent.vue';
@@ -9,7 +10,9 @@ import SettingsConfigProvider from './components/settings/SettingsConfigProvider
 import SearchProvider from './components/search/SearchProvider.vue';
 import BeforeStartModal from './components/BeforeStartModal.vue';
 import BugReport from './components/debug/BugReport.vue';
+
 const appStore = useAppStore();
+const router = useRouter();
 
 darkTheme.Button!!.common!!.errorColor = "#ED4245";
 darkTheme.Button!!.common!!.infoColor = "#62CDFE";
@@ -18,19 +21,29 @@ const collapsed = computed(() => appStore.leftDrawer.collapsed);
 const theme = computed(() => appStore.theme);
 const leftDrawer = computed(() => appStore.leftDrawer)
 const search = computed(() => appStore.search)
+const currentRouteName = ref("")
 appStore.load();
 appStore.startRealtime();
+
+onMounted(() => {
+  currentRouteName.value = router.currentRoute.value.name as string
+  router.afterEach((to, from, failure) => {
+    currentRouteName.value = to.name as string;
+  })
+})
 </script>
 
 <template>
   <div class="lightable-red">
     <ConfettiCanvasProvider>
       <NConfigProvider :theme="(theme == 'Dark') ? darkTheme : lightTheme">
+
         <BeforeStartModal />
         <BugReport/>
         <NLoadingBarProvider>
           <NDialogProvider>
             <NElement>
+              <div id="profile-modal"></div>
               <NMessageProvider>
                 <SettingsConfigProvider>
                   <SearchProvider :show="search.show">
@@ -55,7 +68,7 @@ appStore.startRealtime();
                         </LeftDrawer>
                       </div>
                       <div class="page" :style="{ 'background': `${theme === 'Dark' ? 'var(--lightable-dark-bg)' : 'var(--lightable-light-bg)'}` }">
-                        <div class="content" :style="collapsed ? 'width: 100vw' : 'width: calc(100vw - 250px)'">
+                        <div class="content" :style="collapsed ||  currentRouteName.match(/accounts|signup|invite|login/) ? 'width: 100vw;' : 'width: calc(100vw - 250px)'">
                           <router-view />
                         </div>
                       </div>

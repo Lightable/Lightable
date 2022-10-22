@@ -25,7 +25,7 @@ const props = defineProps({
     flex-direction: row;
     padding: 8px;
     // background-color: rgba(9, 9, 9, 0.253);
-    backdrop-filter: blur(2px) saturate(200%);
+    backdrop-filter: blur(2px);
     width: calc(100% - 25px);
     z-index: 5;
     .inner-header {

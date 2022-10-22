@@ -62,7 +62,7 @@ GetUsers().then((u) => {
 .home {
     display: flex;
     height: inherit;
-    width: 100%;
+    width: 100vw;
     flex-direction: column;
     justify-content: center;
     align-items: center;

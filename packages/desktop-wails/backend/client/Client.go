@@ -197,7 +197,10 @@ func (c *Client) ReadAndRespond(m []byte) {
 		}
 		d := uData.D
 		m, u, i, err := c.RelationshipManager.findRelationWithId(d.Id)
-		nU := c.RelationshipManager.updateUserWithMessageData(*u, d)
+		var nU mocks.PublicUser
+		if u != nil {
+			nU = c.RelationshipManager.updateUserWithMessageData(*u, d)
+		}
 		if err != nil {
 			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to find user for update message")
 			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
@@ -215,6 +218,15 @@ func (c *Client) ReadAndRespond(m []byte) {
 		}
 		c.ChannelManager.addMessageToChannel(uData.D.Channel, &uData.D.Message)
 		runtime.EventsEmit(*c.Ctx, "ws:read:server|dm-message", uData.D)
+	case 31: 
+		uData := mocks.ServerTypingMessage{}
+		err := json.Unmarshal(decoded, &uData)
+		if err != nil {
+			c.Logger.Info().Str("err", fmt.Sprint(err)).Msg("Error occurred when trying to read user typing message")
+			runtime.EventsEmit(*c.Ctx, "ws:read:error", err)
+			return
+		}
+		runtime.EventsEmit(*c.Ctx, "ws:read:channel|typing", uData.D)
 	case 35:
 		uData := mocks.ServerUpdateMessage{}
 		err := json.Unmarshal(decoded, &uData)
@@ -257,7 +269,7 @@ func (c *Client) GetAvatar(id string, size int) string {
 func (c *Client) GetSelfAvatar(size int) string {
 	if c.CurrentUser == nil {
 		return ""
-	} 
+	}
 	if c.CurrentUser.Avatar != nil {
 		return c.GetHttpURL() + "/cdn/user/" + c.CurrentUser.Id + "/avatars/avatar_" + c.CurrentUser.Avatar.Id + "?size=" + fmt.Sprint(size)
 	}
@@ -311,17 +323,16 @@ func (c *Client) GetUsers() []*mocks.PrivateUser {
 }
 
 func (client *Client) getLocation() {
-		location, err := client.Http.GetLocation()
-		if err != nil {
-			fmt.Printf("Something went wrong when trying to get location: %v\n", err)
-		}
-		fmt.Printf("Got location: %v", location)
-		client.Location = location
+	location, err := client.Http.GetLocation()
+	if err != nil {
+		fmt.Printf("Something went wrong when trying to get location: %v\n", err)
+	}
+	fmt.Printf("Got location: %v", location)
+	client.Location = location
 }
 
 func (c *Client) LoginToSocket() {
-	fmt.Printf("Curr User %v", c.CurrentUser)
-	SendMessage(c, mocks.ClientReadyMessage{
+	payload := mocks.ClientReadyMessage{
 		T: 0,
 		D: mocks.ClientReadyPayload{
 			Auth: c.CurrentUser.Token.Token,
@@ -332,7 +343,9 @@ func (c *Client) LoginToSocket() {
 				Geo:     *c.Location,
 			},
 		},
-	})
+	}
+	SendMessage(c, payload)
+	
 }
 
 func (c *Client) ReconnectToSocket() {
@@ -357,9 +370,9 @@ func (c *Client) ChangeUser(u mocks.PrivateUser) {
 }
 
 func (c *Client) RemoveUser(u mocks.PrivateUser) {
-	if (u.Id == c.App.GetConfig().LoggedInUser.Id) {
+	if u.Id == c.App.GetConfig().LoggedInUser.Id {
 		c.App.Config.LoggedInUser = nil
-		c.CurrentUser = nil;
+		c.CurrentUser = nil
 	}
 	delete(*c.App.GetConfig().Users, u.Id)
 	c.App.SaveConfig()

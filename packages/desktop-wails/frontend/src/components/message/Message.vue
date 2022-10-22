@@ -12,7 +12,7 @@ const props = defineProps({
     author: Object as PropType<mocks.PrivateUser | mocks.PublicUser>,
     content: String,
     attachments: Array,
-
+    system: Boolean,
     // Debug
     isPreview: Boolean
 });
@@ -71,12 +71,12 @@ if (props.author && props.author.avatar) {
     <!-- Message -->
     <div class="message" v-else>
         <div class="inner-message" @mouseover="actionOnMouseOver" @mouseleave="actionOnMouseLeave">
-            <div class="avatar" v-if="author">
+            <div class="avatar" v-if="author" @click="appStore.openUserProfile(author.id)">
                 <NAvatar round :src="avatar" class="message-avatar" v-if="author.avatar"/>
             </div>
             <div class="container">
                 <div class="name ns">
-                    <span>{{ author ? (author == self ? 'You' : author.name) : 'Unknown' }}</span>
+                    <span>{{ author ? author == self ? 'You' : author.name : system ? 'System' : 'Unknown' }}</span>
                     <Transition name="fade">
                         <div class="actions" v-if="displayActions">
                             <NTooltip trigger="hover">
@@ -175,11 +175,12 @@ if (props.author && props.author.avatar) {
             margin-bottom: -9px;
 
             .message-avatar {
-                // border: rgba(255, 255, 255, 0) 2px solid;
-
-                // &:hover {
-                //     border: var(--info-color) 2px solid;
-                // }
+              transition: transform 250ms ease;
+              cursor: pointer;
+                 &:hover {
+                     filter: grayscale(50%);
+                     transform: translateY(-2px);
+                 }
             }
         }
 
@@ -221,12 +222,11 @@ if (props.author && props.author.avatar) {
             }
 
             .content {
-                font-family: "Gill Sans";
+                font-family: Titillium Web;
                 color: var(--text-color-2);
                 font-size: 16px;
                 word-break: break-word;
                 white-space: pre-line;
-
 
             }
         }

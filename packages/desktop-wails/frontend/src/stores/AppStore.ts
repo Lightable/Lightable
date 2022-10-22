@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
+import {useRouter} from 'vue-router';
 import {ChangeTheme, GetColour, GetConfig, GetVersion, PingDelay} from '../../wailsjs/go/app/App';
-import {GetSocketHistory, GetUpdate} from '../../wailsjs/go/client/Client';
+import {GetSocketHistory, GetUpdate, GetSelfAvatar, GetAvatar} from '../../wailsjs/go/client/Client';
 import {mocks} from "../../wailsjs/go/models";
 import {EventsOn, WindowSetTitle, WindowSetBackgroundColour} from '../../wailsjs/runtime';
 import {debug} from '../composable/Logger';
@@ -38,7 +39,13 @@ export const useAppStore = defineStore('AppStore', {
         search: {
             show: false
         },
-        customTheme: CustomTheme
+        customTheme: CustomTheme,
+        modalProfile: {
+            visible: false,
+            data: null as mocks.PublicUser | null,
+            avatarURL: ''
+        },
+        focus: true
     }),
 
     actions: {
@@ -66,6 +73,24 @@ export const useAppStore = defineStore('AppStore', {
         },
         async startRealtime() {
             const updateStore = useUpdateStore();
+            const router = useRouter()
+            window.onblur = () => {
+                document.documentElement.classList.remove("focused")
+                document.documentElement.classList.add("blurred")
+                this.focus = false;
+            }
+            window.onfocus = () => {
+                document.documentElement.classList.remove("blurred")
+                document.documentElement.classList.add("focused")
+                this.focus = true;
+            }
+            EventsOn('ws:read:server|dm-message', ({channel, message}) => {
+               const routeID = router.currentRoute.value.params.id
+                console.log('pain', this.focus)
+                    if (!this.focus) {
+                        this.$playNotification("message")
+                    }
+            })
             EventsOn('ws:read:decode', async () => {
                 this.history.websocket = await GetSocketHistory() as Array<string>
             });
@@ -79,6 +104,7 @@ export const useAppStore = defineStore('AppStore', {
             });
             EventsOn('ws:read:server|pending', async (_) => {
                 this.relationships = await GetRelations();
+                this.$playNotification("friend_request")
                 this.updateDrawerComponent('friends', {
                     badge: {
                         show: true,
@@ -154,16 +180,83 @@ export const useAppStore = defineStore('AppStore', {
                     setProperty("--lightable-header-color", "var(--lightable-light-header-color)");
                     setProperty("--lightable-drawer-color", "var(--lightable-light-drawer-color)");
                     setProperty("--lightable-card-color", "var(--lightable-light-card-color)");
-                    WindowSetBackgroundColour( 	255, 255, 255, 1);
+                    WindowSetBackgroundColour(255, 255, 255, 1);
                     break
                 }
+            }
+        },
+        $findUser(_id: string): mocks.PublicUser | mocks.PrivateUser | null {
+            let relations = this.users.find((s) => s.id === _id)
+            if (!relations) {
+                if (this.user!!.id !== _id) {
+                    return null
+                }
+                return this.user!!
+            } else {
+                return relations
+            }
+        },
+        async $getAnyAvatar(user: mocks.PublicUser, size: ValidAvatarSizes): Promise<string> {
+            if (!user.avatar) return
+            if (user.id === this.user!!.id) {
+                return await GetSelfAvatar(size)
+            } else {
+                return await GetAvatar(user.id, size)
+            }
+        },
+        $playNotification(type: NotificationSounds) {
+            switch (type) {
+                case "message": {
+                    this.$playTrack("/src/assets/audio/message.mp3", 0.3)
+                    break;
+                }
+                case "friend_request": {
+                    this.$playTrack("/src/assets/audio/friend_request.mp3", 0.5)
+                    break
+                }
+            }
+        },
+        $playTrack(track: string, vol: number) {
+            import(track).then(t => {
+                if (!t) return
+                const audioSound = new Audio(track)
+                audioSound.volume = vol
+                audioSound.play()
+            })
+        },
+        async openUserProfile(id: string) {
+            let user =  this.$findUser(id)
+            if (!user) {
+                // @ts-ignore
+                user = {
+                    id: '0',
+                    name: 'Not Found',
+                    avatar: undefined,
+                    admin: true,
+                    status: undefined,
+                    state: 0,
+                    channel: undefined,
+                }
+            }
+            this.modalProfile = {
+                visible: true,
+                data: user,
+                avatarURL: await this.$getAnyAvatar(user!!, 512)
+            }
+        },
+        closeProfile() {
+            this.modalProfile = {
+                visible: false,
+                data: null,
+                avatarURL: ''
             }
         }
     }
 })
 
-
+export type NotificationSounds = "message" | "friend_request_accept" | "friend_request_deny" | "friend_request"
 export type LightableTheme = "Dark" | "Light"
+export type ValidAvatarSizes = 32 | 64 | 72 | 128 | 256 | 512
 export enum RelationshipStatus {
     UNKNOWN = 1,
     REQUEST = 2,
@@ -174,10 +267,12 @@ export enum RelationshipStatus {
 export interface AppConfig {
     theme: LightableTheme
 }
+
 export interface LightableDrawerGroupComponent {
     name: string,
     items: LightableDrawerComponentPair[]
 }
+
 export interface LightableDrawerComponentPair {
     t: LightableDrawerType,
     icon?: any,
@@ -199,7 +294,7 @@ export interface LightableDrawerComponentPair {
     }
 }
 
-let CustomTheme =  {
+let CustomTheme = {
     "primaryColor": "#63e2b7",
     "primaryColorHover": "#7fe7c4",
     "primaryColorPressed": "#5acea7",
@@ -235,24 +330,25 @@ let CustomTheme =  {
 export type LightableDrawerType = "Function" | "Route"
 
 
-
-class EventEmitter{
-    constructor(){
+class EventEmitter {
+    constructor() {
         // @ts-ignore
         this.callbacks = {}
     }
+
     // @ts-ignore
-    on(event, cb){
+    on(event, cb) {
         // @ts-ignore
-        if(!this.callbacks[event]) this.callbacks[event] = [];
+        if (!this.callbacks[event]) this.callbacks[event] = [];
         // @ts-ignore
         this.callbacks[event].push(cb)
     }
+
     // @ts-ignore
-    emit(event, data){
+    emit(event, data) {
         // @ts-ignore
         let cbs = this.callbacks[event]
-        if(cbs){
+        if (cbs) {
             // @ts-ignore
             cbs.forEach(cb => cb(data))
         }

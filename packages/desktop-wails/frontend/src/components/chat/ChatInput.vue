@@ -6,7 +6,7 @@ import {ChatInputState} from '../../composable/ChatInput';
 import 'vfonts/Lato.css';
 import {SendTyping} from "../../../wailsjs/go/client/Client";
 import {mocks} from "../../../wailsjs/go/models";
-
+import { PhPlusCircle } from '@dnlsndr/vue-phosphor-icons'
 interface Emits {
   (e: 'message', p: string): void
 
@@ -25,13 +25,13 @@ let props = defineProps({
   isPreview: Boolean
 });
 
-const attribution = ref(true);
+const gamePanel = ref(false);
 const rawState = ref() as Ref<any>;
 const computedHeight = ref(-61);
 const contentToSend = ref('');
 let src: HTMLElement;
-const removeAttribution = () => {
-  attribution.value = false;
+const toggleGamePanel = () => {
+  gamePanel.value = !gamePanel.value;
 }
 let expireTyping = true;
 onMounted(() => {
@@ -98,6 +98,12 @@ const onPaste = () => {
   <!-- {{ props }} -->
   <!-- Debug -->
   <div class="outer-chat">
+    <div class="games-panel ns" v-if="gamePanel">
+      <span class="title">Games</span>
+      <div class="games-list">
+        <span class="title sub">Coming soon</span>
+      </div>
+    </div>
     <Transition name="slide-right-ext">
       <div class="states ns"
            v-if="isPreview || typingUsers !== undefined && typingUsers.length > 0 || state !== undefined" :ref="rawState"
@@ -135,13 +141,11 @@ const onPaste = () => {
       <div class="inner">
         <div class="actions">
           <!-- TODO: Add attachment support web/desktop/server -->
-          <NTooltip trigger="hover" v-if="attribution">
+          <NTooltip trigger="hover">
             <template #trigger>
-              <NIcon color="var(--error-color-suppl)" :size="24" @click="removeAttribution">
-                <Heart/>
-              </NIcon>
+                <PhPlusCircle weight="duotone" color="var(--text-color-3)" @click="toggleGamePanel" size="32"/>
             </template>
-            Thanks for trying this out!
+            Add An Attachment
           </NTooltip>
         </div>
         <textarea class="input"
@@ -263,6 +267,18 @@ const onPaste = () => {
   }
 }
 
+.games-panel {
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-color-3);
+    &.sub {
+      font-size: 12px;
+      font-weight: normal;
+    }
+  }
+  margin-bottom: 10px;
+}
 .slide-right-enter-active,
 .slide-right-leave-active {
   transition: all 0.5s ease;

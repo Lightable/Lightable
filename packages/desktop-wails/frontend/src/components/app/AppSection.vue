@@ -58,7 +58,7 @@ const collapsed = ref(false)
 
     .collapse-button {
       margin-left: auto;
-      margin-right: 20px;
+      margin-right: 25px;
     }
   }
 

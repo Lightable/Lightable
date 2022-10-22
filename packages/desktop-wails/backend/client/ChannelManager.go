@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"red/mocks"
 	"strconv"
-
-	"golang.org/x/exp/maps"
 )
 
 type ChannelManager struct {
@@ -20,10 +18,11 @@ func NewChannelManager(c *Client, h *HttpClient, r *RelationshipManager) *Channe
 		c: c,
 		h: h,
 		r: r,
+		Channels: make(map[int64]*mocks.Channel),
 	}
 }
 
-func (cm *ChannelManager) GetMessagesFromDM(id string, before *string, after *string) ([]*mocks.Message, error) {
+func (cm *ChannelManager) GetMessagesFromDM(id string, before *string, after *string) ([]mocks.Message, error) {
 	channel, err := cm.GetChannel(id)
 	if err != nil {
 		return nil, err
@@ -37,7 +36,7 @@ func (cm *ChannelManager) GetMessagesFromDM(id string, before *string, after *st
 		msg := messages[i]
 		channel.Messages[msg.Id] = &msg
 	}
-	return maps.Values(channel.Messages), nil
+	return messages, nil
 }
 
 

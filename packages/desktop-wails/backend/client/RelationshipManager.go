@@ -172,6 +172,7 @@ func (rm *RelationshipManager) internalAddRelation(Type string, u mocks.PublicUs
 	case "request":
 		rm.Requests[intID] = u
 	}
+	rm.c.ChannelManager.Channels[intID] = u.Channel
 	return nil
 }
 

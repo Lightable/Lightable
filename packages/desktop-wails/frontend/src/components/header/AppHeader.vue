@@ -7,7 +7,7 @@ const props = defineProps({
 
 <template>
     <div class="app-header ns">
-        <slot name="icon" />
+        <slot name="icon"/>
         <h2>{{title}}</h2>
         <div class="divider"/>
         <div class="actions">

@@ -7,6 +7,7 @@ import {useAppStore} from '../../../stores/AppStore';
 import {NButton, NModal} from 'naive-ui';
 import {PhFileImage} from '@dnlsndr/vue-phosphor-icons';
 import {SelectSideDrawerPhoto} from '../../../../wailsjs/go/app/App';
+
 const appStore = useAppStore();
 
 const drawerPhotoSelector = ref({
@@ -24,6 +25,8 @@ const selectDrawerPhoto = async () => {
   }
   drawerState.disabled = false;
 }
+
+
 </script>
 
 <template>

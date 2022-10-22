@@ -408,17 +408,21 @@ func (h *HttpClient) GetDevices(auth string) (*[]mocks.Device, error) {
 
 func (h *HttpClient) GetMessagesFromDM(id string, before *string, after *string) (*[]mocks.Message, error) {
 	var u url.URL
-	str := "/user/@me/" + id + "/messages"+ "?type=FRIEND"
-	if after == nil && before == nil {
-		u = h.createURL(str)
-	} else if after == nil && before != nil {
-		u = h.createURL(str + "&before=" + *before)
+	str := "/user/@me/" + id + "/messages"
+	u = h.createURL(str)
+	q := u.Query()
+	q.Add("type", "FRIEND")
+    if after == nil && before != nil {
+		q.Add("before", *before)
 	} else if after != nil && before == nil {
-		u = h.createURL(str + "&after=" + *after)
+		q.Add("after", *after)
 	} else if after != nil && before != nil {
-		u = h.createURL(str + "&before=" + *before + "&after=" + *after)
+		q.Add("before", *before)
+		q.Add("after", *after)
 	}
+	u.RawQuery = q.Encode()
 	req, err := h.createGetRequestWithAuthorization(u, h.Client.CurrentUser.Token.Token)
+	fmt.Printf("URL: %v\n", req.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -431,6 +435,7 @@ func (h *HttpClient) GetMessagesFromDM(id string, before *string, after *string)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(resp.Request.URL)
 	if resp.StatusCode == 200 {
 		data := []mocks.Message{}
 		err := json.Unmarshal(body, &data)

@@ -1,24 +1,3 @@
-export namespace client {
-	
-	export class HttpResponse {
-	    status: number;
-	    Json: string;
-	    Err: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new HttpResponse(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.status = source["status"];
-	        this.Json = source["Json"];
-	        this.Err = source["Err"];
-	    }
-	}
-
-}
-
 export namespace mocks {
 	
 	export class AppResponderConfig {
@@ -37,36 +16,18 @@ export namespace mocks {
 	        this.secure = source["secure"];
 	    }
 	}
-	export class Icon {
-	    cdn: string;
-	    animated: string;
+	export class UserAvatar {
+	    animated: boolean;
 	    id: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new Icon(source);
+	        return new UserAvatar(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.cdn = source["cdn"];
 	        this.animated = source["animated"];
 	        this.id = source["id"];
-	    }
-	}
-	export class UserAnalytics {
-	    messages: number;
-	    callTime: number;
-	    activeTime: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new UserAnalytics(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.messages = source["messages"];
-	        this.callTime = source["callTime"];
-	        this.activeTime = source["activeTime"];
 	    }
 	}
 	export class GeoLocation {
@@ -97,26 +58,6 @@ export namespace mocks {
 	        this.continent = source["continent"];
 	    }
 	}
-	export class Update {
-	    version: string;
-	    title: string;
-	    notes: string;
-	    signature: string;
-	    url: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Update(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.title = source["title"];
-	        this.notes = source["notes"];
-	        this.signature = source["signature"];
-	        this.url = source["url"];
-	    }
-	}
 	export class Message {
 	    content?: string;
 	    system: boolean;
@@ -143,16 +84,58 @@ export namespace mocks {
 	        this.id = source["id"];
 	    }
 	}
-	export class UserAvatar {
-	    animated: boolean;
+	export class Channel {
 	    id: string;
+	    type: number;
+	    users: number[];
+	    owner?: PublicUser;
+	    messages: {[key: int64]: Message};
+	    active: boolean;
 	
 	    static createFrom(source: any = {}) {
-	        return new UserAvatar(source);
+	        return new Channel(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.type = source["type"];
+	        this.users = source["users"];
+	        this.owner = this.convertValues(source["owner"], PublicUser);
+	        this.messages = source["messages"];
+	        this.active = source["active"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Icon {
+	    cdn: string;
+	    animated: string;
+	    id: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Icon(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.cdn = source["cdn"];
 	        this.animated = source["animated"];
 	        this.id = source["id"];
 	    }
@@ -231,26 +214,59 @@ export namespace mocks {
 		    return a;
 		}
 	}
-	export class Channel {
-	    id: string;
-	    type: number;
-	    users: number[];
-	    owner?: PublicUser;
-	    messages: {[key: int64]: Message};
-	    active: boolean;
+	
+	
+	
+	export class StandardToken {
+	    permissions: string[];
+	    token: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new Channel(source);
+	        return new StandardToken(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.type = source["type"];
-	        this.users = source["users"];
-	        this.owner = this.convertValues(source["owner"], PublicUser);
-	        this.messages = source["messages"];
-	        this.active = source["active"];
+	        this.permissions = source["permissions"];
+	        this.token = source["token"];
+	    }
+	}
+	export class Update {
+	    version: string;
+	    title: string;
+	    notes: string;
+	    signature: string;
+	    url: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Update(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.title = source["title"];
+	        this.notes = source["notes"];
+	        this.signature = source["signature"];
+	        this.url = source["url"];
+	    }
+	}
+	export class RelationshipStruct {
+	    pending: PublicUser[];
+	    requests: PublicUser[];
+	    friends: PublicUser[];
+	    empty: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RelationshipStruct(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pending = this.convertValues(source["pending"], PublicUser);
+	        this.requests = this.convertValues(source["requests"], PublicUser);
+	        this.friends = this.convertValues(source["friends"], PublicUser);
+	        this.empty = source["empty"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -271,18 +287,21 @@ export namespace mocks {
 		    return a;
 		}
 	}
-	export class StandardToken {
-	    permissions: string[];
-	    token: string;
+	
+	export class UserAnalytics {
+	    messages: number;
+	    callTime: number;
+	    activeTime: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new StandardToken(source);
+	        return new UserAnalytics(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.permissions = source["permissions"];
-	        this.token = source["token"];
+	        this.messages = source["messages"];
+	        this.callTime = source["callTime"];
+	        this.activeTime = source["activeTime"];
 	    }
 	}
 	export class PrivateUser {
@@ -370,46 +389,6 @@ export namespace mocks {
 		}
 	}
 	
-	
-	
-	
-	
-	export class RelationshipStruct {
-	    pending: PublicUser[];
-	    requests: PublicUser[];
-	    friends: PublicUser[];
-	    empty: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new RelationshipStruct(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.pending = this.convertValues(source["pending"], PublicUser);
-	        this.requests = this.convertValues(source["requests"], PublicUser);
-	        this.friends = this.convertValues(source["friends"], PublicUser);
-	        this.empty = source["empty"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
 
 }
 
@@ -433,6 +412,27 @@ export namespace app {
 	        this.sysAlloc = source["sysAlloc"];
 	        this.heapSpace = source["heapSpace"];
 	        this.gcTotal = source["gcTotal"];
+	    }
+	}
+
+}
+
+export namespace client {
+	
+	export class HttpResponse {
+	    status: number;
+	    Json: string;
+	    Err: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HttpResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = source["status"];
+	        this.Json = source["Json"];
+	        this.Err = source["Err"];
 	    }
 	}
 

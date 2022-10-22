@@ -90,6 +90,7 @@ func main() {
 			client.Http,
 			client.RelationshipManager,
 			client.DeveloperClient,
+			client.ChannelManager,
 		},
 		AssetsHandler: NewFileLoader(),
 		Experimental: &options.Experimental{

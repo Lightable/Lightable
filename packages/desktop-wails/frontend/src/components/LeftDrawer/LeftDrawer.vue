@@ -124,6 +124,9 @@ const collapse = () => {
   align-items: center;
   position: absolute;
   z-index: 5;
+  .chevron {
+    animation: bring-out 250ms ease forwards;
+  }
 }
 
 .drawer-container {
@@ -226,6 +229,17 @@ const collapse = () => {
   }
 }
 
+
+.bring-out-enter-active,
+.bring-out-leave-active {
+  transition: all .5s ease
+}
+
+.bring-out-enter-from,
+.bring-out-leave-to {
+  opacity: 0;
+  transform: translate(-30px)
+}
 </style>
 
 
